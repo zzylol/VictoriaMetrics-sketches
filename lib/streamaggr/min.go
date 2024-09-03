@@ -3,8 +3,8 @@ package streamaggr
 import (
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
 )
 
 // minAggrState calculates output=min, e.g. the minimum value over input samples.

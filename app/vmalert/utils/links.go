@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httpserver"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httpserver"
 )
 
 const prefix = "/vmalert/"

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"unsafe"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"golang.org/x/sys/windows"
 )
 
@@ -30,7 +30,7 @@ func mustRemoveDirAtomic(dir string) {
 	}
 	if err := os.RemoveAll(tmpDir); err != nil {
 		logger.Warnf("cannot remove dir: %q: %s; restart VictoriaMetrics to complete dir removal; "+
-			"see https://github.com/VictoriaMetrics/VictoriaMetrics/issues/70#issuecomment-1491529183", tmpDir, err)
+			"see https://github.com/zzylol/VictoriaMetrics-sketches/issues/70#issuecomment-1491529183", tmpDir, err)
 	}
 }
 

@@ -8,12 +8,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/backupnames"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/fslocal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/fsnil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/snapshot/snapshotutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/backupnames"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/fslocal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/fsnil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/snapshot/snapshotutil"
 	"github.com/VictoriaMetrics/metrics"
 )
 

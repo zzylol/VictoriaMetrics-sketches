@@ -8,7 +8,7 @@ import (
 
 	"github.com/golang/snappy"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vlinsert/insertutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vlinsert/insertutils"
 )
 
 func BenchmarkParseProtobufRequest(b *testing.B) {

@@ -7,7 +7,7 @@ import (
 	"sync/atomic"
 	"unsafe"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/slicesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/slicesutil"
 )
 
 // Set is a fast set for uint64.

@@ -9,4 +9,4 @@ images with a simple `rm -rf docs/foo/bar*` command. This also simplifies referr
 from docs displayed at various views:
 
 - https://docs.victoriametrics.com
-- https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/docs
+- https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/docs

@@ -8,10 +8,10 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timeutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timeutil"
 )
 
 // table represents a single table with time series data.

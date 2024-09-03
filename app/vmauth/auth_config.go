@@ -21,13 +21,13 @@ import (
 	"github.com/cespare/xxhash/v2"
 	"gopkg.in/yaml.v2"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/envtemplate"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs/fscore"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/netutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/procutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/envtemplate"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs/fscore"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/netutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/procutil"
 )
 
 var (
@@ -597,7 +597,7 @@ func initAuthConfig() {
 
 	// Register SIGHUP handler for config re-read just before readAuthConfig call.
 	// This guarantees that the config will be re-read if the signal arrives during readAuthConfig call.
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1240
+	// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/1240
 	sighupCh := procutil.NewSighupChan()
 
 	_, err := loadAuthConfig()

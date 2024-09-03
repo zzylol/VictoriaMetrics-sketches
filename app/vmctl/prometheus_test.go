@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/prometheus"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/vm"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/prometheus"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/vm"
 )
 
 // If you want to run this test:

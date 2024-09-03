@@ -3,10 +3,10 @@ package encoding
 import (
 	"fmt"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/decimal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fastnum"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fastnum"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 // minCompressibleBlockSize is the minimum block size in bytes for trying compression.

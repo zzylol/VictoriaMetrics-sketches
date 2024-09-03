@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/VictoriaMetrics/metrics"
 )
 

@@ -13,16 +13,16 @@ import (
 
 	"github.com/VictoriaMetrics/metrics"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/awsapi"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httputils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/persistentqueue"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promauth"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/ratelimiter"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timerpool"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timeutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/awsapi"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/persistentqueue"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promauth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/ratelimiter"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timerpool"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timeutil"
 )
 
 var (
@@ -302,7 +302,7 @@ func (c *client) runWorker() {
 		}
 		if len(block) == 0 {
 			// skip empty data blocks from sending
-			// see https://github.com/VictoriaMetrics/VictoriaMetrics/pull/6241
+			// see https://github.com/zzylol/VictoriaMetrics-sketches/pull/6241
 			continue
 		}
 		go func() {
@@ -352,7 +352,7 @@ func (c *client) doRequest(url string, body []byte) (*http.Response, error) {
 	// It is likely connection became stale or timed out during the first request.
 	// Make another attempt in hope request will succeed.
 	// If not, the error should be handled by the caller as usual.
-	// This should help with https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4139
+	// This should help with https://github.com/zzylol/VictoriaMetrics-sketches/issues/4139
 	req, err = c.newRequest(url, body)
 	if err != nil {
 		return nil, fmt.Errorf("second attempt: %w", err)
@@ -447,8 +447,8 @@ again:
 				len(block), c.sanitizedURL, statusCode, string(body))
 		}
 		// Just drop block on 409 and 400 status codes like Prometheus does.
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/873
-		// and https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1149
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/873
+		// and https://github.com/zzylol/VictoriaMetrics-sketches/issues/1149
 		_ = resp.Body.Close()
 		c.packetsDropped.Inc()
 		return true

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/graphiteql"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/graphiteql"
 	"github.com/VictoriaMetrics/metricsql"
 )
 

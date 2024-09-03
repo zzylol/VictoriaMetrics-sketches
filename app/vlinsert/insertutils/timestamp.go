@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logstorage"
 )
 
 // ExtractTimestampRFC3339NanoFromFields extracts RFC3339 timestamp in nanoseconds from the field with the name timeField at fields.

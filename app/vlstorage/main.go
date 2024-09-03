@@ -10,11 +10,11 @@ import (
 
 	"github.com/VictoriaMetrics/metrics"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httpserver"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httpserver"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logstorage"
 )
 
 var (

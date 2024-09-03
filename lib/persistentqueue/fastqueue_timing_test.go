@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/cgroup"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
 )
 
 func BenchmarkFastQueueThroughputSerial(b *testing.B) {

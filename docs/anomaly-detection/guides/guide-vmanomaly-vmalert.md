@@ -28,7 +28,7 @@ aliases:
 
 <img src="guide-vmanomaly-vmalert_overview.webp" alt="vmanomaly typical setup diagram">
 
-> **Note: Configurations used throughout this guide can be found [here](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/deployment/docker/vmanomaly/vmanomaly-integration/)**
+> **Note: Configurations used throughout this guide can be found [here](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/deployment/docker/vmanomaly/vmanomaly-integration/)**
 
 > **Note:** Starting from [v1.13.0](/anomaly-detection/CHANGELOG#v1130) `node-exporter` observability preset is available for `vmanomaly`. Please find the guide [here](/anomaly-detection/presets/#node-exporter).
 
@@ -217,7 +217,7 @@ Selecting an appropriate threshold for the anomaly score depends on your specifi
 
 ## 8. Docker Compose configuration
 
-You can find the `docker-compose.yml` and all configs in this [folder](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/deployment/docker/vmanomaly/vmanomaly-integration/)
+You can find the `docker-compose.yml` and all configs in this [folder](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/deployment/docker/vmanomaly/vmanomaly-integration/)
 
 Now we are going to configure the `docker-compose.yml` file to run all needed services.
 Here are all services we are going to run:

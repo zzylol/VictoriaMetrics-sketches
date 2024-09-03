@@ -6,10 +6,10 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/filestream"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/filestream"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 // blockStreamWriter represents block stream writer.

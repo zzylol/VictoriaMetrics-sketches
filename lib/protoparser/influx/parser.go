@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/VictoriaMetrics/metrics"
 	"github.com/valyala/fastjson/fastfloat"
 )

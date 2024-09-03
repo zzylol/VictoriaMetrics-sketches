@@ -11,11 +11,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompb"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/slicesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompb"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/slicesutil"
 )
 
 const (

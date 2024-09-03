@@ -9,30 +9,30 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/auth"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/procutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/azure"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/consul"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/consulagent"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/digitalocean"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/dns"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/docker"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/dockerswarm"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/ec2"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/eureka"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/gce"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/hetzner"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/http"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/kubernetes"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/kuma"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/nomad"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/openstack"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/vultr"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/yandexcloud"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/auth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/procutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/azure"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/consul"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/consulagent"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/digitalocean"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/dns"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/docker"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/dockerswarm"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/ec2"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/eureka"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/gce"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/hetzner"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/http"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/kubernetes"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/kuma"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/nomad"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/openstack"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/vultr"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/yandexcloud"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 	"github.com/VictoriaMetrics/metrics"
 )
 
@@ -108,7 +108,7 @@ func runScraper(configFile string, pushData func(at *auth.Token, wr *prompbmarsh
 
 	// Register SIGHUP handler for config reload before loadConfig.
 	// This guarantees that the config will be re-read if the signal arrives just after loadConfig.
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1240
+	// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/1240
 	sighupCh := procutil.NewSighupChan()
 
 	logger.Infof("reading scrape configs from %q", configFile)

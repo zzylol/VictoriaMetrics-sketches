@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/cgroup"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httpserver"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timerpool"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httpserver"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timerpool"
 	"github.com/VictoriaMetrics/metrics"
 )
 

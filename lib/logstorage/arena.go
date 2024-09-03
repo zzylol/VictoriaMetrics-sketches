@@ -3,8 +3,8 @@ package logstorage
 import (
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/slicesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/slicesutil"
 )
 
 func getArena() *arena {

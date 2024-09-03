@@ -7,8 +7,8 @@ import (
 
 	"github.com/cespare/xxhash/v2"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/slicesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/slicesutil"
 )
 
 const dedupAggrShardsCount = 128

@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vlinsert/elasticsearch"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vlinsert/jsonline"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vlinsert/loki"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vlinsert/syslog"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vlinsert/elasticsearch"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vlinsert/jsonline"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vlinsert/loki"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vlinsert/syslog"
 )
 
 // Init initializes vlinsert

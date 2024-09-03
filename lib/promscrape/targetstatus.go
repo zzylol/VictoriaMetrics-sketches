@@ -16,9 +16,9 @@ import (
 	"github.com/VictoriaMetrics/metrics"
 	"github.com/cespare/xxhash/v2"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promrelabel"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promrelabel"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 var maxDroppedTargets = flag.Int("promscrape.maxDroppedTargets", 10000, "The maximum number of droppedTargets to show at /api/v1/targets page. "+

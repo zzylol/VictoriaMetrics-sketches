@@ -3,15 +3,15 @@ package prometheusimport
 import (
 	"net/http"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/remotewrite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/auth"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httpserver"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	parserCommon "github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/common"
-	parser "github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/prometheus"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/prometheus/stream"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/tenantmetrics"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/remotewrite"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/auth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httpserver"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	parserCommon "github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/common"
+	parser "github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/prometheus"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/prometheus/stream"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/tenantmetrics"
 	"github.com/VictoriaMetrics/metrics"
 )
 

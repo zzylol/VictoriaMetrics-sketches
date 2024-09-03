@@ -9,8 +9,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/memory"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/memory"
 	"github.com/VictoriaMetrics/metrics"
 )
 
@@ -96,7 +96,7 @@ func MustOpen(path string, nocache bool) *Reader {
 	}
 	if *disableFadvise {
 		// Unconditionally disable fadvise() syscall
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/pull/5120 for details on why this is needed
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/pull/5120 for details on why this is needed
 		nocache = false
 	}
 	if nocache {

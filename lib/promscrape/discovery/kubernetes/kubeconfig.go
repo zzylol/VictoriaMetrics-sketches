@@ -7,9 +7,9 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs/fscore"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promauth"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/proxy"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs/fscore"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promauth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/proxy"
 )
 
 // apiConfig contains config for API server
@@ -89,7 +89,7 @@ func (au *AuthInfo) validate() error {
 
 func unsupportedFieldError(fieldName string) error {
 	return fmt.Errorf("field %q is not supported yet; if you feel it is needed please open a feature request "+
-		"at https://github.com/VictoriaMetrics/VictoriaMetrics/issues/new", fieldName)
+		"at https://github.com/zzylol/VictoriaMetrics-sketches/issues/new", fieldName)
 }
 
 // ExecConfig contains information about os.command, that returns auth token for kubernetes cluster connection

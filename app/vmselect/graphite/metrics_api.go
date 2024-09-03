@@ -10,12 +10,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/netstorage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/searchutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bufferedwriter"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httputils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bufferedwriter"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
 	"github.com/VictoriaMetrics/metrics"
 	"github.com/VictoriaMetrics/metricsql"
 )

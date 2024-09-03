@@ -3,8 +3,8 @@ package gce
 import (
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discoveryutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discoveryutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 func TestParseInstanceListFailure(t *testing.T) {

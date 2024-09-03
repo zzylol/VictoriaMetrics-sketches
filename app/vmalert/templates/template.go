@@ -31,9 +31,9 @@ import (
 
 	"github.com/bmatcuk/doublestar/v4"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/datasource"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/formatutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/datasource"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/formatutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 // go template execution fails when it's tree is empty

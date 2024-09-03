@@ -3,8 +3,8 @@ package loki
 import (
 	"net/http"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vlinsert/insertutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vlinsert/insertutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logstorage"
 )
 
 // RequestHandler processes Loki insert requests

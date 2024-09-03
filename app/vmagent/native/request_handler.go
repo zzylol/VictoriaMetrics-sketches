@@ -3,15 +3,15 @@ package native
 import (
 	"net/http"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/remotewrite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/auth"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	parserCommon "github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/native/stream"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/tenantmetrics"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/remotewrite"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/auth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	parserCommon "github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/native/stream"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/tenantmetrics"
 	"github.com/VictoriaMetrics/metrics"
 )
 
@@ -23,7 +23,7 @@ var (
 
 // InsertHandler processes `/api/v1/import` request.
 //
-// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/6
+// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/6
 func InsertHandler(at *auth.Token, req *http.Request) error {
 	extraLabels, err := parserCommon.GetExtraLabels(req)
 	if err != nil {

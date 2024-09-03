@@ -43,16 +43,16 @@ Bumping the limits may significantly improve build speed.
 
 ## Release version and Docker images
 
-1. Make sure all the changes are documented in [CHANGELOG.md](https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/docs/CHANGELOG.md).
+1. Make sure all the changes are documented in [CHANGELOG.md](https://github.com/zzylol/VictoriaMetrics-sketches/blob/master/docs/CHANGELOG.md).
    Ideally, every change must be documented in the commit with the change. Alternatively, the change must be documented immediately
    after the commit, which adds the change.
 1. Make sure all the changes are synced between `master`, `cluster`, `enterprise-single-node` and `enterprise-cluster` branches.
    Changes in these branches must be synced immediately after they are committed in at least a single branch.
 1. Make sure that the release branches have no security issues.
-1. Update release versions if needed in [SECURITY.md](https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/SECURITY.md).
+1. Update release versions if needed in [SECURITY.md](https://github.com/zzylol/VictoriaMetrics-sketches/blob/master/SECURITY.md).
 1. Add `(available starting from v1.xx.y)` line to feature docs introduced in the upcoming release.
-1. Cut new version in [CHANGELOG.md](https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/docs/CHANGELOG.md)
-   and make it merged. See example in this [commit](https://github.com/VictoriaMetrics/VictoriaMetrics/commit/b771152039d23b5ccd637a23ea748bc44a9511a7).
+1. Cut new version in [CHANGELOG.md](https://github.com/zzylol/VictoriaMetrics-sketches/blob/master/docs/CHANGELOG.md)
+   and make it merged. See example in this [commit](https://github.com/zzylol/VictoriaMetrics-sketches/commit/b771152039d23b5ccd637a23ea748bc44a9511a7).
 1. Cherry-pick bug fixes relevant for [LTS releases](https://docs.victoriametrics.com/lts-releases/).
 1. Make sure you get all changes fetched `git fetch --all`.
 1. Create the following release tags:
@@ -72,7 +72,7 @@ Bumping the limits may significantly improve build speed.
       * linux/ppc64le
       * linux/386
       This step can be run manually with the command `make publish` from the needed git tag.
-1. Push the tags `v1.xx.y` and `v1.xx.y-cluster` created at step 8 to public GitHub repository at https://github.com/VictoriaMetrics/VictoriaMetrics.
+1. Push the tags `v1.xx.y` and `v1.xx.y-cluster` created at step 8 to public GitHub repository at https://github.com/zzylol/VictoriaMetrics-sketches.
    Push the tags `v1.xx.y`, `v1.xx.y-cluster`, `v1.xx.y-enterprise` and `v1.xx.y-enterprise-cluster` to the corresponding
    branches in private repository.
    **Important note:** do not push enterprise tags to public GitHub repository - they must be pushed only to private repository.
@@ -90,14 +90,14 @@ Bumping the limits may significantly improve build speed.
         file created at the step `a`.
       - To run the command `TAG=v1.xx.y make github-create-release github-upload-assets`, so new release is created
         and all the needed assets are re-uploaded to it.
-1. Go to <https://github.com/VictoriaMetrics/VictoriaMetrics/releases> and verify that draft release with the name `TAG` has been created
+1. Go to <https://github.com/zzylol/VictoriaMetrics-sketches/releases> and verify that draft release with the name `TAG` has been created
    and this release contains all the needed binaries and checksums.
-1. Update the release description with the content of [CHANGELOG](https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/docs/CHANGELOG.md) for this release.
+1. Update the release description with the content of [CHANGELOG](https://github.com/zzylol/VictoriaMetrics-sketches/blob/master/docs/CHANGELOG.md) for this release.
 1. Publish release by pressing "Publish release" green button in GitHub's UI.
 1. Bump version of the VictoriaMetrics cluster in the [sandbox environment](https://github.com/VictoriaMetrics/ops/blob/main/gcp-test/sandbox/manifests/benchmark-vm/vmcluster.yaml)
    by [opening and merging PR](https://github.com/VictoriaMetrics/ops/pull/58).
 1. Bump VictoriaMetrics version at `deployment/docker/docker-compose.yml` and at `deployment/docker/docker-compose-cluster.yml`.
-1. Follow the instructions in [release follow-up](https://github.com/VictoriaMetrics/VictoriaMetrics-enterprise/blob/master/Release-Guide.md).
+1. Follow the instructions in [release follow-up](https://github.com/zzylol/VictoriaMetrics-sketches-enterprise/blob/master/Release-Guide.md).
 
 ### Public Announcement
 
@@ -175,16 +175,16 @@ Repository [https://github.com/VictoriaMetrics/ansible-playbooks](https://github
 
 ### Bump the version of components
 
-Repository [https://github.com/VictoriaMetrics/victoriametrics-lts-rpm](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm)
+Repository [https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm)
 
-1. Update `vmagent` version in [`vmagent.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vmagent.spec#L2)
-1. Update `vmalert` version in [`vmalert.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vmalert.spec#L2)
-1. Update `vmauth` version in [`vmauth.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vmauth.spec#L2)
-1. Update `vmbackup` version in [`vmbackup.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vmbackup.spec#L2)
-1. Update `vmctl` version in [`vmctl.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vmctl.spec#L2)
-1. Update `vmrestore` version in [`vmrestore.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vmrestore.spec#L2)
-1. Update `vminsert` version in [`vminsert.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vminsert.spec#L2)
-1. Update `vmselect` version in [`vmselect.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vmselect.spec#L2)
-1. Update `vmstorage` version in [`vmstorage.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vmstorage.spec#L2)
-1. Update `vmsingle` version in [`vmsingle.spec`](https://github.com/VictoriaMetrics/victoriametrics-lts-rpm/blob/master/vmsingle.spec#L2)
+1. Update `vmagent` version in [`vmagent.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vmagent.spec#L2)
+1. Update `vmalert` version in [`vmalert.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vmalert.spec#L2)
+1. Update `vmauth` version in [`vmauth.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vmauth.spec#L2)
+1. Update `vmbackup` version in [`vmbackup.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vmbackup.spec#L2)
+1. Update `vmctl` version in [`vmctl.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vmctl.spec#L2)
+1. Update `vmrestore` version in [`vmrestore.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vmrestore.spec#L2)
+1. Update `vminsert` version in [`vminsert.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vminsert.spec#L2)
+1. Update `vmselect` version in [`vmselect.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vmselect.spec#L2)
+1. Update `vmstorage` version in [`vmstorage.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vmstorage.spec#L2)
+1. Update `vmsingle` version in [`vmsingle.spec`](https://github.com/zzylol/VictoriaMetrics-sketches-lts-rpm/blob/master/vmsingle.spec#L2)
 1. Commit and push changes to the repository. This will automatically build and publish new versions of RPM packages.

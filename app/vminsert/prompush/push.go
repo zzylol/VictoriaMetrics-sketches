@@ -1,9 +1,9 @@
 package prompush
 
 import (
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vminsert/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
 	"github.com/VictoriaMetrics/metrics"
 )
 

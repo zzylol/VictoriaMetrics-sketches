@@ -9,14 +9,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/notifier"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/rule"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/tpl"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httpserver"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httputils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/procutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/notifier"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/rule"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/tpl"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httpserver"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/procutil"
 )
 
 var reloadAuthKey = flagutil.NewPassword("reloadAuthKey", "Auth key for /-/reload http endpoint. It must be passed via authKey query arg. It overrides httpAuth.* settings.")
@@ -276,7 +276,7 @@ func (rh *requestHandler) groups(rf rulesFilter) []apiGroup {
 
 		g := groupToAPI(group)
 		// the returned list should always be non-nil
-		// https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4221
+		// https://github.com/zzylol/VictoriaMetrics-sketches/issues/4221
 		filteredRules := make([]apiRule, 0)
 		for _, r := range g.Rules {
 			if rf.ruleType != "" && rf.ruleType != r.Type {

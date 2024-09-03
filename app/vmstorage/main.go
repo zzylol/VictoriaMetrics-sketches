@@ -12,17 +12,17 @@ import (
 
 	"github.com/VictoriaMetrics/metrics"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httpserver"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/mergeset"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/querytracer"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/syncwg"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timeutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httpserver"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/mergeset"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/querytracer"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/syncwg"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timeutil"
 )
 
 var (

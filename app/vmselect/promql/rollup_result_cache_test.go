@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
 	"github.com/VictoriaMetrics/metricsql"
 )
 

@@ -7,8 +7,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discoveryutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discoveryutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 	"github.com/VictoriaMetrics/metrics"
 )
 

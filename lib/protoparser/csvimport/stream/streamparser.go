@@ -9,10 +9,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/csvimport"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/writeconcurrencylimiter"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/csvimport"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/writeconcurrencylimiter"
 	"github.com/VictoriaMetrics/metrics"
 )
 

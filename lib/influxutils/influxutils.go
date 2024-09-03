@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
 )
 
 var influxDatabaseNames = flagutil.NewArrayString("influx.databaseNames", "Comma-separated list of database names to return from /query and /influx/query API. "+
@@ -15,7 +15,7 @@ var influxDatabaseNames = flagutil.NewArrayString("influx.databaseNames", "Comma
 func WriteDatabaseNames(w http.ResponseWriter) {
 	// Emulate fake response for influx query.
 	// This is required for TSBS benchmark and some Telegraf plugins.
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1124
+	// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/1124
 	w.Header().Set("Content-Type", "application/json")
 	dbNames := *influxDatabaseNames
 	if len(dbNames) == 0 {

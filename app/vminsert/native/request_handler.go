@@ -4,13 +4,13 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vminsert/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vminsert/relabel"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	parserCommon "github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/native/stream"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/relabel"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	parserCommon "github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/native/stream"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
 	"github.com/VictoriaMetrics/metrics"
 )
 

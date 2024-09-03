@@ -9,12 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/config"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/datasource"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/notifier"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/remotewrite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/rule"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/templates"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/config"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/datasource"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/notifier"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/remotewrite"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/rule"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/templates"
 )
 
 func TestMain(m *testing.M) {

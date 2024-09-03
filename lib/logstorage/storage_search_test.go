@@ -12,7 +12,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
 )
 
 func TestStorageRunQuery(t *testing.T) {

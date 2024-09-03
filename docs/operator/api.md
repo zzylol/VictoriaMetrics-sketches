@@ -1250,7 +1250,7 @@ _Appears in:_
 
 ProxyAuth represent proxy auth config
 Only VictoriaMetrics scrapers supports it.
-See https://github.com/VictoriaMetrics/VictoriaMetrics/commit/a6a71ef861444eb11fe8ec6d2387f0fc0c4aea87
+See https://github.com/zzylol/VictoriaMetrics-sketches/commit/a6a71ef861444eb11fe8ec6d2387f0fc0c4aea87
 
 
 
@@ -2157,7 +2157,7 @@ _Appears in:_
 | `probeSelector` | ProbeSelector defines VMProbe to be selected for target probing.<br />Works in combination with NamespaceSelector.<br />NamespaceSelector nil - only objects at VMAgent namespace.<br />Selector nil - only objects at NamespaceSelector namespaces.<br />If both nil - behaviour controlled by selectAllByDefault | _[LabelSelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#labelselector-v1-meta)_ | false |
 | `readinessGates` | ReadinessGates defines pod readiness gates | _[PodReadinessGate](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#podreadinessgate-v1-core) array_ | true |
 | `relabelConfig` | RelabelConfig ConfigMap with global relabel config -remoteWrite.relabelConfig<br />This relabeling is applied to all the collected metrics before sending them to remote storage. | _[ConfigMapKeySelector](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#configmapkeyselector-v1-core)_ | false |
-| `remoteWrite` | RemoteWrite list of victoria metrics /some other remote write system<br />for vm it must looks like: http://victoria-metrics-single:8429/api/v1/write<br />or for cluster different url<br />https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/app/vmagent#splitting-data-streams-among-multiple-systems | _[VMAgentRemoteWriteSpec](#vmagentremotewritespec) array_ | true |
+| `remoteWrite` | RemoteWrite list of victoria metrics /some other remote write system<br />for vm it must looks like: http://victoria-metrics-single:8429/api/v1/write<br />or for cluster different url<br />https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/app/vmagent#splitting-data-streams-among-multiple-systems | _[VMAgentRemoteWriteSpec](#vmagentremotewritespec) array_ | true |
 | `remoteWriteSettings` | RemoteWriteSettings defines global settings for all remoteWrite urls. | _[VMAgentRemoteWriteSettings](#vmagentremotewritesettings)_ | false |
 | `replicaCount` | ReplicaCount is the expected size of the VMAgent cluster. The controller will<br />eventually make the size of the running cluster equal to the expected<br />size.<br />NOTE enable VMSingle deduplication for replica usage | _integer_ | false |
 | `resources` | Resources container resource request and limits, https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/<br />if not specified - default setting will be used | _[ResourceRequirements](https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.30/#resourcerequirements-v1-core)_ | false |
@@ -3102,10 +3102,10 @@ _Appears in:_
 | `disable_compression` |  | _boolean_ | false |
 | `disable_keep_alive` | disable_keepalive allows disabling HTTP keep-alive when scraping targets.<br />By default, HTTP keep-alive is enabled, so TCP connections to scrape targets<br />could be re-used.<br />See https://docs.victoriametrics.com/vmagent.html#scrape_config-enhancements | _boolean_ | false |
 | `headers` | Headers allows sending custom headers to scrape targets<br />must be in of semicolon separated header with it's value<br />eg:<br />headerName: headerValue<br />vmagent supports since 1.79.0 version | _string array_ | false |
-| `metric_relabel_debug` | deprecated since [v1.85](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.85.0), will be removed in next release | _boolean_ | false |
+| `metric_relabel_debug` | deprecated since [v1.85](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.85.0), will be removed in next release | _boolean_ | false |
 | `no_stale_markers` |  | _boolean_ | false |
 | `proxy_client_config` | ProxyClientConfig configures proxy auth settings for scraping<br />See feature description https://docs.victoriametrics.com/vmagent.html#scraping-targets-via-a-proxy | _[ProxyAuth](#proxyauth)_ | false |
-| `relabel_debug` | deprecated since [v1.85](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.85.0), will be removed in next release | _boolean_ | false |
+| `relabel_debug` | deprecated since [v1.85](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.85.0), will be removed in next release | _boolean_ | false |
 | `scrape_align_interval` |  | _string_ | false |
 | `scrape_offset` |  | _string_ | false |
 | `stream_parse` |  | _boolean_ | false |

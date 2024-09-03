@@ -8,9 +8,9 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/cgroup"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timeutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timeutil"
 	"github.com/cespare/xxhash/v2"
 )
 

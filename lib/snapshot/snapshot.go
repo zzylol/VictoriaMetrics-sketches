@@ -9,8 +9,8 @@ import (
 	"net/http"
 	"net/url"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httputils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 var (

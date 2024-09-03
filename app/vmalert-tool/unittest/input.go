@@ -11,11 +11,11 @@ import (
 	"strings"
 	"time"
 
-	testutil "github.com/VictoriaMetrics/VictoriaMetrics/app/victoria-metrics/test"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmstorage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/decimal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	testutil "github.com/zzylol/VictoriaMetrics-sketches/app/victoria-metrics/test"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 	"github.com/VictoriaMetrics/metricsql"
 )
 

@@ -9,7 +9,7 @@ import (
 	"sync"
 	"sync/atomic"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/netutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/netutil"
 	"github.com/VictoriaMetrics/metrics"
 )
 

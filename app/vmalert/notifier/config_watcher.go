@@ -5,11 +5,11 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promauth"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/consul"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/dns"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promauth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/consul"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/dns"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 // configWatcher supports dynamic reload of Notifier objects

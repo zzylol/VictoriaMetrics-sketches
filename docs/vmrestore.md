@@ -263,18 +263,18 @@ i.e. the end result would be similar to [rsync --delete](https://askubuntu.com/q
 
 ## How to build from sources
 
-It is recommended using [binary releases](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/latest) - see `vmutils-*` archives there.
+It is recommended using [binary releases](https://github.com/zzylol/VictoriaMetrics-sketches/releases/latest) - see `vmutils-*` archives there.
 
 ### Development build
 
 1. [Install Go](https://golang.org/doc/install). The minimum supported version is Go 1.22.
-1. Run `make vmrestore` from the root folder of [the repository](https://github.com/VictoriaMetrics/VictoriaMetrics).
+1. Run `make vmrestore` from the root folder of [the repository](https://github.com/zzylol/VictoriaMetrics-sketches).
    It builds `vmrestore` binary and puts it into the `bin` folder.
 
 ### Production build
 
 1. [Install docker](https://docs.docker.com/install/).
-1. Run `make vmrestore-prod` from the root folder of [the repository](https://github.com/VictoriaMetrics/VictoriaMetrics).
+1. Run `make vmrestore-prod` from the root folder of [the repository](https://github.com/zzylol/VictoriaMetrics-sketches).
    It builds `vmrestore-prod` binary and puts it into the `bin` folder.
 
 ### Building docker images

@@ -3,11 +3,11 @@ package opentsdb
 import (
 	"io"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/remotewrite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	parser "github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/opentsdb"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/opentsdb/stream"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/remotewrite"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	parser "github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/opentsdb"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/opentsdb/stream"
 	"github.com/VictoriaMetrics/metrics"
 )
 

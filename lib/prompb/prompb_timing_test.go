@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
 )
 
 func BenchmarkWriteRequestUnmarshalProtobuf(b *testing.B) {

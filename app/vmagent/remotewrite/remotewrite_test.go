@@ -7,9 +7,9 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promrelabel"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/streamaggr"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promrelabel"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/streamaggr"
 	"github.com/VictoriaMetrics/metrics"
 )
 

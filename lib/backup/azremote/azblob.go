@@ -17,10 +17,10 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/sas"
 	"github.com/Azure/azure-sdk-for-go/sdk/storage/azblob/service"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/fscommon"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/envtemplate"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/fscommon"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/envtemplate"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 const (

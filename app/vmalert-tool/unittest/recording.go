@@ -8,8 +8,8 @@ import (
 	"sort"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/datasource"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/datasource"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 	"github.com/VictoriaMetrics/metricsql"
 )
 

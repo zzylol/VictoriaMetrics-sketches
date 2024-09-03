@@ -9,15 +9,15 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/backoff"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/barpool"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/limiter"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/native"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/stepper"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/utils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/vm"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/searchutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/backoff"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/barpool"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/limiter"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/native"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/stepper"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/utils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/vm"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 type vmNativeProcessor struct {

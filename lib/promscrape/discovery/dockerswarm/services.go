@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"net"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discoveryutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discoveryutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 // https://docs.docker.com/engine/api/v1.40/#tag/Service

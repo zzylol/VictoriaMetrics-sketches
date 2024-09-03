@@ -11,21 +11,21 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/graphite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/netstorage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/prometheus"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/promql"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/searchutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmstorage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/cgroup"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httpserver"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httputils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/querytracer"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timerpool"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/graphite"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/prometheus"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/promql"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httpserver"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/querytracer"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timerpool"
 	"github.com/VictoriaMetrics/metrics"
 )
 
@@ -551,7 +551,7 @@ func handleStaticAndSimpleRequests(w http.ResponseWriter, r *http.Request, path 
 		w.Header().Set("Content-Type", "application/json")
 		// prometheus version is used here, which affects what API Grafana uses when retrieving label values.
 		// as new Grafana features are added that are customized for the Prometheus version, maybe the version will need to be increased.
-		// see this issue for more info: https://github.com/VictoriaMetrics/VictoriaMetrics/issues/5370
+		// see this issue for more info: https://github.com/zzylol/VictoriaMetrics-sketches/issues/5370
 		fmt.Fprintf(w, "%s", `{"status":"success","data":{"version":"2.24.0"}}`)
 		return true
 	case "/api/v1/query_exemplars":
@@ -701,7 +701,7 @@ func proxyVMAlertRequests(w http.ResponseWriter, r *http.Request) {
 		err := recover()
 		if err == nil || err == http.ErrAbortHandler {
 			// Suppress http.ErrAbortHandler panic.
-			// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1353
+			// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/1353
 			return
 		}
 		// Forward other panics to the caller.

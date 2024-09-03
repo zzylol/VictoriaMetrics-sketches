@@ -7,10 +7,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/blockcache"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/blockcache"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 // partSearch represents blocks stream for the given search args

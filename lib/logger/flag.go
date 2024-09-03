@@ -4,8 +4,8 @@ import (
 	"flag"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/buildinfo"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
 )
 
 func logAllFlags() {

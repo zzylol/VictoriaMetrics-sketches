@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/VictoriaMetrics/metrics"
 	"github.com/valyala/fastjson/fastfloat"
 )
@@ -89,7 +89,7 @@ func (r *Row) unmarshal(s string, tagsPool []Tag) ([]Tag, error) {
 		// Missing tags.
 		// Accept this case even if OpenTSDB forbids it according to http://opentsdb.net/docs/build/html/api_telnet/put.html:
 		// > At least one tag pair must be present.
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3290
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/3290
 		valueStr = tail
 	} else {
 		valueStr = tail[:n]

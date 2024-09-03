@@ -6,10 +6,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/datasource"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/utils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httputils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/datasource"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/utils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
 )
 
 var (

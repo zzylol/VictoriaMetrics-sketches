@@ -12,14 +12,14 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/config"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/datasource"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/notifier"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/remotewrite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/templates"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/decimal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/config"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/datasource"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/notifier"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/remotewrite"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/templates"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 func init() {

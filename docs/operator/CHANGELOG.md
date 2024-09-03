@@ -68,7 +68,7 @@ aliases:
 
 ## [v0.43.5](https://github.com/VictoriaMetrics/operator/releases/tag/v0.43.5) - 26 Apr 2024
 
-- Update VictoriaMetrics image tags to [v1.101.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.101.0).
+- Update VictoriaMetrics image tags to [v1.101.0](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.101.0).
 
 <a name="v0.43.4"></a>
 
@@ -107,7 +107,7 @@ aliases:
 **Update note: `Alertmanager` versions below `v0.22.0` are no longer supported. Version must upgraded - manually for resources or use default version bundled with operator config.**
 
 - [operator](./README.md): properly reconcile `ServiceAccount` specified for `CRD`s. Previously operator didn't perform a check for actual owner of `ServiceAccount`. Now it creates and updates `ServiceAccount` only if this field is omitted at `CRD` definition. It fixes possible ownership race conditions.
-- Update VictoriaMetrics image tags to [v1.100.1](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.100.1).
+- Update VictoriaMetrics image tags to [v1.100.1](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.100.1).
 - [operator](./README.md): reduce number of watched resources owned by `CRD`s. Operator no longer watches for `Service`, `Secret`, `Configmap` changes owned by CRD object. It must reduce logging output, CPU and memory usage for operator.
 - [operator](./README.md): exposes `config-reloader-http` port with `8435` number for the customer config-reloader containers. Operator may use own config-reloader implementation for `VMAuth`, `VMAlertmanager` and `VMAgent`.
 - [operator](./README.md): adds new field `configReloaderExtraArgs` for `VMAgent`, `VMAlert`, `VMAuth` and `VMAlertmanager` CRDs. It allows to configure config-reloader container.
@@ -129,7 +129,7 @@ aliases:
 - [vmprobe](./api.md#vmprobe): add field `proxy_url`, see [this issue](https://github.com/VictoriaMetrics/operator/issues/731) for details.
 - scrape CRDs: add field `series_limit`, which can be used to limit the number of unique time series a single scrape target can expose.
 - scrape CRDs: fix scrape_config filed `disable_keep_alive`, before it's misconfigured as `disable_keepalive` and won't work.
-- scrape CRDs: deprecated option `relabel_debug` and  `metric_relabel_debug`, they were deprecated since [v1.85.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.85.0).
+- scrape CRDs: deprecated option `relabel_debug` and  `metric_relabel_debug`, they were deprecated since [v1.85.0](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.85.0).
 
 <a name="v0.42.3"></a>
 
@@ -158,7 +158,7 @@ aliases:
 ## [v0.42.0](https://github.com/VictoriaMetrics/operator/releases/tag/v0.42.0) - 4 Mar 2024
 
 - [operator](./README.md): adds more context to the log messages. It must greatly improve debugging process and log quality.
-- Update VictoriaMetrics image tags to [v1.99.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.99.0).
+- Update VictoriaMetrics image tags to [v1.99.0](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.99.0).
 - [operator](./README.md): allow multiple comma separated values for `WATCH_NAMESPACE` param. It adds multiple watch namespace mode without cluster-wide permission. See this [issue](https://github.com/VictoriaMetrics/operator/issues/557) for details. Need namspace RBAC permissions located at `config/examples/operator_rbac_for_single_namespace.yaml`
 - [operator](./README.md): updates runtime dependencies (controller-runtime, controller-gen). See this [issue](https://github.com/VictoriaMetrics/operator/issues/878) for details.
 - [operator](./README.md): updates runtime dependencies (controller-runtime, controller-gen). See this [issue](https://github.com/VictoriaMetrics/operator/issues/878) for details.
@@ -175,19 +175,19 @@ aliases:
 ## [v0.41.2](https://github.com/VictoriaMetrics/operator/releases/tag/v0.41.2) - 21 Feb 2024
 
 - Remove deprecated autoscaling/v2beta1 HPA objects, previously operator still use it for k8s 1.25. See [this issue](https://github.com/VictoriaMetrics/operator/issues/864) for details.
-- Update VictoriaMetrics image tags to [v1.98.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.98.0).
+- Update VictoriaMetrics image tags to [v1.98.0](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.98.0).
 
 <a name="v0.41.1"></a>
 
 ## [v0.41.1](https://github.com/VictoriaMetrics/operator/releases/tag/v0.41.1) - 1 Feb 2024
 
-- update VictoriaMetrics image tags to [v1.97.1](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.97.1).
+- update VictoriaMetrics image tags to [v1.97.1](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.97.1).
 
 <a name="v0.41.0"></a>
 
 ## [v0.41.0](https://github.com/VictoriaMetrics/operator/releases/tag/v0.41.0) - 31 Jan 2024
 
-- update VictoriaMetrics image tags to [v1.97.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.97.0).
+- update VictoriaMetrics image tags to [v1.97.0](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.97.0).
 - [vmauth](./api.html#vmauth): add new fields for `unauthorized_user` like `src_hosts`, `headers`, `retry_status_codes` and `load_balancing_policy`. See [vmauth docs](https://docs.victoriametrics.com/vmauth.htm) for more details.
 
 <a name="v0.40.0"></a>
@@ -205,7 +205,7 @@ aliases:
 
 ## [v0.39.4](https://github.com/VictoriaMetrics/operator/releases/tag/v0.39.4) - 13 Dec 2023
 
-- update VictoriaMetrics image tags to [v1.96.0](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.96.0).
+- update VictoriaMetrics image tags to [v1.96.0](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.96.0).
 - [vmalertmanagerconfig](./api.html#vmalertmanagerconfig): add fields `entity`, `actions` and `update_alerts` for opsgenie_configs according to <https://prometheus.io/docs/alerting/latest/configuration/#opsgenie_config>.
 - [vmoperator](./README.md): remove vmalert notifier null check, since `-notifier.url` is optional and is needed only if there are alerting rules.
 
@@ -213,7 +213,7 @@ aliases:
 
 ## [v0.39.3](https://github.com/VictoriaMetrics/operator/releases/tag/v0.39.3) - 16 Nov 2023
 
-- update VictoriaMetrics image tags to [v1.95.1](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.95.1).
+- update VictoriaMetrics image tags to [v1.95.1](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.95.1).
 
 <a name="v0.39.2"></a>
 
@@ -263,7 +263,7 @@ aliases:
 
 - [vmuser](./api.md#vmuser): [Enterprise] fixes ip_filters indent for url_prefix. Previously it wasn't possible to use ip_filters with multiple target refs
 - [vmoperator](./README.md): turn off `EnableStrictSecurity` by default. Before, upgrade operator to v0.36.0+ could fail components with volume attached, see [this issue](https://github.com/VictoriaMetrics/operator/issues/749) for details.
-- [vmoperator](./README.md): bump default version of VictoriaMetrics components to [1.93.4](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.93.4).
+- [vmoperator](./README.md): bump default version of VictoriaMetrics components to [1.93.4](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.93.4).
 
 ### Features
 
@@ -277,7 +277,7 @@ aliases:
 
 ### Updates
 
-- bump default version of Victoria Metrics components to [v1.93.3](https://github.com/VictoriaMetrics/VictoriaMetrics/releases/tag/v1.93.3)
+- bump default version of Victoria Metrics components to [v1.93.3](https://github.com/zzylol/VictoriaMetrics-sketches/releases/tag/v1.93.3)
 
 <a name="v0.37.0"></a>
 
@@ -336,9 +336,9 @@ aliases:
 
 - [vmagent](./api.md#vmagent): add [example config](https://github.com/VictoriaMetrics/operator/blob/master/config/examples/vmagent_stateful_with_sharding.yaml) for vmagent statefulmode.
 - [vmagent](./api.md#vmagent)/[vmsingle](./api.md#vmsingle): adapt new features in streaming aggregation:
-  - support `streamAggr.dropInput`, see [this issue](https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4243) for details;
-  - support list for `match` parameter, see [this issue](https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4635) for details;
-  - support `staleness_interval`, see [this issue](https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4667) for details.
+  - support `streamAggr.dropInput`, see [this issue](https://github.com/zzylol/VictoriaMetrics-sketches/issues/4243) for details;
+  - support list for `match` parameter, see [this issue](https://github.com/zzylol/VictoriaMetrics-sketches/issues/4635) for details;
+  - support `staleness_interval`, see [this issue](https://github.com/zzylol/VictoriaMetrics-sketches/issues/4667) for details.
 - [vmcluster](./api.md#vmagent): add [example config](https://github.com/VictoriaMetrics/operator/blob/master/config/examples/vmcluster_with_additional_claim.yaml) for cluster with custom storage claims.
 - [vmrule](./api.md#vmrule): support `update_entries_limit` field in rules, refer to [alerting rules](https://docs.victoriametrics.com/vmalert.html#alerting-rules). See [this PR](https://github.com/VictoriaMetrics/operator/pull/691) for details.
 - [vmrule](./api.md#vmrule): support `keep_firing_for` field in rules, refer to [alerting rules](https://docs.victoriametrics.com/vmalert.html#alerting-rules). See [this PR](https://github.com/VictoriaMetrics/operator/pull/711) for details.
@@ -697,7 +697,7 @@ aliases:
 ### Fixes
 
 - security: changes base docker image <https://github.com/VictoriaMetrics/operator/commit/cda21275517f84b66786e25c5f6b76977ee27a49>
-- vmagent: fixes incorrect usage of remoteWriteSettings  <https://github.com/VictoriaMetrics/VictoriaMetrics/issues/2946>
+- vmagent: fixes incorrect usage of remoteWriteSettings  <https://github.com/zzylol/VictoriaMetrics-sketches/issues/2946>
 - vmalert: password_file usage <https://github.com/VictoriaMetrics/operator/commit/45163164662934587eafd6afed7709efa31ddbe8>
 
 ### Features
@@ -1320,7 +1320,7 @@ aliases:
 
 ### Fixes
 
-- removes liveness probe from vmstorage and `VMSingle` <https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1158>
+- removes liveness probe from vmstorage and `VMSingle` <https://github.com/zzylol/VictoriaMetrics-sketches/issues/1158>
 - fixes update process for `VMCluster` and `VMAlertmanager`
 
 [Changes][v0.12.1]
@@ -1519,7 +1519,7 @@ aliases:
 
 - New CRD type `VMNodeScrape`, it's useful for kubernetes nodes exporters scraping. See details at <https://github.com/VictoriaMetrics/operator/issues/125>.
 - `VMAlert` support multiple notifiers with `notifiers` spec.  See details at <https://github.com/VictoriaMetrics/operator/issues/117>.
-- `VMRule` support `concurrency` for group execution, see detail at vmalert docs  <https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/app/vmalert#groups>.
+- `VMRule` support `concurrency` for group execution, see detail at vmalert docs  <https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/app/vmalert#groups>.
 
 ### Fixes
 
@@ -1568,7 +1568,7 @@ aliases:
 - Fixes Volumes mounts <https://github.com/VictoriaMetrics/operator/issues/97>
 - Fixes deployments update loop with extra-args <https://github.com/VictoriaMetrics/operator/pull/100> . Thanks [@zhiyin009](https://github.com/zhiyin009)
 - Fixes securityContext field <https://github.com/VictoriaMetrics/operator/pull/101> . Thanks [@zhiyin009](https://github.com/zhiyin009)
-- Fixes `VMAgent` start-up error <https://github.com/VictoriaMetrics/VictoriaMetrics/issues/879>
+- Fixes `VMAgent` start-up error <https://github.com/zzylol/VictoriaMetrics-sketches/issues/879>
 
 [Changes][v0.4.0]
 

@@ -4,9 +4,9 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promrelabel"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promrelabel"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 func TestApplyRelabeling(t *testing.T) {

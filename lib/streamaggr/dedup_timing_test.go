@@ -5,7 +5,7 @@ import (
 	"sync/atomic"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
 )
 
 func BenchmarkDedupAggr(b *testing.B) {

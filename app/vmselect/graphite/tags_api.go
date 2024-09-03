@@ -9,14 +9,14 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/netstorage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/searchutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmstorage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bufferedwriter"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httputils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompb"
-	graphiteparser "github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/graphite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bufferedwriter"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompb"
+	graphiteparser "github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/graphite"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
 	"github.com/VictoriaMetrics/metrics"
 )
 

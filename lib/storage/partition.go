@@ -13,13 +13,13 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/cgroup"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/memory"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/mergeset"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timeutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/memory"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/mergeset"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timeutil"
 )
 
 // The maximum size of big part.
@@ -251,7 +251,7 @@ func mustOpenPartition(smallPartsPath, bigPartsPath string, s *Storage) *partiti
 	if !fs.IsPathExist(partsFile) {
 		// Create parts.json file if it doesn't exist yet.
 		// This should protect from possible carshloops just after the migration from versions below v1.90.0
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4336
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/4336
 		mustWritePartNames(smallParts, bigParts, smallPartsPath)
 	}
 
@@ -1285,7 +1285,7 @@ func (pt *partition) getMaxSmallPartSize() uint64 {
 
 func (pt *partition) getMaxBigPartSize() uint64 {
 	// Always use 4 workers for big merges due to historical reasons.
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4915#issuecomment-1733922830
+	// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/4915#issuecomment-1733922830
 	workersCount := 4
 	return getMaxOutBytes(pt.bigPartsPath, workersCount)
 }

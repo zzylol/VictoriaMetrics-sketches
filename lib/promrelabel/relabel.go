@@ -6,11 +6,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/regexutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/regexutil"
 	"github.com/cespare/xxhash/v2"
 )
 

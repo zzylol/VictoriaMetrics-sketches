@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timerpool"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timerpool"
 	"github.com/VictoriaMetrics/metrics"
 )
 

@@ -7,9 +7,9 @@ import (
 
 	"github.com/VictoriaMetrics/metricsql"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/netstorage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/searchutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
 )
 
 func TestEscapeDots(t *testing.T) {
@@ -4353,7 +4353,7 @@ func TestExecSuccess(t *testing.T) {
 		f(q, resultExpected)
 	})
 	t.Run(`histogram_quantile(duplicate-le)`, func(t *testing.T) {
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/pull/3225
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/pull/3225
 		t.Parallel()
 		q := `round(sort(histogram_quantile(0.6,
 			label_set(90, "foo", "bar", "le", "5")
@@ -9514,7 +9514,7 @@ max_over_time(cpuIdle[1h:])`)
 	// These are valid MetricsQL queries, which return correct result most of the time
 	f("count_over_time(http_total)")
 
-	// The following queries are from https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3974
+	// The following queries are from https://github.com/zzylol/VictoriaMetrics-sketches/issues/3974
 	//
 	// They are mostly correct. It is better to teach metricsql parser converting them to proper ones
 	// instead of denying them.
@@ -9546,7 +9546,7 @@ func TestMetricsqlIsLikelyInvalid_True(t *testing.T) {
 	f("rate(sum(http_total)) - rate(sum(http_total))")
 	f("avg_over_time(rate(http_total)-rate(http_total))")
 
-	// These queries are from https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3996
+	// These queries are from https://github.com/zzylol/VictoriaMetrics-sketches/issues/3996
 	f("sum_over_time(up{cluster='a'} or up{cluster='b'})")
 	f("sum_over_time(up{cluster='a'}[1m] or up{cluster='b'}[1m])")
 	f("sum(sum_over_time(up{cluster='a'}[1m] or up{cluster='b'}[1m])) by (instance)")

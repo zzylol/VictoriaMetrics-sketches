@@ -15,10 +15,10 @@ import (
 
 	"github.com/golang/snappy"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/netutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promauth"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/netutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promauth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
 	"github.com/VictoriaMetrics/metrics"
 )
 

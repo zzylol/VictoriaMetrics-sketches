@@ -3,9 +3,9 @@ package firehose
 import (
 	"bytes"
 	"fmt"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/opentelemetry/stream"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/opentelemetry/stream"
 	"strings"
 	"sync/atomic"
 	"testing"

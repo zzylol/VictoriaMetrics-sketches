@@ -10,38 +10,38 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/csvimport"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/datadogsketches"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/datadogv1"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/datadogv2"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/graphite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/influx"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/native"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/newrelic"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/opentelemetry"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/opentsdb"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/opentsdbhttp"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/prometheusimport"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/promremotewrite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/remotewrite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/vmimport"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/auth"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/envflag"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httpserver"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/influxutils"
-	graphiteserver "github.com/VictoriaMetrics/VictoriaMetrics/lib/ingestserver/graphite"
-	influxserver "github.com/VictoriaMetrics/VictoriaMetrics/lib/ingestserver/influx"
-	opentsdbserver "github.com/VictoriaMetrics/VictoriaMetrics/lib/ingestserver/opentsdb"
-	opentsdbhttpserver "github.com/VictoriaMetrics/VictoriaMetrics/lib/ingestserver/opentsdbhttp"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/procutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/opentelemetry/firehose"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/pushmetrics"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/csvimport"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/datadogsketches"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/datadogv1"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/datadogv2"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/graphite"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/influx"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/native"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/newrelic"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/opentelemetry"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/opentsdb"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/opentsdbhttp"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/prometheusimport"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/promremotewrite"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/remotewrite"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/vmimport"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/auth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/buildinfo"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/envflag"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httpserver"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/influxutils"
+	graphiteserver "github.com/zzylol/VictoriaMetrics-sketches/lib/ingestserver/graphite"
+	influxserver "github.com/zzylol/VictoriaMetrics-sketches/lib/ingestserver/influx"
+	opentsdbserver "github.com/zzylol/VictoriaMetrics-sketches/lib/ingestserver/opentsdb"
+	opentsdbhttpserver "github.com/zzylol/VictoriaMetrics-sketches/lib/ingestserver/opentsdbhttp"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/procutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/opentelemetry/firehose"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/pushmetrics"
 	"github.com/VictoriaMetrics/metrics"
 )
 
@@ -252,7 +252,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) bool {
 		if strings.HasPrefix(path, "/prometheus/api/v1/import/prometheus/metrics/job/") ||
 			strings.HasPrefix(path, "/api/v1/import/prometheus/metrics/job/") {
 			// Return 200 status code for pushgateway requests.
-			// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3636
+			// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/3636
 			statusCode = http.StatusOK
 		}
 		w.WriteHeader(statusCode)
@@ -260,7 +260,7 @@ func requestHandler(w http.ResponseWriter, r *http.Request) bool {
 	}
 	if strings.HasPrefix(path, "/datadog/") {
 		// Trim suffix from paths starting from /datadog/ in order to support legacy DataDog agent.
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/pull/2670
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/pull/2670
 		path = strings.TrimSuffix(path, "/")
 	}
 	switch path {
@@ -509,7 +509,7 @@ func processMultitenantRequest(w http.ResponseWriter, r *http.Request, path stri
 	}
 	if strings.HasPrefix(p.Suffix, "datadog/") {
 		// Trim suffix from paths starting from /datadog/ in order to support legacy DataDog agent.
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/pull/2670
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/pull/2670
 		p.Suffix = strings.TrimSuffix(p.Suffix, "/")
 	}
 	switch p.Suffix {

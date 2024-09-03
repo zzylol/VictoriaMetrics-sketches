@@ -585,7 +585,7 @@ metadata:
 
 ## Version management
 
-To set `VMAgent` version add `spec.image.tag` name from [releases](https://github.com/VictoriaMetrics/VictoriaMetrics/releases)
+To set `VMAgent` version add `spec.image.tag` name from [releases](https://github.com/zzylol/VictoriaMetrics-sketches/releases)
 
 ```yaml
 apiVersion: operator.victoriametrics.com/v1beta1

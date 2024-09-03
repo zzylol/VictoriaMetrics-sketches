@@ -7,7 +7,7 @@ import (
 	"net"
 	"sync/atomic"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
 	"github.com/VictoriaMetrics/metrics"
 )
 

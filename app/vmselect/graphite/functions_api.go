@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/httputils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
 )
 
 // FunctionsHandler implements /functions handler.

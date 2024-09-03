@@ -5,7 +5,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
 )
 
 func TestStorageSearchStreamIDs(t *testing.T) {

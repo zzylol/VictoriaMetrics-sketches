@@ -3,7 +3,7 @@ package logstorage
 import (
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 // filterStream is the filter for `_stream:{...}`

@@ -3,7 +3,7 @@ package encoding
 import (
 	"fmt"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding/zstd"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding/zstd"
 	"github.com/VictoriaMetrics/metrics"
 )
 

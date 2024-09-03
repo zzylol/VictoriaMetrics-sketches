@@ -43,7 +43,7 @@ After you run `vmanomaly` with `preset` arg specified, available assets can be v
 
 ## Node-Exporter
 
-> **Note: Preset assets can be also found [here](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/)**
+> **Note: Preset assets can be also found [here](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/)**
 
 For enabling Node-Exporter in config file use `preset` parameter:
 ```yaml
@@ -79,8 +79,8 @@ anomaly_score{for="cpu_seconds_total", instance="node-exporter:9100", preset="no
 > Provided `vmanomaly` alerts are set to fire only if *all anomaly detection models* vote that the datapoint is anomalous.
 
 You can find corresponding alerting rules here:
-- `vmanomaly` [Anomaly Detection alerts](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/vmanomaly_alerts.yml): `http://localhost:8490/presets/vmanomaly_alerts.yml`
-- [Modified Awesome Alerts](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/awesome_alerts.yml): `http://localhost:8490/presets/awesome_alerts.yml`
+- `vmanomaly` [Anomaly Detection alerts](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/vmanomaly_alerts.yml): `http://localhost:8490/presets/vmanomaly_alerts.yml`
+- [Modified Awesome Alerts](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/awesome_alerts.yml): `http://localhost:8490/presets/awesome_alerts.yml`
 
 #### Awesome Alerts replaced by Machine Learning alerts
 - HostMemoryUnderMemoryPressure
@@ -95,7 +95,7 @@ You can find corresponding alerting rules here:
 - HostUnusualNetworkThroughputOut
 
 ### Grafana dashboard
-Grafana dashboard `.json` file can be found [here](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/dashboard.json): `http://localhost:8490/presets/dashboard.json`
+Grafana dashboard `.json` file can be found [here](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/dashboard.json): `http://localhost:8490/presets/dashboard.json`
 
 ### Indicators monitored by preset
 
@@ -145,7 +145,7 @@ The produced anomaly scores will have a label `for` containing the name of corre
 
 ## Example
 
-Here's how attached [Grafana dashboard](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/dashboard.json) can be used to drill down anomalies:
+Here's how attached [Grafana dashboard](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/deployment/docker/vmanomaly/vmanomaly-node-exporter-preset/dashboard.json) can be used to drill down anomalies:
 
 On the (global) graph **'Percentage of Anomalies'**, you can see a spike 8.75% of anomalies at the timestamp '2024-06-03 10:35:00'. The (global) graph **'Anomalies per Indicator'** shows the indicators that were anomalous at the corresponding time.
 

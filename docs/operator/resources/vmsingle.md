@@ -39,7 +39,7 @@ use [`VMCluster`](./vmcluster.md) instead or duplicate the setup.
 
 ## Version management
 
-To set `VMSingle` version add `spec.image.tag` name from [releases](https://github.com/VictoriaMetrics/VictoriaMetrics/releases)
+To set `VMSingle` version add `spec.image.tag` name from [releases](https://github.com/zzylol/VictoriaMetrics-sketches/releases)
 
 ```yaml
 apiVersion: operator.victoriametrics.com/v1beta1

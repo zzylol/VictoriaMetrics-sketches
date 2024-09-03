@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vlinsert/insertutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vlinsert/insertutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 )
 
 func BenchmarkReadBulkRequest(b *testing.B) {

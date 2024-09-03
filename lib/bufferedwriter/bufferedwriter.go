@@ -6,7 +6,7 @@ import (
 	"io"
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/netutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/netutil"
 )
 
 // Get returns buffered writer for the given w.

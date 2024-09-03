@@ -7,8 +7,8 @@ aliases:
 ---
 # VictoriaLogs
 
-VictoriaLogs is [open source](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/app/victoria-logs) user-friendly database for logs
-from [VictoriaMetrics](https://github.com/VictoriaMetrics/VictoriaMetrics/).
+VictoriaLogs is [open source](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/app/victoria-logs) user-friendly database for logs
+from [VictoriaMetrics](https://github.com/zzylol/VictoriaMetrics-sketches/).
 
 VictoriaLogs provides the following features:
 
@@ -152,7 +152,7 @@ VictoriaLogs doesn't perform per-tenant authorization. Use [vmauth](https://docs
 
 ## Benchmarks
 
-Here is a [benchmark suite](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/deployment/logs-benchmark) for comparing data ingestion performance
+Here is a [benchmark suite](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/deployment/logs-benchmark) for comparing data ingestion performance
 and resource usage between VictoriaLogs and Elasticsearch or Loki.
 
 It is recommended [setting up VictoriaLogs](https://docs.victoriametrics.com/victorialogs/quickstart/) in production alongside the existing

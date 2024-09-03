@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 func Test_parseAPIResponse(t *testing.T) {

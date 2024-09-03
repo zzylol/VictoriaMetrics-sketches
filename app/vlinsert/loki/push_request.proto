@@ -9,7 +9,7 @@ package logproto;
 import "gogoproto/gogo.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/VictoriaMetrics/VictoriaMetrics/app/vlinsert/loki";
+option go_package = "github.com/zzylol/VictoriaMetrics-sketches/app/vlinsert/loki";
 
 message PushRequest {
   repeated StreamAdapter streams = 1 [

@@ -9,10 +9,10 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmagent/remotewrite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmagent/remotewrite"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/common"
 )
 
 var (

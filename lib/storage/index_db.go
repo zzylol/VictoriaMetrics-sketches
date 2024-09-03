@@ -14,17 +14,17 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/memory"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/mergeset"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/querytracer"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/slicesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/uint64set"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/workingsetcache"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/memory"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/mergeset"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/querytracer"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/slicesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/uint64set"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/workingsetcache"
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/cespare/xxhash/v2"
 )
@@ -656,7 +656,7 @@ func (is *indexSearch) searchLabelNamesWithFiltersOnDate(qt *querytracer.Tracer,
 	if filter != nil && filter.Len() <= 100e3 {
 		// It is faster to obtain label names by metricIDs from the filter
 		// instead of scanning the inverted index for the matching filters.
-		// This would help https://github.com/VictoriaMetrics/VictoriaMetrics/issues/2978
+		// This would help https://github.com/zzylol/VictoriaMetrics-sketches/issues/2978
 		metricIDs := filter.AppendTo(nil)
 		qt.Printf("sort %d metricIDs", len(metricIDs))
 		is.getLabelNamesForMetricIDs(qt, metricIDs, lns, maxLabelNames)
@@ -814,7 +814,7 @@ func (db *indexDB) SearchLabelValuesWithFiltersOnTimeRange(qt *querytracer.Trace
 	for labelValue := range lvs {
 		if len(labelValue) == 0 {
 			// Skip empty values, since they have no any meaning.
-			// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/600
+			// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/600
 			continue
 		}
 		labelValues = append(labelValues, labelValue)
@@ -882,7 +882,7 @@ func (is *indexSearch) searchLabelValuesWithFiltersOnDate(qt *querytracer.Tracer
 	if filter != nil && filter.Len() <= 100e3 {
 		// It is faster to obtain label values by metricIDs from the filter
 		// instead of scanning the inverted index for the matching filters.
-		// This would help https://github.com/VictoriaMetrics/VictoriaMetrics/issues/2978
+		// This would help https://github.com/zzylol/VictoriaMetrics-sketches/issues/2978
 		metricIDs := filter.AppendTo(nil)
 		qt.Printf("sort %d metricIDs", len(metricIDs))
 		is.getLabelValuesForMetricIDs(qt, lvs, labelName, metricIDs, maxLabelValues)
@@ -1506,7 +1506,7 @@ func (db *indexDB) searchMetricNameWithCache(dst []byte, metricID uint64) ([]byt
 	// 1. The corresponding metricID -> metricName entry isn't visible for search yet.
 	//    The solution is to wait for some time and try the search again.
 	//    It is OK if newly registered time series isn't visible for search during some time.
-	//    This should resolve https://github.com/VictoriaMetrics/VictoriaMetrics/issues/5959
+	//    This should resolve https://github.com/zzylol/VictoriaMetrics-sketches/issues/5959
 	//
 	// 2. The metricID -> metricName entry doesn't exist in the indexdb.
 	//    This is possible after unclean shutdown or after restoring of indexdb from a snapshot.
@@ -1603,7 +1603,7 @@ func (db *indexDB) deleteMetricIDs(metricIDs []uint64) {
 	// Make this after updating the deletedMetricIDs and resetting caches
 	// in order to exclude the possibility of the inconsistent state when the deleted metricIDs
 	// remain available in the tsidCache after unclean shutdown.
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1347
+	// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/1347
 	items := getIndexItems()
 	for _, metricID := range metricIDs {
 		items.B = append(items.B, nsPrefixDeletedMetricID)
@@ -2145,8 +2145,8 @@ func matchTagFilters(mn *MetricName, tfs []*tagFilter, kb *bytesutil.ByteBuffer)
 			//
 			// Note that the filter `{non_existing_tag_key!~"|foobar"}` shouldn't match anything,
 			// since it is expected that it matches non-empty `non_existing_tag_key`.
-			// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/546 and
-			// https://github.com/VictoriaMetrics/VictoriaMetrics/issues/2255 for details.
+			// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/546 and
+			// https://github.com/zzylol/VictoriaMetrics-sketches/issues/2255 for details.
 			continue
 		}
 		if tagMatched {
@@ -2912,8 +2912,8 @@ func (is *indexSearch) getMetricIDsForDateTagFilter(qt *querytracer.Tracer, tf *
 	}
 	// The tag filter, which matches empty label such as {foo=~"bar|"}
 	// Convert it to negative filter, which matches {foo=~".+",foo!~"bar|"}.
-	// This fixes https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1601
-	// See also https://github.com/VictoriaMetrics/VictoriaMetrics/issues/395
+	// This fixes https://github.com/zzylol/VictoriaMetrics-sketches/issues/1601
+	// See also https://github.com/zzylol/VictoriaMetrics-sketches/issues/395
 	maxLoopsCount -= loopsCount
 	var tfGross tagFilter
 	if err := tfGross.Init(prefix, tf.key, []byte(".+"), false, true); err != nil {

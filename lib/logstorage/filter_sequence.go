@@ -5,7 +5,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 // filterSequence matches an ordered sequence of phrases

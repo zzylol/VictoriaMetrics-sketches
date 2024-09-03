@@ -6,8 +6,8 @@ import (
 	"sync"
 	"unicode/utf8"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 // filterPhrase filters field entries by phrase match (aka full text search).

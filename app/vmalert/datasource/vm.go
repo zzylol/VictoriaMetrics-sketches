@@ -10,9 +10,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/netutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promauth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/netutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promauth"
 )
 
 type datasourceType string
@@ -100,7 +100,7 @@ func (s *VMStorage) ApplyParams(params QuerierParams) *VMStorage {
 			for _, v := range vl {
 				// don't use .Set() instead of Del/Add since it is allowed
 				// for GET params to be duplicated
-				// see https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4908
+				// see https://github.com/zzylol/VictoriaMetrics-sketches/issues/4908
 				s.extraParams.Add(k, v)
 			}
 		}

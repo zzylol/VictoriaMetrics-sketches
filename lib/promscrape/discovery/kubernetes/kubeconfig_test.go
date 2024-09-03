@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promauth"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promauth"
 )
 
 func TestParseKubeConfigSuccess(t *testing.T) {

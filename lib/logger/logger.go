@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/buildinfo"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/stringsutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/buildinfo"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/stringsutil"
 	"github.com/VictoriaMetrics/metrics"
 )
 

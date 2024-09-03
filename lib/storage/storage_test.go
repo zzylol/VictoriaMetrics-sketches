@@ -13,9 +13,9 @@ import (
 	"testing/quick"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/decimal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/uint64set"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/uint64set"
 )
 
 func TestReplaceAlternateRegexpsWithGraphiteWildcards(t *testing.T) {

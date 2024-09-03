@@ -10,9 +10,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discovery/consul"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promscrape/discoveryutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discovery/consul"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape/discoveryutils"
 	"github.com/VictoriaMetrics/metrics"
 )
 

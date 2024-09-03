@@ -5,7 +5,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 )
 
 func BenchmarkQueueThroughputSerial(b *testing.B) {

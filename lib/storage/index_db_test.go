@@ -12,12 +12,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/mergeset"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/uint64set"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/workingsetcache"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/mergeset"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/uint64set"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/workingsetcache"
 	"github.com/VictoriaMetrics/fastcache"
 )
 
@@ -820,7 +820,7 @@ func testIndexDBCheckTSIDByName(db *indexDB, mns []MetricName, tsids []TSID, isC
 		}
 
 		// Search with a filter matching empty tag (a single filter)
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1601
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/1601
 		tfs.Reset()
 		if err := tfs.Add(nil, mn.MetricGroup, false, false); err != nil {
 			return fmt.Errorf("cannot create tag filter for MetricGroup: %w", err)
@@ -837,7 +837,7 @@ func testIndexDBCheckTSIDByName(db *indexDB, mns []MetricName, tsids []TSID, isC
 		}
 
 		// Search with filters matching empty tags (multiple filters)
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1601
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/1601
 		tfs.Reset()
 		if err := tfs.Add(nil, mn.MetricGroup, false, false); err != nil {
 			return fmt.Errorf("cannot create tag filter for MetricGroup: %w", err)
@@ -1271,7 +1271,7 @@ func TestMatchTagFilters(t *testing.T) {
 		t.Fatalf("Shouldn't match")
 	}
 
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/546
+	// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/546
 	tfs.Reset()
 	if err := tfs.Add([]byte("key 3"), []byte("|value 3"), true, true); err != nil {
 		t.Fatalf("cannot add regexp, negative filter: %s", err)

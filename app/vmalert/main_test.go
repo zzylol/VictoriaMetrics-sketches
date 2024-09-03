@@ -8,11 +8,11 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/datasource"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/notifier"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/remotewrite"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/rule"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/procutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/datasource"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/notifier"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/remotewrite"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/rule"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/procutil"
 )
 
 func init() {

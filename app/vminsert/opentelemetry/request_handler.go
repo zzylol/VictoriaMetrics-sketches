@@ -4,12 +4,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vminsert/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vminsert/relabel"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	parserCommon "github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/opentelemetry/firehose"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/opentelemetry/stream"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/relabel"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	parserCommon "github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/opentelemetry/firehose"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/opentelemetry/stream"
 	"github.com/VictoriaMetrics/metrics"
 )
 

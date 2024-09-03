@@ -1,4 +1,4 @@
-module github.com/VictoriaMetrics/VictoriaMetrics
+module github.com/zzylol/VictoriaMetrics-sketches
 
 go 1.22.5
 

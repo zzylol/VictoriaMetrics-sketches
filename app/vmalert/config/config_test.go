@@ -11,9 +11,9 @@ import (
 
 	"gopkg.in/yaml.v2"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/notifier"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/templates"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/notifier"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/templates"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 func TestMain(m *testing.M) {

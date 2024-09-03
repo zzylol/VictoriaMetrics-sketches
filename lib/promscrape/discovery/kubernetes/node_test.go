@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 func TestParseNodeListFailure(t *testing.T) {

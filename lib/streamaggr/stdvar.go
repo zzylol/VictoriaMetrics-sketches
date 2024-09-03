@@ -3,8 +3,8 @@ package streamaggr
 import (
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
 )
 
 // stdvarAggrState calculates output=stdvar, e.g. the average value over input samples.

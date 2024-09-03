@@ -7,7 +7,7 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/cgroup"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
 )
 
 // virtualMachine represents an Azure virtual machine (which can also be created by a VMSS)
@@ -87,7 +87,7 @@ func visitAllAPIObjects(ac *apiConfig, apiURL string, cb func(data json.RawMessa
 		}
 
 		// Azure API returns NextLink with apiServer in it, so we need to remove it.
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3247
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/3247
 		if lar.NextLink == "" {
 			break
 		}

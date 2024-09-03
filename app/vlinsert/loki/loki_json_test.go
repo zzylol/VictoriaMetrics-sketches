@@ -3,7 +3,7 @@ package loki
 import (
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vlinsert/insertutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vlinsert/insertutils"
 )
 
 func TestParseJSONRequest_Failure(t *testing.T) {

@@ -8,11 +8,11 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/backupnames"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/common"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/backup/fslocal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/backupnames"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/common"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/fslocal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/VictoriaMetrics/metrics"
 )
 
@@ -117,7 +117,7 @@ func (r *Restore) Run() error {
 		// Assume other files are partially downloaded during the previous Restore.Run call,
 		// so only the last part in them may be incomplete.
 		// The last part for partially downloaded files will be re-downloaded later.
-		// This addresses https://github.com/VictoriaMetrics/VictoriaMetrics/issues/487 .
+		// This addresses https://github.com/zzylol/VictoriaMetrics-sketches/issues/487 .
 		pathsToDelete := make(map[string]bool)
 		for _, p := range partsToDelete {
 			if p.Offset == 0 {

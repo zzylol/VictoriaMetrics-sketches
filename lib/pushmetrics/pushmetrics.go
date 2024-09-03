@@ -7,9 +7,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/appmetrics"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/flagutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/appmetrics"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/VictoriaMetrics/metrics"
 )
 
@@ -52,7 +52,7 @@ func Init() {
 
 // Stop stops the periodic push of metrics.
 // It is important to stop the push of metrics before disposing resources
-// these metrics attached to. See related https://github.com/VictoriaMetrics/VictoriaMetrics/issues/5548
+// these metrics attached to. See related https://github.com/zzylol/VictoriaMetrics-sketches/issues/5548
 //
 // Stop must be called after Init.
 func Stop() {

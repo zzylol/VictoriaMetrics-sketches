@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 )
 
 var benchPrefixes = []string{

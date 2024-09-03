@@ -9,17 +9,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fs"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/memory"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/querytracer"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/slicesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/stringsutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/workingsetcache"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/memory"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/querytracer"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/slicesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/stringsutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/workingsetcache"
 	"github.com/VictoriaMetrics/fastcache"
 	"github.com/VictoriaMetrics/metrics"
 	"github.com/VictoriaMetrics/metricsql"
@@ -39,7 +39,7 @@ var (
 func ResetRollupResultCacheIfNeeded(mrs []storage.MetricRow) {
 	if *disableAutoCacheReset {
 		// Do not reset response cache if -search.disableAutoCacheReset is set.
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1570 .
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/1570 .
 		return
 	}
 	checkRollupResultCacheResetOnce.Do(func() {
@@ -159,7 +159,7 @@ func InitRollupResultCache(cachePath string) {
 
 	// Use metrics.GetOrCreateGauge instead of metrics.NewGauge,
 	// so InitRollupResultCache+StopRollupResultCache could be called multiple times in tests.
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/2406
+	// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/2406
 	metrics.GetOrCreateGauge(`vm_cache_entries{type="promql/rollupResult"}`, func() float64 {
 		return float64(fcs().EntriesCount)
 	})

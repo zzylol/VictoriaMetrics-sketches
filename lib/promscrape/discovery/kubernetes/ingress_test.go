@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 func TestMatchesHostPattern(t *testing.T) {

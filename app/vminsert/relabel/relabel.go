@@ -5,12 +5,12 @@ import (
 	"fmt"
 	"sync/atomic"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/procutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompb"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompbmarshal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promrelabel"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/procutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompb"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promrelabel"
 	"github.com/VictoriaMetrics/metrics"
 )
 
@@ -28,7 +28,7 @@ var (
 func Init() {
 	// Register SIGHUP handler for config re-read just before loadRelabelConfig call.
 	// This guarantees that the config will be re-read if the signal arrives during loadRelabelConfig call.
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1240
+	// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/1240
 	sighupCh := procutil.NewSighupChan()
 
 	pcs, err := loadRelabelConfig()

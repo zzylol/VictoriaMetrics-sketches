@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/slicesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/slicesutil"
 )
 
 func TestGetPutConcurrent(t *testing.T) {

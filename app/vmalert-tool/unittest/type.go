@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmalert/datasource"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/datasource"
 )
 
 // parsedSample is a sample with parsed Labels

@@ -9,12 +9,12 @@ import (
 	"time"
 	"unsafe"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/decimal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/encoding"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fastnum"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/slicesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fastnum"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/slicesutil"
 )
 
 // blockResult holds results for a single block of log entries.
@@ -521,7 +521,7 @@ func (br *blockResult) addStreamColumnSlow(bs *blockSearch) bool {
 		// Couldn't find stream tags by streamID. This may be the case when the corresponding log stream
 		// was recently registered and its tags aren't visible to search yet.
 		// The stream tags must become visible in a few seconds.
-		// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/6042
+		// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/6042
 		bs.prevStreamID = *streamID
 		bs.prevStream = bs.prevStream[:0]
 		return false

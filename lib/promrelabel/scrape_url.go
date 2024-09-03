@@ -4,8 +4,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/promutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 )
 
 // GetScrapeURL makes scrape url and __address_ labels for the given labels and extraParams.

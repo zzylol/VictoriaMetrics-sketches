@@ -5,13 +5,13 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/graphiteql"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/netstorage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/searchutils"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/cgroup"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/timerpool"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/graphiteql"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/timerpool"
 )
 
 var maxGraphiteSeries = flag.Int("search.maxGraphiteSeries", 300e3, "The maximum number of time series, which can be scanned during queries to Graphite Render API. "+

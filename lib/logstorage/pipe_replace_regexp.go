@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 )
 
 // pipeReplaceRegexp processes '| replace_regexp ...' pipe.

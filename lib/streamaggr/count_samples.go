@@ -3,8 +3,8 @@ package streamaggr
 import (
 	"sync"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/fasttime"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
 )
 
 // countSamplesAggrState calculates output=count_samples, e.g. the count of input samples.

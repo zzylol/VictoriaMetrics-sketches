@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
 )
 
 func TestGetExtraTagFilters(t *testing.T) {

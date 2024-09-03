@@ -16,18 +16,18 @@ If you like VictoriaMetrics and want to contribute, then it would be great:
 
 - Joining VictoriaMetrics community Slack ([Slack inviter](https://slack.victoriametrics.com/) and [Slack channel](https://victoriametrics.slack.com/))
   and helping other community members there.
-- Filing issues, feature requests and questions [at VictoriaMetrics GitHub](https://github.com/VictoriaMetrics/VictoriaMetrics/issues).
+- Filing issues, feature requests and questions [at VictoriaMetrics GitHub](https://github.com/zzylol/VictoriaMetrics-sketches/issues).
 - Improving [VictoriaMetrics docs](https://docs.victoriametrics.com/). See how to update docs [here](https://docs.victoriametrics.com/#documentation).
 - Spreading the word about VictoriaMetrics via various channels:
   - conference talks
-  - blogposts, articles and [case studies](https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/docs/CaseStudies.md)
+  - blogposts, articles and [case studies](https://github.com/zzylol/VictoriaMetrics-sketches/blob/master/docs/CaseStudies.md)
   - comments at Hacker News, Twitter, LinkedIn, Reddit, Facebook, etc.
   - experience sharing with colleagues.
 - Convincing your management to sign [Enterprise contract](https://docs.victoriametrics.com/enterprise/) with VictoriaMetrics.
 
 ## Pull request checklist
 
-Before sending a pull request to [VictoriaMetrics repository](https://github.com/VictoriaMetrics/VictoriaMetrics/) please make sure it **conforms all** the following checks:
+Before sending a pull request to [VictoriaMetrics repository](https://github.com/zzylol/VictoriaMetrics-sketches/) please make sure it **conforms all** the following checks:
 
 - The pull request conforms [VictoriaMetrics goals](https://docs.victoriametrics.com/goals/).
 - The pull request conforms [`KISS` principle](https://en.wikipedia.org/wiki/KISS_principle). See [these docs](#kiss-principle) for more details.
@@ -47,7 +47,7 @@ Before sending a pull request to [VictoriaMetrics repository](https://github.com
 
 Further checks are optional for external contributions:
 
-- The change must be described in **clear user-readable** form at [docs/CHANGELOG.md](https://github.com/VictoriaMetrics/VictoriaMetrics/blob/master/docs/CHANGELOG.md),
+- The change must be described in **clear user-readable** form at [docs/CHANGELOG.md](https://github.com/zzylol/VictoriaMetrics-sketches/blob/master/docs/CHANGELOG.md),
   since it is read by **VictoriaMetrics users** who may not know implementation details of VictoriaMetrics products. The change description must **clearly** answer the following questions:
   - What does this change do?
   - Why this change is needed?
@@ -62,14 +62,14 @@ Further checks are optional for external contributions:
   - Provide a link to the relevant documentation if the change modifies user-visible behaviour of VictoriaMetrics producs.
 
 - After your pull request is merged, please add a message to the issue with instructions for how to test the change you added before the new release.
-  [Here is an example](https://github.com/VictoriaMetrics/VictoriaMetrics/issues/4048#issuecomment-1546453726).
+  [Here is an example](https://github.com/zzylol/VictoriaMetrics-sketches/issues/4048#issuecomment-1546453726).
 - Do not close the original issue before the change is released. In some cases Github can automatically close the issue once PR is merged. Re-open the issue in such case.
 - If the change introduces a new feature, this feature must be documented in **user-readable** form at the appropriate parts of [VictoriaMetrics docs](https://docs.victoriametrics.com/).
-  The docs' sources are located in the [`docs` folder](https://github.com/VictoriaMetrics/VictoriaMetrics/tree/master/docs).
+  The docs' sources are located in the [`docs` folder](https://github.com/zzylol/VictoriaMetrics-sketches/tree/master/docs).
 
 Examples of good changelog messages:
 
-* FEATURE: [vmagent](https://docs.victoriametrics.com/vmagent/): add support for [VictoriaMetrics remote write protocol](https://docs.victoriametrics.com/vmagent/#victoriametrics-remote-write-protocol) when [sending / receiving data to / from Kafka](https://docs.victoriametrics.com/vmagent/#kafka-integration). This protocol allows saving egress network bandwidth costs when sending data from `vmagent` to `Kafka` located in another datacenter or availability zone. See [this feature request](https://github.com/VictoriaMetrics/VictoriaMetrics/issues/1225).
+* FEATURE: [vmagent](https://docs.victoriametrics.com/vmagent/): add support for [VictoriaMetrics remote write protocol](https://docs.victoriametrics.com/vmagent/#victoriametrics-remote-write-protocol) when [sending / receiving data to / from Kafka](https://docs.victoriametrics.com/vmagent/#kafka-integration). This protocol allows saving egress network bandwidth costs when sending data from `vmagent` to `Kafka` located in another datacenter or availability zone. See [this feature request](https://github.com/zzylol/VictoriaMetrics-sketches/issues/1225).
 
 * BUGFIX: [stream aggregation](https://docs.victoriametrics.com/stream-aggregation/): suppress `series after dedup` error message in logs when `-remoteWrite.streamAggr.dedupInterval` command-line flag is set at [vmagent](https://docs.victoriametrics.com/vmgent.html) or when `-streamAggr.dedupInterval` command-line flag is set at [single-node VictoriaMetrics](https://docs.victoriametrics.com/).
 

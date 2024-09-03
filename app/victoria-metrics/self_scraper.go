@@ -5,14 +5,14 @@ import (
 	"sync"
 	"time"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmstorage"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/appmetrics"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/bytesutil"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/decimal"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/logger"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/prompb"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/protoparser/prometheus"
-	"github.com/VictoriaMetrics/VictoriaMetrics/lib/storage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/appmetrics"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompb"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/prometheus"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
 )
 
 var (

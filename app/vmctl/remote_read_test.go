@@ -8,11 +8,11 @@ import (
 
 	"github.com/prometheus/prometheus/prompb"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/barpool"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/remoteread"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/stepper"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/testdata/servers_integration_test"
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmctl/vm"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/barpool"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/remoteread"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/stepper"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/testdata/servers_integration_test"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmctl/vm"
 )
 
 func TestRemoteRead(t *testing.T) {

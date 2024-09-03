@@ -6,7 +6,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/VictoriaMetrics/VictoriaMetrics/app/vmselect/netstorage"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
 )
 
 func TestRemoveEmptyValuesAndTimeseries(t *testing.T) {
@@ -175,7 +175,7 @@ func TestAdjustLastPoints(t *testing.T) {
 	})
 
 	// Check for timestamps outside the configured time range.
-	// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/625
+	// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/625
 	f([]netstorage.Result{
 		{
 			Timestamps: []int64{100, 200, 300, 400, 500},
