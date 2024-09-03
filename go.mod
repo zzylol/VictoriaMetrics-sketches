@@ -30,6 +30,7 @@ require (
 	github.com/valyala/gozstd v1.21.1
 	github.com/valyala/histogram v1.2.0
 	github.com/valyala/quicktemplate v1.8.0
+	github.com/zzylol/promsketch v0.2.56
 	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sys v0.24.0
 	google.golang.org/api v0.187.0
@@ -115,7 +116,6 @@ require (
 	github.com/zzylol/go-kll v0.0.0-20240604180517-e15a688e6ebe // indirect
 	github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240902204925-7755a8976497 // indirect
 	github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240902204925-7755a8976497 // indirect
-	github.com/zzylol/promsketch v0.2.56 // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/collector/pdata v1.11.0 // indirect
 	go.opentelemetry.io/collector/semconv v0.104.0 // indirect
