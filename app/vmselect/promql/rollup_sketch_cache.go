@@ -1,10 +1,6 @@
 package promql
 
-import (
-	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
-	"github.com/zzylol/promsketch"
-)
-
+/*
 var sketchCache *promsketch.VMSketches
 
 // InitRollupSketchCache initializes the rollupResult cache
@@ -24,3 +20,4 @@ func ResetRollupSketchCache() {
 	sketchCache.Reset()
 	logger.Infof("rollupSketch cache has been cleared")
 }
+*/

@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/VictoriaMetrics/metrics"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/graphite"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/prometheus"
@@ -26,7 +27,6 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/promscrape"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/querytracer"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/timerpool"
-	"github.com/VictoriaMetrics/metrics"
 )
 
 var (
@@ -64,7 +64,7 @@ func Init() {
 	fs.RemoveDirContents(tmpDirPath)
 	netstorage.InitTmpBlocksDir(tmpDirPath)
 	promql.InitRollupResultCache(*vmstorage.DataPath + "/cache/rollupResult")
-	promql.InitRollupSketchCache()
+	// 	promql.InitRollupSketchCache()
 
 	concurrencyLimitCh = make(chan struct{}, *maxConcurrentRequests)
 	initVMAlertProxy()
@@ -73,7 +73,7 @@ func Init() {
 // Stop stops vmselect
 func Stop() {
 	promql.StopRollupResultCache()
-	promql.StopRollupSketchCache()
+	// promql.StopRollupSketchCache()
 }
 
 var concurrencyLimitCh chan struct{}
