@@ -1,0 +1,19 @@
+rule_files:
+  - rules_profiling.yaml
+
+evaluation_interval: 1s
+group_eval_order: ["group1"]
+
+tests:
+  - interval: 100ms
+    name: "stress test"
+    input_series:
+      - series: "test"
+        values: "1+5x1000000"
+
+    metricsql_expr_test:
+      - expr: job:test:count_over_time1000s
+        eval_time: 100010s
+        exp_samples:
+          - labels: '{__name__="job:test:quantile_over_time1000s"}'
+            value: 6000
