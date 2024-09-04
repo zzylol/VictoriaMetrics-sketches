@@ -67,7 +67,7 @@ func Stop() {
 // RegisterMetricNames registers all the metrics from mrs in the storage.
 func RegisterMetricNames(qt *querytracer.Tracer, mrs []storage.MetricRow) {
 	WG.Add(1)
-	SketchCache.RegisterMetricNames(mrs)
+
 	WG.Done()
 }
 
