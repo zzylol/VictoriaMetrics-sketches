@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/relabel"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmsketch"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmstorage"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/httpserver"
@@ -149,10 +150,15 @@ func (ctx *InsertCtx) FlushBufs() error {
 		}
 		matchIdxsPool.Put(matchIdxs)
 	}
+
+	err := vmsketch.AddRows(ctx.mrs) // TODO: or move this before crx.addRows?
+	if err != nil {
+		fmt.Errorf("cannot insert to sketch cache: %w", err)
+	}
 	// There is no need in limiting the number of concurrent calls to vmstorage.AddRows() here,
 	// since the number of concurrent FlushBufs() calls should be already limited via writeconcurrencylimiter
 	// used at every stream.Parse() call under lib/protoparser/*
-	err := vmstorage.AddRows(ctx.mrs)
+	err = vmstorage.AddRows(ctx.mrs)
 	ctx.Reset(0)
 	if err == nil {
 		return nil

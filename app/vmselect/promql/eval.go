@@ -16,6 +16,7 @@ import (
 	"github.com/VictoriaMetrics/metricsql"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmsketch"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
@@ -959,7 +960,7 @@ func evalRollupFuncWithSubquery(qt *querytracer.Tracer, ec *EvalConfig, funcName
 		preFunc(values, timestamps)
 		for _, rc := range rcs {
 			if tsm := newTimeseriesMap(funcName, keepMetricNames, sharedTimestamps, &tsSQ.MetricName); tsm != nil {
-				samplesScanned := rc.DoTimeseriesMap(tsm, values, timestamps)
+				samplesScanned := rc.DoTimeseriesMap(tsm, &tsSQ.MetricName, values, timestamps)
 				samplesScannedTotal.Add(samplesScanned)
 				seriesByWorkerID[workerID].tss = tsm.AppendTimeseriesTo(seriesByWorkerID[workerID].tss)
 				continue
@@ -1684,31 +1685,6 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 		return nil, err
 	}
 
-	/*
-		// Use sketch cache if possible
-		lookup := ev.sketchCache.LookUp(selVS.Series[i].Labels(), e.Func.Name, mint, maxt)
-
-		if lookup {
-			// inArgs, e.Args, enh
-			var c float64 = 0
-			if vec, ok := inArgs[0].(Vector); ok {
-				c = vec[0].F
-			}
-			promVec, _ := ev.sketchCache.Eval(e.Func.Name, selVS.Series[i].Labels(), c, mint, maxt, maxt)
-			outVec = copy_prom_vec(promVec)
-
-		} else {
-
-			// A sketch instance is not allocated but a rule query appears,
-			// we should allocate a sketch cache for the rule.
-
-			err := ev.sketchCache.NewSketchCacheInstance(selVS.Series[i].Labels(), e.Func.Name, (maxt-mint)*2, int64(float64(maxt-mint)/float64(ev.ScrapeInterval))*2, 100000)
-
-			if err != nil {
-				ev.errorf("Failed to create new PromSketch cache for %s %s", selVS.Series[i].Labels(), e.Func.Name)
-			}
-	*/
-	// Fetch the result.
 	tfss := searchutils.ToTagFilterss(me.LabelFilterss)
 	tfss = searchutils.JoinTagFilterss(tfss, ec.EnforcedTagFilterss)
 	minTimestamp := ec.Start
@@ -1720,78 +1696,88 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 	} else {
 		minTimestamp -= ec.Step
 	}
-	sq := storage.NewSearchQuery(minTimestamp, ec.End, tfss, ec.MaxSeries)
-	rss, err := netstorage.ProcessSearchQuery(qt, sq, ec.Deadline)
-	if err != nil {
-		return nil, err
-	}
-	rssLen := rss.Len()
-	if rssLen == 0 {
-		rss.Cancel()
-		return nil, nil
-	}
-	ec.QueryStats.addSeriesFetched(rssLen)
 
-	// Verify timeseries fit available memory during rollup calculations.
-	timeseriesLen := rssLen
-	if iafc != nil {
-		// Incremental aggregates require holding only GOMAXPROCS timeseries in memory.
-		timeseriesLen = cgroup.AvailableCPUs()
-		if iafc.ae.Modifier.Op != "" {
-			if iafc.ae.Limit > 0 {
-				// There is an explicit limit on the number of output time series.
-				timeseriesLen *= iafc.ae.Limit
-			} else {
-				// Increase the number of timeseries for non-empty group list: `aggr() by (something)`,
-				// since each group can have own set of time series in memory.
-				timeseriesLen *= 1000
+	// Check whether sketch cache has all queried data and funcName (queried types) covered
+	funcNames := getRollupFuncNames(rcs)
+	scs, isCovered := vmsketch.ProcessSearchQuery(minTimestamp, ec.End, tfss, funcNames, ec.MaxSeries)
+	if isCovered {
+		keepMetricNames := getKeepMetricNames(expr)
+		return evalRollupSketchCache(qt, funcName, keepMetricNames, scs, rcs, sharedTimestamps)
+	} else {
+
+		// Fetch the result.
+		sq := storage.NewSearchQuery(minTimestamp, ec.End, tfss, ec.MaxSeries)
+		rss, err := netstorage.ProcessSearchQuery(qt, sq, ec.Deadline)
+		if err != nil {
+			return nil, err
+		}
+		rssLen := rss.Len()
+		if rssLen == 0 {
+			rss.Cancel()
+			return nil, nil
+		}
+		ec.QueryStats.addSeriesFetched(rssLen)
+
+		// Verify timeseries fit available memory during rollup calculations.
+		timeseriesLen := rssLen
+		if iafc != nil {
+			// Incremental aggregates require holding only GOMAXPROCS timeseries in memory.
+			timeseriesLen = cgroup.AvailableCPUs()
+			if iafc.ae.Modifier.Op != "" {
+				if iafc.ae.Limit > 0 {
+					// There is an explicit limit on the number of output time series.
+					timeseriesLen *= iafc.ae.Limit
+				} else {
+					// Increase the number of timeseries for non-empty group list: `aggr() by (something)`,
+					// since each group can have own set of time series in memory.
+					timeseriesLen *= 1000
+				}
+			}
+			// The maximum number of output time series is limited by rssLen.
+			if timeseriesLen > rssLen {
+				timeseriesLen = rssLen
 			}
 		}
-		// The maximum number of output time series is limited by rssLen.
-		if timeseriesLen > rssLen {
-			timeseriesLen = rssLen
+		rollupPoints := mulNoOverflow(pointsPerSeries, int64(timeseriesLen*len(rcs)))
+		rollupMemorySize := sumNoOverflow(mulNoOverflow(int64(timeseriesLen), 1000), mulNoOverflow(rollupPoints, 16))
+		if maxMemory := int64(logQueryMemoryUsage.N); maxMemory > 0 && rollupMemorySize > maxMemory {
+			memoryIntensiveQueries.Inc()
+			requestURI := ec.GetRequestURI()
+			logger.Warnf("remoteAddr=%s, requestURI=%s: the %s requires %d bytes of memory for processing; "+
+				"logging this query, since it exceeds the -search.logQueryMemoryUsage=%d; "+
+				"the query selects %d time series and generates %d points across all the time series; try reducing the number of selected time series",
+				ec.QuotedRemoteAddr, requestURI, expr.AppendString(nil), rollupMemorySize, maxMemory, timeseriesLen*len(rcs), rollupPoints)
 		}
-	}
-	rollupPoints := mulNoOverflow(pointsPerSeries, int64(timeseriesLen*len(rcs)))
-	rollupMemorySize := sumNoOverflow(mulNoOverflow(int64(timeseriesLen), 1000), mulNoOverflow(rollupPoints, 16))
-	if maxMemory := int64(logQueryMemoryUsage.N); maxMemory > 0 && rollupMemorySize > maxMemory {
-		memoryIntensiveQueries.Inc()
-		requestURI := ec.GetRequestURI()
-		logger.Warnf("remoteAddr=%s, requestURI=%s: the %s requires %d bytes of memory for processing; "+
-			"logging this query, since it exceeds the -search.logQueryMemoryUsage=%d; "+
-			"the query selects %d time series and generates %d points across all the time series; try reducing the number of selected time series",
-			ec.QuotedRemoteAddr, requestURI, expr.AppendString(nil), rollupMemorySize, maxMemory, timeseriesLen*len(rcs), rollupPoints)
-	}
-	if maxMemory := int64(maxMemoryPerQuery.N); maxMemory > 0 && rollupMemorySize > maxMemory {
-		rss.Cancel()
-		err := fmt.Errorf("not enough memory for processing %s, which returns %d data points across %d time series with %d points in each time series "+
-			"according to -search.maxMemoryPerQuery=%d; requested memory: %d bytes; "+
-			"possible solutions are: reducing the number of matching time series; increasing `step` query arg (step=%gs); "+
-			"increasing -search.maxMemoryPerQuery",
-			expr.AppendString(nil), rollupPoints, timeseriesLen*len(rcs), pointsPerSeries, maxMemory, rollupMemorySize, float64(ec.Step)/1e3)
-		return nil, err
-	}
-	rml := getRollupMemoryLimiter()
-	if !rml.Get(uint64(rollupMemorySize)) {
-		rss.Cancel()
-		err := fmt.Errorf("not enough memory for processing %s, which returns %d data points across %d time series with %d points in each time series; "+
-			"total available memory for concurrent requests: %d bytes; requested memory: %d bytes; "+
-			"possible solutions are: reducing the number of matching time series; increasing `step` query arg (step=%gs); "+
-			"switching to node with more RAM; increasing -memory.allowedPercent",
-			expr.AppendString(nil), rollupPoints, timeseriesLen*len(rcs), pointsPerSeries, rml.MaxSize, uint64(rollupMemorySize), float64(ec.Step)/1e3)
-		return nil, err
-	}
-	defer rml.Put(uint64(rollupMemorySize))
-	qt.Printf("the rollup evaluation needs an estimated %d bytes of RAM for %d series and %d points per series (summary %d points)",
-		rollupMemorySize, timeseriesLen, pointsPerSeries, rollupPoints)
+		if maxMemory := int64(maxMemoryPerQuery.N); maxMemory > 0 && rollupMemorySize > maxMemory {
+			rss.Cancel()
+			err := fmt.Errorf("not enough memory for processing %s, which returns %d data points across %d time series with %d points in each time series "+
+				"according to -search.maxMemoryPerQuery=%d; requested memory: %d bytes; "+
+				"possible solutions are: reducing the number of matching time series; increasing `step` query arg (step=%gs); "+
+				"increasing -search.maxMemoryPerQuery",
+				expr.AppendString(nil), rollupPoints, timeseriesLen*len(rcs), pointsPerSeries, maxMemory, rollupMemorySize, float64(ec.Step)/1e3)
+			return nil, err
+		}
+		rml := getRollupMemoryLimiter()
+		if !rml.Get(uint64(rollupMemorySize)) {
+			rss.Cancel()
+			err := fmt.Errorf("not enough memory for processing %s, which returns %d data points across %d time series with %d points in each time series; "+
+				"total available memory for concurrent requests: %d bytes; requested memory: %d bytes; "+
+				"possible solutions are: reducing the number of matching time series; increasing `step` query arg (step=%gs); "+
+				"switching to node with more RAM; increasing -memory.allowedPercent",
+				expr.AppendString(nil), rollupPoints, timeseriesLen*len(rcs), pointsPerSeries, rml.MaxSize, uint64(rollupMemorySize), float64(ec.Step)/1e3)
+			return nil, err
+		}
+		defer rml.Put(uint64(rollupMemorySize))
+		qt.Printf("the rollup evaluation needs an estimated %d bytes of RAM for %d series and %d points per series (summary %d points)",
+			rollupMemorySize, timeseriesLen, pointsPerSeries, rollupPoints)
 
-	// Evaluate rollup
-	keepMetricNames := getKeepMetricNames(expr)
-	if iafc != nil {
-		return evalRollupWithIncrementalAggregate(qt, funcName, keepMetricNames, iafc, rss, rcs, preFunc, sharedTimestamps)
+		// Evaluate rollup
+		keepMetricNames := getKeepMetricNames(expr)
+		if iafc != nil {
+			return evalRollupWithIncrementalAggregate(qt, funcName, keepMetricNames, iafc, rss, rcs, preFunc, sharedTimestamps)
+		}
+		return evalRollupNoIncrementalAggregate(qt, funcName, keepMetricNames, rss, rcs, preFunc, sharedTimestamps)
 	}
-	return evalRollupNoIncrementalAggregate(qt, funcName, keepMetricNames, rss, rcs, preFunc, sharedTimestamps)
-	// }
 }
 
 var (
@@ -1827,7 +1813,7 @@ func evalRollupWithIncrementalAggregate(qt *querytracer.Tracer, funcName string,
 		defer putTimeseries(ts)
 		for _, rc := range rcs {
 			if tsm := newTimeseriesMap(funcName, keepMetricNames, sharedTimestamps, &rs.MetricName); tsm != nil {
-				samplesScanned := rc.DoTimeseriesMap(tsm, rs.Values, rs.Timestamps)
+				samplesScanned := rc.DoTimeseriesMap(tsm, &rs.MetricName, rs.Values, rs.Timestamps)
 				for _, ts := range tsm.m {
 					iafc.updateTimeseries(ts, workerID)
 				}
@@ -1868,13 +1854,49 @@ func evalRollupNoIncrementalAggregate(qt *querytracer.Tracer, funcName string, k
 		preFunc(rs.Values, rs.Timestamps)
 		for _, rc := range rcs {
 			if tsm := newTimeseriesMap(funcName, keepMetricNames, sharedTimestamps, &rs.MetricName); tsm != nil {
-				samplesScanned := rc.DoTimeseriesMap(tsm, rs.Values, rs.Timestamps)
+				samplesScanned := rc.DoTimeseriesMap(tsm, &rs.MetricName, rs.Values, rs.Timestamps)
 				samplesScannedTotal.Add(samplesScanned)
 				seriesByWorkerID[workerID].tss = tsm.AppendTimeseriesTo(seriesByWorkerID[workerID].tss)
 				continue
 			}
 			var ts timeseries
 			samplesScanned := doRollupForTimeseries(funcName, keepMetricNames, rc, &ts, &rs.MetricName, rs.Values, rs.Timestamps, sharedTimestamps)
+			samplesScannedTotal.Add(samplesScanned)
+			seriesByWorkerID[workerID].tss = append(seriesByWorkerID[workerID].tss, &ts)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	tss := make([]*timeseries, 0, seriesLen*len(rcs))
+	for i := range seriesByWorkerID {
+		tss = append(tss, seriesByWorkerID[i].tss...)
+	}
+	putTimeseriesByWorkerID(tsw)
+
+	rowsScannedPerQuery.Update(float64(samplesScannedTotal.Load()))
+	qt.Printf("samplesScanned=%d", samplesScannedTotal.Load())
+	return tss, nil
+}
+
+func evalRollupSketchCache(qt *querytracer.Tracer, funcName string, keepMetricNames bool, srs *vmsketch.SketchResults, rcs []*rollupConfig,
+	sharedTimestamps []int64) ([]*timeseries, error) {
+	qt = qt.NewChild("rollup %s() over %d series; rollupConfigs=%s", funcName, srs.Len(), rcs)
+	defer qt.Done()
+
+	var samplesScannedTotal atomic.Uint64
+	tsw := getTimeseriesByWorkerID()
+	seriesByWorkerID := tsw.byWorkerID
+	seriesLen := srs.Len() // number of timeseries for querying
+	err := srs.RunParallel(qt, func(sr *vmsketch.SketchResult, workerID uint) error {
+		for _, rc := range rcs {
+			if tsm := newTimeseriesMap(funcName, keepMetricNames, sharedTimestamps, &sr.MetricName); tsm != nil {
+				seriesByWorkerID[workerID].tss = tsm.AppendTimeseriesTo(seriesByWorkerID[workerID].tss)
+				continue
+			}
+			var ts timeseries
+			samplesScanned := doRollupForTimeseriesSketch(funcName, keepMetricNames, rc, &ts, sr, sharedTimestamps)
 			samplesScannedTotal.Add(samplesScanned)
 			seriesByWorkerID[workerID].tss = append(seriesByWorkerID[workerID].tss, &ts)
 		}
@@ -1904,7 +1926,22 @@ func doRollupForTimeseries(funcName string, keepMetricNames bool, rc *rollupConf
 		tsDst.MetricName.ResetMetricGroup()
 	}
 	var samplesScanned uint64
-	tsDst.Values, samplesScanned = rc.Do(tsDst.Values[:0], valuesSrc, timestampsSrc)
+	tsDst.Values, samplesScanned = rc.Do(tsDst.Values[:0], mnSrc, valuesSrc, timestampsSrc)
+	tsDst.Timestamps = sharedTimestamps
+	tsDst.denyReuse = true
+	return samplesScanned
+}
+
+func doRollupForTimeseriesSketch(funcName string, keepMetricNames bool, rc *rollupConfig, tsDst *timeseries, sr *vmsketch.SketchResult, sharedTimestamps []int64) uint64 {
+	tsDst.MetricName.CopyFrom(&sr.MetricName)
+	if len(rc.TagValue) > 0 {
+		tsDst.MetricName.AddTag("rollup", rc.TagValue)
+	}
+	if !keepMetricNames && !rollupFuncsKeepMetricName[funcName] {
+		tsDst.MetricName.ResetMetricGroup()
+	}
+	var samplesScanned uint64
+	tsDst.Values, samplesScanned = rc.DoSketch(tsDst.Values[:0], sr)
 	tsDst.Timestamps = sharedTimestamps
 	tsDst.denyReuse = true
 	return samplesScanned

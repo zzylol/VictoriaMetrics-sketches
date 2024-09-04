@@ -10,6 +10,7 @@ import (
 
 	"github.com/VictoriaMetrics/metrics"
 	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmsketch"
 
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
@@ -505,6 +506,14 @@ func getRollupConfigs(funcName string, rf rollupFunc, expr metricsql.Expr, start
 	return preFunc, rcs, nil
 }
 
+func getRollupFuncNames(rcs []*rollupConfig) []string {
+	funcNames := make([]string, 0)
+	for _, rc := range rcs {
+		funcNames = append(funcNames, rc.FuncName)
+	}
+	return funcNames
+}
+
 func getRollupFunc(funcName string) newRollupFunc {
 	funcName = strings.ToLower(funcName)
 	return rollupFuncs[funcName]
@@ -675,20 +684,24 @@ func (tsm *timeseriesMap) GetOrCreateTimeseries(labelName, labelValue string) *t
 // It is expected that timestamps cover the time range [rc.Start - rc.Window ... rc.End].
 //
 // Do cannot be called from concurrent goroutines.
-func (rc *rollupConfig) Do(dstValues []float64, values []float64, timestamps []int64) ([]float64, uint64) {
-	return rc.doInternal(dstValues, nil, values, timestamps)
+func (rc *rollupConfig) Do(dstValues []float64, mnSrc *storage.MetricName, values []float64, timestamps []int64) ([]float64, uint64) {
+	return rc.doInternal(dstValues, nil, mnSrc, values, timestamps)
+}
+
+func (rc *rollupConfig) DoSketch(dstValues []float64, sr *vmsketch.SketchResult) ([]float64, uint64) {
+	return rc.doInternalSketch(dstValues, nil, sr)
 }
 
 // DoTimeseriesMap calculates rollups for the given timestamps and values and puts them to tsm.
-func (rc *rollupConfig) DoTimeseriesMap(tsm *timeseriesMap, values []float64, timestamps []int64) uint64 {
+func (rc *rollupConfig) DoTimeseriesMap(tsm *timeseriesMap, mnSrc *storage.MetricName, values []float64, timestamps []int64) uint64 {
 	ts := getTimeseries()
 	var samplesScanned uint64
-	ts.Values, samplesScanned = rc.doInternal(ts.Values[:0], tsm, values, timestamps)
+	ts.Values, samplesScanned = rc.doInternal(ts.Values[:0], tsm, mnSrc, values, timestamps)
 	putTimeseries(ts)
 	return samplesScanned
 }
 
-func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, values []float64, timestamps []int64) ([]float64, uint64) {
+func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSrc *storage.MetricName, values []float64, timestamps []int64) ([]float64, uint64) {
 	// Sanity checks.
 	if rc.Step <= 0 {
 		logger.Panicf("BUG: Step must be bigger than 0; got %d", rc.Step)
@@ -727,12 +740,12 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, valu
 			// If the user explicitly sets the lookbehind window to some fixed value, e.g. rate(foo[1s]),
 			// then it is expected he knows what he is doing. Do not adjust the lookbehind window then.
 			//
-			// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/3483
+			// See https://github.com/VictoriaMetrics/VictoriaMetrics/issues/3483
 			window = maxPrevInterval
 		}
 		if rc.isDefaultRollup && rc.LookbackDelta > 0 && window > rc.LookbackDelta {
 			// Implicit window exceeds -search.maxStalenessInterval, so limit it to -search.maxStalenessInterval
-			// according to https://github.com/zzylol/VictoriaMetrics-sketches/issues/784
+			// according to https://github.com/VictoriaMetrics/VictoriaMetrics/issues/784
 			window = rc.LookbackDelta
 		}
 	}
@@ -740,6 +753,19 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, valu
 	rfa.idx = 0
 	rfa.window = window
 	rfa.tsm = tsm
+
+	lookup := vmsketch.SearchMetricNameFuncName(mnSrc, rc.FuncName)
+	if !lookup {
+		// Initiate a VMSketch cache
+		// It will be the best to check if it's a query from rules.
+		// A sketch instance is not allocated but when a rule query appears,
+		// we should allocate a sketch cache for the rule.
+		err := vmsketch.RegisterMetricNameFuncName(mnSrc, rc.FuncName, window*2, int64(float64(window)/float64(scrapeInterval))*2)
+
+		if err != nil {
+			fmt.Errorf("Failed to create new VMSketch cache for %s %s", mnSrc, rc.FuncName)
+		}
+	}
 
 	i := 0
 	j := 0
@@ -778,6 +804,88 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, valu
 		}
 		rfa.currTimestamp = tEnd
 		value := f(rfa)
+		rfa.idx++
+		if samplesScannedPerCall > 0 {
+			samplesScanned += samplesScannedPerCall
+		} else {
+			samplesScanned += uint64(len(rfa.values))
+		}
+		dstValues = append(dstValues, value)
+	}
+	putRollupFuncArg(rfa)
+
+	return dstValues, samplesScanned
+}
+
+func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap, sr *vmsketch.SketchResult) ([]float64, uint64) {
+	// Sanity checks.
+	if rc.Step <= 0 {
+		logger.Panicf("BUG: Step must be bigger than 0; got %d", rc.Step)
+	}
+	if rc.Start > rc.End {
+		logger.Panicf("BUG: Start cannot exceed End; got %d vs %d", rc.Start, rc.End)
+	}
+	if rc.Window < 0 {
+		logger.Panicf("BUG: Window must be non-negative; got %d", rc.Window)
+	}
+	if err := ValidateMaxPointsPerSeries(rc.Start, rc.End, rc.Step, rc.MaxPointsPerSeries); err != nil {
+		logger.Panicf("BUG: %s; this must be validated before the call to rollupConfig.DoSketch", err)
+	}
+
+	// Extend dstValues in order to remove mallocs below.
+	dstValues = decimal.ExtendFloat64sCapacity(dstValues, len(rc.Timestamps))
+
+	scrapeInterval := rc.Step
+	maxPrevInterval := getMaxPrevInterval(scrapeInterval)
+	if rc.LookbackDelta > 0 && maxPrevInterval > rc.LookbackDelta {
+		maxPrevInterval = rc.LookbackDelta
+	}
+	if *minStalenessInterval > 0 {
+		if msi := minStalenessInterval.Milliseconds(); msi > 0 && maxPrevInterval < msi {
+			maxPrevInterval = msi
+		}
+	}
+	window := rc.Window
+	if window <= 0 {
+		window = rc.Step
+		if rc.MayAdjustWindow && window < maxPrevInterval {
+			// Adjust lookbehind window only if it isn't set explicitly, e.g. rate(foo).
+			// In the case of missing lookbehind window it should be adjusted in order to return non-empty graph
+			// when the window doesn't cover at least two raw samples (this is what most users expect).
+			//
+			// If the user explicitly sets the lookbehind window to some fixed value, e.g. rate(foo[1s]),
+			// then it is expected he knows what he is doing. Do not adjust the lookbehind window then.
+			//
+			// See https://github.com/zzylol/VictoriaMetrics-sketches/issues/3483
+			window = maxPrevInterval
+		}
+		if rc.isDefaultRollup && rc.LookbackDelta > 0 && window > rc.LookbackDelta {
+			// Implicit window exceeds -search.maxStalenessInterval, so limit it to -search.maxStalenessInterval
+			// according to https://github.com/zzylol/VictoriaMetrics-sketches/issues/784
+			window = rc.LookbackDelta
+		}
+	}
+	rfa := getRollupFuncArg()
+	rfa.idx = 0
+	rfa.window = window
+	rfa.tsm = tsm
+
+	samplesScanned := uint64(0)
+	samplesScannedPerCall := uint64(rc.samplesScannedPerCall)
+	for _, tEnd := range rc.Timestamps {
+		tStart := tEnd - window
+		rfa.prevValue = nan
+		rfa.prevTimestamp = tStart - maxPrevInterval
+
+		rfa.currTimestamp = tEnd
+
+		// inArgs, e.Args, enh
+		var c float64 = 0
+		if vec, ok := inArgs[0].(Vector); ok {
+			c = vec[0].F
+		}
+		value := sr.Eval(sr.MetricName, rc.FuncName, tStart, tEnd, rfa.currTimestamp)
+
 		rfa.idx++
 		if samplesScannedPerCall > 0 {
 			samplesScanned += samplesScannedPerCall

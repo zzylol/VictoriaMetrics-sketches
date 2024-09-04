@@ -12,6 +12,7 @@ import (
 	vminsertrelabel "github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/relabel"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/promql"
+	"github.com/zzylol/VictoriaMetrics-sketches/app/vmsketch"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmstorage"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/buildinfo"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/envflag"
@@ -75,6 +76,7 @@ func main() {
 	storage.SetDedupInterval(*minScrapeInterval)
 	storage.SetDataFlushInterval(*inmemoryDataFlushInterval)
 	vmstorage.Init(promql.ResetRollupResultCacheIfNeeded)
+	vmsketch.Init()
 	vmselect.Init()
 	vminsert.Init()
 
@@ -100,6 +102,7 @@ func main() {
 
 	vmstorage.Stop()
 	vmselect.Stop()
+	vmsketch.Stop()
 
 	fs.MustStopDirRemover()
 
