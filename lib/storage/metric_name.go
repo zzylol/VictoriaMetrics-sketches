@@ -143,6 +143,24 @@ type MetricName struct {
 	Tags []Tag
 }
 
+// Equal returns true if tag equals t
+func (mn *MetricName) Equal(other *MetricName) bool {
+	if len(mn.MetricGroup) != len(other.MetricGroup) || len(mn.Tags) != len(other.Tags) {
+		return false
+	}
+
+	if !bytesutil.Equal(mn.MetricGroup, other.MetricGroup) {
+		return false
+	}
+
+	for i := range mn.Tags {
+		if string(mn.Tags[i].Key) != string(other.Tags[i].Key) || string(mn.Tags[i].Value) != string(other.Tags[i].Value) {
+			return false
+		}
+	}
+	return true
+}
+
 // GetMetricName returns a MetricName from pool.
 func GetMetricName() *MetricName {
 	v := mnPool.Get()
