@@ -3,13 +3,11 @@ package promsketch
 import (
 	// "fmt"
 
-	"hash"
-	"hash/fnv"
+	"fmt"
 	"math"
 	"unsafe"
 
-	"github.com/cespare/xxhash/v2"
-	//"strconv"
+	"github.com/OneOfOne/xxhash"
 )
 
 /*
@@ -17,32 +15,14 @@ Can be used for Prometheus functions: count_over_time, entropy_over_time (newly 
  card_over_time (newly added), sum_over_time, avg_over_time, stddev_over_time, stdvar_over_time, min_over_time, max_over_time
 */
 
-type HHLayerStruct struct {
-	topK *TopKHeap
-	// HH_table map[string]([]Item)
-	// HH_list	[]Item
-}
-
-func NewHHLayerStruct(k int) (hh_layer_s HHLayerStruct, err error) {
-	topkheap := NewTopKHeap(k)
-	hh_layer_s = HHLayerStruct{
-		topK: topkheap,
-		// HH_table: make(map[string]([]Item)),
-	}
-
-	return hh_layer_s, nil
-}
-
 type UnivSketch struct {
 	k           int // topK
 	row         int
 	col         int
 	layer       int
-	hasher      hash.Hash64
-	cs_layers   []CountSketchUniv
-	HH_layers   []HHLayerStruct
+	cs_layers   []*CountSketchUniv
+	HH_layers   []*TopKHeap
 	seed        uint32 // one hash for all layers
-	bucketsize  int    // for sliding window model based on item size; per sketch
 	max_time    int64  // for sliding window model based on time; per sketch
 	min_time    int64  // for sliding window model based on time; per sketch
 	pool_idx    int64
@@ -50,63 +30,108 @@ type UnivSketch struct {
 	bucket_size int64
 }
 
-func (us UnivSketch) GetBucketSize() int64 {
+func (us *UnivSketch) GetBucketSize() int64 {
 	return us.bucket_size
 }
 
 // New create a new Universal Sketch with row hashing funtions and col counters per row of a Count Sketch.
-func NewUnivSketch(k, row, col, layer int, seed1, seed2 []uint32, seed3 uint32, pool_idx int64) (us UnivSketch, err error) {
+func NewUnivSketch(k, row, col, layer int, seed1, seed2 []uint32, seed3 uint32, pool_idx int64) (us *UnivSketch, err error) {
 
-	us = UnivSketch{
+	us = &UnivSketch{
 		k:           k,
 		row:         row,
 		col:         col,
 		layer:       layer,
-		hasher:      fnv.New64(),
 		pool_idx:    pool_idx,
 		heap_update: 0,
 		seed:        seed3,
 		bucket_size: 0,
 	}
 
-	// t_now := time.Now()
-	us.cs_layers = make([]CountSketchUniv, layer)
-	us.HH_layers = make([]HHLayerStruct, layer)
-	// since := time.Since(t_now)
-	// fmt.Println("make time", since.Seconds())
+	us.cs_layers = make([]*CountSketchUniv, layer)
+	us.HH_layers = make([]*TopKHeap, layer)
 
 	for i := 0; i < layer; i++ {
-		// t_now := time.Now()
 		us.cs_layers[i], _ = NewCountSketchUniv(row, col, seed1, seed2)
-		// since := time.Since(t_now)
-		// fmt.Println("new cs time", since)
 	}
 
-	// t_now := time.Now()
 	for i := 0; i < layer; i++ {
-		us.HH_layers[i], _ = NewHHLayerStruct(k)
+		us.HH_layers[i] = NewTopKHeap(k)
 	}
-	// since := time.Since(t_now)
-	// fmt.Println("new heap time", since.Seconds())
 
 	return us, nil
 }
 
-func (us UnivSketch) Free() {
+func NewUnivSketchPyramid(k, row, col, layer int, seed1, seed2 []uint32, seed3 uint32, pool_idx int64) (us *UnivSketch, err error) {
+
+	us = &UnivSketch{
+		k:           k,
+		row:         row,
+		col:         col,
+		layer:       layer,
+		pool_idx:    pool_idx,
+		heap_update: 0,
+		seed:        seed3,
+		bucket_size: 0,
+	}
+
+	us.cs_layers = make([]*CountSketchUniv, layer)
+	us.HH_layers = make([]*TopKHeap, layer)
+
+	if layer <= ELEPHANT_LAYER {
+		for i := 0; i < layer; i++ {
+			us.cs_layers[i], _ = NewCountSketchUniv(CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, seed1, seed2)
+		}
+		for i := 0; i < layer; i++ {
+			us.HH_layers[i] = NewTopKHeap(k)
+		}
+	} else {
+		for i := 0; i < ELEPHANT_LAYER; i++ {
+			us.cs_layers[i], _ = NewCountSketchUniv(CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, seed1, seed2)
+		}
+		for i := 0; i < ELEPHANT_LAYER; i++ {
+			us.HH_layers[i] = NewTopKHeap(TOPK_SIZE)
+		}
+		for i := ELEPHANT_LAYER; i < layer; i++ {
+			us.cs_layers[i], _ = NewCountSketchUniv(CS_ROW_NO_Univ_MICE, CS_COL_NO_Univ_MICE, seed1, seed2)
+		}
+		for i := ELEPHANT_LAYER; i < layer; i++ {
+			us.HH_layers[i] = NewTopKHeap(TOPK_SIZE_MICE)
+		}
+	}
+
+	return us, nil
+}
+
+func (us *UnivSketch) Free() {
+	us.bucket_size = 0
+
 	for i := 0; i < us.layer; i++ {
 		us.cs_layers[i].CleanCountSketchUniv()
-		us.HH_layers[i].topK.Clean()
+		us.HH_layers[i].Clean()
 	}
 }
 
-func (us UnivSketch) GetMemoryKB() float64 {
+func (us *UnivSketch) GetMemoryKB() float64 {
 	var total_topk float64 = 0
 
 	for i := 0; i < us.layer; i++ {
-		total_topk += float64(unsafe.Sizeof(us.HH_layers[i].topK))
+		total_topk += float64(unsafe.Sizeof(us.HH_layers[i]))
 	}
+	return (float64(CS_COL_NO_Univ_ELEPHANT)*float64(CS_ROW_NO_Univ_ELEPHANT)*float64(us.layer)*8 + total_topk) / 1024
+}
 
-	return (float64(CS_COL_NO_Univ)*float64(CS_ROW_NO_Univ)*float64(us.layer)*8 + total_topk) / 1024
+func (us *UnivSketch) GetMemoryKBPyramid() float64 {
+	var total_topk float64 = 0
+
+	for i := 0; i < us.layer; i++ {
+		total_topk += float64(unsafe.Sizeof(us.HH_layers[i]))
+	}
+	if us.layer <= ELEPHANT_LAYER {
+		return (float64(CS_COL_NO_Univ_ELEPHANT)*float64(CS_ROW_NO_Univ_ELEPHANT)*float64(us.layer)*8 + total_topk) / 1024
+	} else {
+		return ((float64(CS_COL_NO_Univ_ELEPHANT)*float64(CS_ROW_NO_Univ_ELEPHANT)*float64(ELEPHANT_LAYER)+float64(CS_COL_NO_Univ_MICE)*float64(CS_ROW_NO_Univ_MICE)*float64(us.layer-ELEPHANT_LAYER))*8 + total_topk) / 1024
+	}
 }
 
 // Update Universal Sketch
@@ -125,78 +150,142 @@ func findBottomLayerNum(hash uint64, layer int) int {
 
 // update multiple layers from top to bottom_layer_num
 // insert a key into Universal Sketch
-func (us UnivSketch) update(key string, value int64, bottom_layer_num int, pos []int32, sign []int32) {
+func (us *UnivSketch) update(key string, value int64, bottom_layer_num int, pos *([]int16), sign *([]int8)) {
 
 	for l := 0; l <= bottom_layer_num; l++ {
 		median_count := int64(0)
-		if l > 0 {
-			median_count = us.cs_layers[l].UpdateAndEstimateString(key, value, pos, sign) // add item key to the layer
+		if l == 0 {
+			median_count = us.cs_layers[l].UpdateAndEstimateString(key, value, pos, sign)
 		} else {
-			median_count = us.cs_layers[l].UpdateAndEstimateStringNoL2(key, value, pos, sign) // add item key to the layer
+			median_count = us.cs_layers[l].UpdateAndEstimateStringNoL2(key, value, pos, sign)
 		}
-		us.HH_layers[l].topK.Update(key, median_count)
+		us.HH_layers[l].Update(key, median_count)
+	}
+}
+
+// update multiple layers from top to bottom_layer_num
+// only update the first and bottom layer CS in UnivMon
+func (us *UnivSketch) update_optimized(key string, value int64, bottom_layer_num int, pos *([]int16), sign *([]int8)) {
+
+	if bottom_layer_num < ELEPHANT_LAYER {
+		if bottom_layer_num > 0 {
+			median_count := us.cs_layers[bottom_layer_num].UpdateAndEstimateStringNoL2(key, value, pos, sign)
+
+			// use bottom layer heap to update upper layer heaps, but not update its counters to save compute
+			for l := bottom_layer_num; l > 0; l-- {
+				us.HH_layers[l].Update(key, median_count)
+			}
+			median_count = us.cs_layers[0].UpdateAndEstimateString(key, value, pos, sign)
+			us.HH_layers[0].Update(key, median_count)
+		} else {
+			median_count := us.cs_layers[0].UpdateAndEstimateString(key, value, pos, sign)
+			us.HH_layers[0].Update(key, median_count)
+		}
+	} else {
+		pos_mice, sign_mice := us.cs_layers[bottom_layer_num].position_and_sign([]byte(key))
+		median_count := us.cs_layers[bottom_layer_num].UpdateAndEstimateStringNoL2(key, value, &pos_mice, &sign_mice)
+
+		// use bottom layer heap to update upper layer heaps, but not update its counters to save compute
+		for l := bottom_layer_num; l > 0; l-- {
+			us.HH_layers[l].Update(key, median_count)
+		}
+		median_count = us.cs_layers[0].UpdateAndEstimateString(key, value, pos, sign)
+		us.HH_layers[0].Update(key, median_count)
 	}
 
 }
 
-func (us UnivSketch) univmon_processing(key string, value int64, bottom_layer_num int, pos []int32, sign []int32) {
-	// t := time.Now()
-	// hash := wyhash.Hash([]byte(key), uint64(us.seed))
-	/*
-		hash := xxhash.Sum64String(key)
-	*/
-	// since := time.Since(t)
-	// fmt.Println("hash key time=", since)
-	// t = time.Now()
-	/*
-		bottom_layer_num := us.findBottomLayerNum(hash, CS_LVLS)
-	*/
-	// since = time.Since(t)
-	// fmt.Println("find bottom layer time=", since)
-	// t = time.Now()
+// update multiple layers from top to bottom_layer_num
+// only update the first and bottom layer CS in UnivMon
+func (us *UnivSketch) update_pyramid(key string, value int64, bottom_layer_num int, pos *([]int16), sign *([]int8)) {
+
+	if bottom_layer_num < ELEPHANT_LAYER {
+		// use bottom layer heap to update upper layer heaps, but not update its counters to save compute
+		for l := bottom_layer_num; l >= 0; l-- {
+			median_count := int64(0)
+			if l == 0 {
+				median_count = us.cs_layers[l].UpdateAndEstimateString(key, value, pos, sign)
+			} else {
+				median_count = us.cs_layers[l].UpdateAndEstimateStringNoL2(key, value, pos, sign)
+			}
+			us.HH_layers[l].Update(key, median_count)
+		}
+
+	} else {
+
+		for l := ELEPHANT_LAYER - 1; l >= 0; l-- {
+			median_count := int64(0)
+			if l == 0 {
+				median_count = us.cs_layers[l].UpdateAndEstimateString(key, value, pos, sign)
+			} else {
+				median_count = us.cs_layers[l].UpdateAndEstimateStringNoL2(key, value, pos, sign)
+			}
+			us.HH_layers[l].Update(key, median_count)
+		}
+
+		pos_mice, sign_mice := us.cs_layers[bottom_layer_num].position_and_sign([]byte(key))
+		for l := bottom_layer_num; l >= ELEPHANT_LAYER; l-- {
+			median_count := us.cs_layers[l].UpdateAndEstimateStringNoL2(key, value, &pos_mice, &sign_mice)
+			us.HH_layers[l].Update(key, median_count)
+		}
+	}
+
+}
+
+func (us *UnivSketch) univmon_processing_optimized(key string, value int64, bottom_layer_num int, pos *([]int16), sign *([]int8)) {
+	us.bucket_size += value
+	us.update_optimized(key, value, bottom_layer_num, pos, sign)
+}
+
+func (us *UnivSketch) univmon_processing(key string, value int64, bottom_layer_num int, pos *([]int16), sign *([]int8)) {
+	us.bucket_size += value
 	us.update(key, value, bottom_layer_num, pos, sign)
-	// since = time.Since(t)
-	// fmt.Println("univmon update time=", since)
+}
+
+func (us *UnivSketch) PrintHHlayers() {
+	for i := 0; i < us.layer; i++ {
+		fmt.Println("layer:", i)
+		for _, item := range us.HH_layers[i].heap {
+			fmt.Println(item.key, item.count)
+		}
+	}
+	fmt.Println()
 }
 
 // Query Universal Sketch
-func (us UnivSketch) calcGSumHeuristic(g func(float64) float64) float64 {
+func (us *UnivSketch) calcGSumHeuristic(g func(float64) float64, isCard bool) float64 {
 	Y := make([]float64, us.layer)
 	var coe float64 = 1
 	var tmp float64 = 0
 
 	Y[us.layer-1] = 0
 
-	for _, item := range us.HH_layers[us.layer-1].topK.heap {
-		// fmt.Println(item.key, coe, item.count)
-		tmp += g(float64(item.count))
+	var l2_value float64 = us.cs_layers[us.layer-1].cs_l2()
+	var threshold int64 = int64(l2_value * 0.01)
+	if !isCard {
+		threshold = 0
+	}
+	for _, item := range us.HH_layers[us.layer-1].heap {
+		if item.count > threshold {
+			tmp += g(float64(item.count))
+		}
 	}
 	Y[us.layer-1] = tmp
 
 	for i := (us.layer - 2); i >= 0; i-- {
 		tmp = 0
-		// fmt.Println("==============")
-		for _, item := range us.HH_layers[i].topK.heap {
-			// fmt.Println(item.key, item.count)
-			hash := xxhash.Sum64String(item.key)
-			hash = ((hash >> (i + 1)) & 1)
-
-			/*
-				tmp_hash := float64(0.0)
-				for _, next_layer_item := range us.HH_layers[i+1].topK.heap {
-					if item.key == next_layer_item.key {
-						tmp_hash = 1.0
-						break
-					}
-				}
-				if hash != uint64(tmp_hash) {
-					fmt.Println(hash, tmp_hash)
-				}
-			*/
-
-			coe = 1 - 2*float64(hash)
-			// fmt.Println(item.key, coe, item.count)
-			tmp += coe * g(float64(item.count))
+		var l2_value float64 = us.cs_layers[i].cs_l2()
+		var threshold int64 = int64(l2_value * 0.01)
+		if !isCard {
+			threshold = 0
+		}
+		for _, item := range us.HH_layers[i].heap {
+			if item.count > threshold {
+				hash := xxhash.ChecksumString64S(item.key, uint64(us.seed))
+				hash = ((hash >> (i + 1)) & 1)
+				coe = 1 - 2*float64(hash)
+				tmp += coe * g(float64(item.count))
+			}
 		}
 		Y[i] = 2*Y[i+1] + tmp
 	}
@@ -204,46 +293,70 @@ func (us UnivSketch) calcGSumHeuristic(g func(float64) float64) float64 {
 	return Y[0]
 }
 
-func (us UnivSketch) calcGSum(g func(float64) float64) float64 {
-	return us.calcGSumHeuristic(g)
+func (us *UnivSketch) calcGSum(g func(float64) float64, isCard bool) float64 {
+	return us.calcGSumHeuristic(g, isCard)
 }
 
-func (us UnivSketch) calcL1() float64 {
-	return us.calcGSum(func(x float64) float64 { return x })
+func (us *UnivSketch) calcL1() float64 {
+	return us.calcGSum(func(x float64) float64 { return x }, false)
 }
 
-func (us UnivSketch) calcL2() float64 {
-	return us.calcGSum(func(x float64) float64 { return x * x })
+func (us *UnivSketch) calcL2() float64 {
+	tmp := us.calcGSum(func(x float64) float64 { return x * x }, false)
+	return math.Sqrt(tmp)
 }
 
-func (us UnivSketch) calcEntropy() float64 {
-	return us.calcGSum(func(x float64) float64 {
+func (us *UnivSketch) calcEntropy() float64 {
+	tmp := us.calcGSum(func(x float64) float64 {
 		if x > 0 {
 			return x * math.Log2(x)
 		} else {
 			return 0
 		}
-	})
+	}, false)
+	return math.Log2(float64(us.bucket_size)) - tmp/float64(us.bucket_size)
 }
 
-func (us UnivSketch) calcCard() float64 {
-	return us.calcGSum(func(x float64) float64 { return 1 })
+func (us *UnivSketch) calcCard() float64 {
+	return us.calcGSum(func(x float64) float64 { return 1 }, true)
 }
 
-func (us UnivSketch) MergeWith(other UnivSketch) { // Addition
-	for i := 0; i < CS_LVLS; i++ {
-		for j := 0; j < CS_ROW_NO_Univ; j++ {
-			for k := 0; k < CS_COL_NO_Univ; k++ {
+func (us *UnivSketch) MergeWith(other *UnivSketch) { // Addition
+	// fmt.Println("us HH:")
+	// us.PrintHHlayers()
+
+	// fmt.Println("other HH:")
+	// other.PrintHHlayers()
+	for i := 0; i < us.layer; i++ {
+		row := len(us.cs_layers[i].count)
+		col := len(us.cs_layers[i].count[0])
+		for j := 0; j < row; j++ {
+			for k := 0; k < col; k++ {
 				us.cs_layers[i].count[j][k] = us.cs_layers[i].count[j][k] + other.cs_layers[i].count[j][k]
 			}
 		}
 
-		for _, item := range us.HH_layers[i].topK.heap {
-			us.HH_layers[i].topK.Update(item.key, us.cs_layers[i].EstimateStringCount(item.key))
+		topk := NewTopKHeap(us.k)
+		// fmt.Println("!!layer:", i)
+		for _, item := range us.HH_layers[i].heap {
+			topk.Update(item.key, item.count)
+			// fmt.Println("!!", item.key, us.cs_layers[i].EstimateStringCount(item.key))
 		}
 
-		for _, item := range other.HH_layers[i].topK.heap {
-			us.HH_layers[i].topK.Update(item.key, us.cs_layers[i].EstimateStringCount(item.key))
+		for _, item := range other.HH_layers[i].heap {
+			index, find := topk.Find(item.key)
+			var count int64 = 0
+			if find {
+				count = topk.heap[index].count + item.count
+			} else {
+				count = item.count
+			}
+			topk.Update(item.key, count)
+			// fmt.Println("!!", item.key, us.cs_layers[i].EstimateStringCount(item.key))
 		}
+		us.HH_layers[i] = NewTopKFromHeap(topk)
 	}
+
+	// fmt.Println("merged us HH:")
+	// us.PrintHHlayers()
 }

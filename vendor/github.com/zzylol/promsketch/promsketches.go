@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"strconv"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -19,9 +18,8 @@ type SketchType int
 
 const (
 	SHUniv SketchType = iota + 1
-	// EHUniv
+	EHUniv
 	EHCount
-	// SHCount
 	EHKLL
 	EHDD
 	EffSum
@@ -32,16 +30,16 @@ const (
 var funcSketchMap = map[string]([]SketchType){
 	"avg_over_time":      {USampling},
 	"count_over_time":    {USampling},
-	"entropy_over_time":  {SHUniv},
+	"entropy_over_time":  {EHUniv},
 	"max_over_time":      {EHKLL},
 	"min_over_time":      {EHKLL},
 	"stddev_over_time":   {USampling},
 	"stdvar_over_time":   {USampling},
 	"sum_over_time":      {USampling},
 	"sum2_over_time":     {USampling},
-	"distinct_over_time": {SHUniv},
-	"l1_over_time":       {SHUniv}, // same as count_over_time
-	"l2_over_time":       {SHUniv},
+	"distinct_over_time": {EHUniv},
+	"l1_over_time":       {EHUniv}, // same as count_over_time
+	"l2_over_time":       {EHUniv},
 	"quantile_over_time": {EHKLL},
 }
 
@@ -50,11 +48,11 @@ type SketchConfig struct {
 	// 	CM_config       CMConfig
 	// CS_config      CSConfig
 	// Univ_config    UnivConfig
-	SH_univ_config SHUnivConfig
+	// SH_univ_config SHUnivConfig
 	// 	SH_count_config SHCountConfig
 	// EH_count_config EHCountConfig
-	// 	EH_univ_config  EHUnivConfig
-	EH_kll_config EHKLLConfig
+	EH_univ_config EHUnivConfig
+	EH_kll_config  EHKLLConfig
 	// EH_dd_config    EHDDConfig
 	// EffSum_config   EffSumConfig
 	// EffSum2_config  EffSum2Config
@@ -134,7 +132,8 @@ type EffSum2Config struct {
 
 // Each series maintain their own sketches
 type SketchInstances struct {
-	shuniv *SmoothHistogramUnivMon
+	// shuniv *SmoothHistogramUnivMon
+	ehuniv *ExpoHistogramUnivOptimized
 	ehkll  *ExpoHistogramKLL
 	// ehdd   *ExpoHistogramDD
 	sampling *UniformSampling
@@ -269,8 +268,8 @@ func newSlidingHistorgrams(s *memSeries, stype SketchType, sc *SketchConfig) err
 		s.sketchInstances.ehkll = ExpoInitKLL(sc.EH_kll_config.K, sc.EH_kll_config.Kll_k, sc.EH_kll_config.Time_window_size)
 	}
 
-	if stype == SHUniv && s.sketchInstances.shuniv == nil {
-		s.sketchInstances.shuniv = SmoothInitUnivMon(sc.SH_univ_config.Beta, sc.SH_univ_config.Time_window_size)
+	if stype == EHUniv && s.sketchInstances.ehuniv == nil {
+		s.sketchInstances.ehuniv = ExpoInitUnivOptimized(sc.EH_univ_config.K, sc.EH_univ_config.Time_window_size)
 	}
 
 	/*
@@ -376,8 +375,8 @@ func (ps *PromSketches) NewSketchCacheInstance(lset labels.Labels, funcName stri
 
 	for _, stype := range stypes {
 		switch stype {
-		case SHUniv:
-			sc.SH_univ_config = SHUnivConfig{Beta: 0.3535, Time_window_size: time_window_size}
+		case EHUniv:
+			sc.EH_univ_config = EHUnivConfig{K: 20, Time_window_size: time_window_size}
 		case USampling:
 			sc.Sampling_config = SamplingConfig{Sampling_rate: 0.05, Time_window_size: time_window_size, max_size: int(float64(item_window_size) * 0.05)}
 		case EHKLL:
@@ -423,11 +422,11 @@ func (ps *PromSketches) LookUp(lset labels.Labels, funcName string, mint, maxt i
 					return false
 				}
 		*/
-		case SHUniv:
-			if series.sketchInstances.shuniv == nil {
+		case EHUniv:
+			if series.sketchInstances.ehuniv == nil {
 				// fmt.Println("[lookup] no sketch instance")
 				return false
-			} else if series.sketchInstances.shuniv.Cover(mint, maxt) == false {
+			} else if series.sketchInstances.ehuniv.Cover(mint, maxt) == false {
 				// fmt.Println("[lookup] not covered")
 				return false
 			}
@@ -487,7 +486,7 @@ func (ps *PromSketches) Eval(funcName string, lset labels.Labels, otherArgs floa
 			fmt.Println("memory queue dequeue error")
 			break
 		}
-		series.sketchInstances.shuniv.Update(item.(Sample).T, strconv.FormatFloat(item.(Sample).F, 'f', -1, 64))
+		series.sketchInstances.ehuniv.Update(item.(Sample).T, item.(Sample).F)
 		if item.(Sample).T >= maxt {
 			break
 		}
@@ -541,11 +540,12 @@ func (ps *PromSketches) SketchInsertInsertionThroughputTest(lset labels.Labels, 
 
 		fmt.Println("getOrCreate=", since_1)
 		t_now := time.Now()
-		sketch_types := []SketchType{SHUniv, EHCount, EHDD, EffSum}
+		sketch_types := []SketchType{EHUniv, EHCount, EHDD, EffSum}
 		sketch_config := SketchConfig{
 			// CS_config:       CSConfig{Row_no: 3, Col_no: 4096},
 			// Univ_config:     UnivConfig{TopK_size: 5, Row_no: 3, Col_no: 4096, Layer: 16},
-			SH_univ_config:  SHUnivConfig{Beta: 0.1, Time_window_size: 1000000},
+			// SH_univ_config:  SHUnivConfig{Beta: 0.1, Time_window_size: 1000000},
+			EH_univ_config:  EHUnivConfig{K: 20, Time_window_size: 1000000},
 			EH_kll_config:   EHKLLConfig{K: 100, Kll_k: 256, Time_window_size: 1000000},
 			Sampling_config: SamplingConfig{Sampling_rate: 0.05, Time_window_size: 1000000, max_size: int(50000)},
 			// EH_count_config: EHCountConfig{K: 100, Time_window_size: 100000},
@@ -578,11 +578,11 @@ func (ps *PromSketches) SketchInsertInsertionThroughputTest(lset labels.Labels, 
 	*/
 
 	t_4 := time.Now()
-	if s.sketchInstances.shuniv != nil {
+	if s.sketchInstances.ehuniv != nil {
 		s.MemPartAppend(t, val)
 	}
 	since_4 := time.Since(t_4)
-	fmt.Println("shuniv=", (s.sketchInstances.shuniv == nil), since_4)
+	fmt.Println("ehuniv=", (s.sketchInstances.ehuniv == nil), since_4)
 
 	t_7 := time.Now()
 	if s.sketchInstances.ehkll != nil {
@@ -629,7 +629,7 @@ func (ps *PromSketches) SketchInsertDefinedRules(lset labels.Labels, t int64, va
 	*/
 
 	//	t_4 := time.Now()
-	if s.sketchInstances.shuniv != nil {
+	if s.sketchInstances.ehuniv != nil {
 		s.MemPartAppend(t, val)
 		// s.sketchInstances.shuniv.Update(t, strconv.FormatFloat(val, 'f', -1, 64))
 	}
@@ -662,12 +662,12 @@ func (ps *PromSketches) SketchInsert(lset labels.Labels, t int64, val float64) e
 		s.sketchInstances.sampling.Insert(t, val)
 	}
 
-	if s.sketchInstances.shuniv != nil {
+	if s.sketchInstances.ehuniv != nil {
 		wg.Add(1)
 		// s.MemPartAppend(t, val)
 		go func() {
 			defer wg.Done()
-			s.sketchInstances.shuniv.Update(t, strconv.FormatFloat(val, 'f', -1, 64))
+			s.sketchInstances.ehuniv.Update(t, val)
 		}()
 
 		/*
@@ -696,8 +696,8 @@ func (ps *PromSketches) StopBackground() {
 		if series == nil {
 			continue
 		}
-		if series.sketchInstances.shuniv != nil {
-			series.sketchInstances.shuniv.StopBackgroundClean()
+		if series.sketchInstances.ehuniv != nil {
+			series.sketchInstances.ehuniv.StopBackgroundClean()
 		}
 	}
 }
@@ -717,7 +717,7 @@ func (ps *PromSketches) BackgroundSketchInsert() {
 					fmt.Println("memory queue dequeue error")
 					break
 				}
-				series.sketchInstances.shuniv.Update(item.(Sample).T, strconv.FormatFloat(item.(Sample).F, 'f', -1, 64))
+				series.sketchInstances.ehuniv.Update(item.(Sample).T, item.(Sample).F)
 			}
 			wg.Done()
 		}()

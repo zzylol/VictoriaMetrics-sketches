@@ -38,20 +38,20 @@ type CountSketch struct {
 }
 
 // New create a new Count Sketch with row hasing funtions and col counters per row.
-func NewCountSketch(row int, col int, seed1, seed2 []uint32) (s CountSketch, err error) {
+func NewCountSketch(row int, col int, seed1, seed2 []uint32) (s *CountSketch, err error) {
 	if row <= 0 || col <= 0 {
-		return CountSketch{}, errors.New("CountSketch New: values of row and col should be positive.")
+		return nil, errors.New("CountSketch New: values of row and col should be positive.")
 	}
 
-	if row > CS_ROW_NO_Univ {
-		row = CS_ROW_NO_Univ
+	if row > CS_ROW_NO_Univ_ELEPHANT {
+		row = CS_ROW_NO_Univ_ELEPHANT
 	}
 
-	if col > CS_COL_NO_Univ {
-		col = CS_COL_NO_Univ
+	if col > CS_COL_NO_Univ_ELEPHANT {
+		col = CS_COL_NO_Univ_ELEPHANT
 	}
 
-	s = CountSketch{
+	s = &CountSketch{
 		row:    row,
 		col:    col,
 		hasher: fnv.New64(),
@@ -100,7 +100,7 @@ func NewCountSketch(row int, col int, seed1, seed2 []uint32) (s CountSketch, err
 	return s, nil
 }
 
-func (s CountSketch) FreeCountSketch() error {
+func (s *CountSketch) FreeCountSketch() error {
 	for r := 0; r < s.row; r++ {
 		for c := 0; c < s.col; c++ {
 			s.count[r][c] = 0
@@ -117,12 +117,12 @@ func (s CountSketch) FreeCountSketch() error {
 // Accuracy guarantees will be made in terms of a pair of user specified parameters,
 // ε and δ, meaning that the error in answering a query is within a factor of ε with
 // probability δ.
-func NewCountSketchWithEstimates(epsilon, delta float64) (s CountSketch, err error) {
+func NewCountSketchWithEstimates(epsilon, delta float64) (s *CountSketch, err error) {
 	if epsilon <= 0 || epsilon >= 1 {
-		return CountSketch{}, errors.New("CountSketch NewWithEstiamtes: value of epsilon should be in range (0,1).")
+		return nil, errors.New("CountSketch NewWithEstiamtes: value of epsilon should be in range (0,1).")
 	}
 	if delta <= 0 || delta >= 1 {
-		return CountSketch{}, errors.New("CountSketch NewWithEstimates: value of delta should be in range (0,1).")
+		return nil, errors.New("CountSketch NewWithEstimates: value of delta should be in range (0,1).")
 	}
 
 	row := int(math.Ceil(2.72 / epsilon / epsilon))
@@ -140,12 +140,12 @@ func NewCountSketchWithEstimates(epsilon, delta float64) (s CountSketch, err err
 }
 
 // Row returns the number of rows (hash functions)
-func (s CountSketch) Row() int { return s.row }
+func (s *CountSketch) Row() int { return s.row }
 
 // Col returns the number of colums
-func (s CountSketch) Col() int { return s.col }
+func (s *CountSketch) Col() int { return s.col }
 
-func (s CountSketch) position_and_sign(key []byte) (pos []int32, sign []int32) {
+func (s *CountSketch) position_and_sign(key []byte) (pos []int32, sign []int32) {
 	pos = make([]int32, s.row)
 	sign = make([]int32, s.row)
 	var hash1, hash2 uint32
@@ -159,7 +159,7 @@ func (s CountSketch) position_and_sign(key []byte) (pos []int32, sign []int32) {
 	return pos, sign
 }
 
-func (s CountSketch) UpdateString(key string, count float64) {
+func (s *CountSketch) UpdateString(key string, count float64) {
 	pos, sign := s.position_and_sign([]byte(key))
 	counters := make([]float64, s.row)
 	for r, c := range pos {
@@ -176,10 +176,10 @@ func (s CountSketch) UpdateString(key string, count float64) {
 	} else {
 		median = counters[s.row/2]
 	}
-	s.topK.Update(key, int64(median))
+	s.topK.UpdateCS(key, int64(median))
 }
 
-func (s CountSketch) EstimateStringCount(key string) float64 {
+func (s *CountSketch) EstimateStringCount(key string) int64 {
 	pos, sign := s.position_and_sign([]byte(key))
 	counters := make([]float64, s.row)
 	for r, c := range pos {
@@ -194,10 +194,10 @@ func (s CountSketch) EstimateStringCount(key string) float64 {
 		median = counters[s.row/2]
 	}
 
-	return median
+	return int64(median)
 }
 
-func (s CountSketch) UpdateAndEstimateString(key string, count float64) float64 {
+func (s *CountSketch) UpdateAndEstimateString(key string, count float64) float64 {
 	pos, sign := s.position_and_sign([]byte(key))
 	for r, c := range pos {
 		s.count[r][c] += float64(sign[r]) * count
@@ -215,11 +215,27 @@ func (s CountSketch) UpdateAndEstimateString(key string, count float64) float64 
 	} else {
 		median = counters[s.row/2]
 	}
-	s.topK.Update(key, int64(median))
+	s.topK.UpdateCS(key, int64(median))
 	return median
 }
 
-func (s CountSketch) cs_l2() float64 {
+func (s *CountSketch) cs_l1() float64 {
+
+	sos := make([]float64, s.row)
+	for i := 0; i < s.row; i++ {
+		sos[i] = 0
+		for j := 0; j < s.col; j++ {
+			sos[i] += AbsFloat64(s.count[i][j])
+		}
+	}
+
+	sort.Slice(sos, func(i, j int) bool { return sos[i] < sos[j] })
+	f1_value := sos[s.row/2]
+
+	return f1_value
+}
+
+func (s *CountSketch) cs_l2() float64 {
 
 	sos := make([]float64, s.row)
 	for i := 0; i < s.row; i++ {
@@ -232,7 +248,7 @@ func (s CountSketch) cs_l2() float64 {
 	return math.Sqrt(f2_value)
 }
 
-func (s CountSketch) cs_l2_new() float64 {
+func (s *CountSketch) cs_l2_new() float64 {
 	sos := make([]float64, s.row)
 	for i := 0; i < s.row; i++ {
 		sos[i] = 0
@@ -245,10 +261,31 @@ func (s CountSketch) cs_l2_new() float64 {
 	return math.Sqrt(f2_value)
 }
 
-func (s CountSketch) MergeWith(other CountSketch) {
+func (s *CountSketch) MergeWith(other *CountSketch) {
 	for i := 0; i < s.row; i++ {
 		for j := 0; j < s.col; j++ {
 			s.count[i][j] += other.count[i][j]
 		}
+	}
+
+	if s.topK != nil {
+
+		topk := NewTopKHeap(s.topK.k)
+		for _, item := range s.topK.heap {
+			topk.Update(item.key, item.count)
+		}
+
+		for _, item := range other.topK.heap {
+			index, find := topk.Find(item.key)
+			var count int64 = 0
+			if find {
+				count = topk.heap[index].count + item.count
+			} else {
+				count = item.count
+			}
+			topk.Update(item.key, count)
+			// fmt.Println("!!", item.key, us.cs_layers[i].EstimateStringCount(item.key))
+		}
+		s.topK = NewTopKFromHeap(topk)
 	}
 }

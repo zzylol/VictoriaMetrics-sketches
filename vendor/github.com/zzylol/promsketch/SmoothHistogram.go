@@ -11,8 +11,8 @@ import (
 
 	"time"
 
+	"github.com/OneOfOne/xxhash"
 	"github.com/RoaringBitmap/roaring/v2"
-	"github.com/cespare/xxhash/v2"
 )
 
 type HeavyHitter struct {
@@ -28,7 +28,7 @@ type SmoothHistogramCS struct {
 	seed1            []uint32
 	seed2            []uint32
 	s_count          int // sketch count
-	cs_instances     []CountSketch
+	cs_instances     []*CountSketch
 	beta             float64
 	time_window_size int64
 }
@@ -67,9 +67,9 @@ type SmoothHistogramHH struct {
 type SmoothHistogramUnivMon struct {
 	cs_seed1         []uint32
 	cs_seed2         []uint32
-	seed3            uint32       // univmon seed
-	s_count          int          // sketch count
-	univs            []UnivSketch // each bucket is a univsketch
+	seed3            uint32        // univmon seed
+	s_count          int           // sketch count
+	univs            []*UnivSketch // each bucket is a univsketch
 	beta             float64
 	time_window_size int64
 	univPool         UnivSketchPool
@@ -80,7 +80,7 @@ type SmoothHistogramUnivMon struct {
 }
 
 type UnivSketchPool struct {
-	pool     []UnivSketch
+	pool     []*UnivSketch
 	size     uint32
 	max_size uint32
 	bm       *roaring.Bitmap
@@ -101,20 +101,20 @@ func SmoothInitUnivMon(beta float64, time_window_size int64) (shu *SmoothHistogr
 
 	shu.putch = make(chan int64, 100)
 
-	shu.cs_seed1 = make([]uint32, CS_ROW_NO_Univ)
-	shu.cs_seed2 = make([]uint32, CS_ROW_NO_Univ)
+	shu.cs_seed1 = make([]uint32, CS_ROW_NO_Univ_ELEPHANT)
+	shu.cs_seed2 = make([]uint32, CS_ROW_NO_Univ_ELEPHANT)
 	rand.Seed(time.Now().UnixNano())
-	for i := 0; i < CS_ROW_NO_Univ; i++ {
+	for i := 0; i < CS_ROW_NO_Univ_ELEPHANT; i++ {
 		shu.cs_seed1[i] = rand.Uint32()
 		shu.cs_seed2[i] = rand.Uint32()
 	}
 	shu.seed3 = rand.Uint32()
 
-	shu.univs = make([]UnivSketch, shu.s_count)
+	shu.univs = make([]*UnivSketch, shu.s_count)
 
-	shu.univPool = UnivSketchPool{pool: make([]UnivSketch, UnivPoolCAP), size: 0, max_size: UnivPoolCAP}
+	shu.univPool = UnivSketchPool{pool: make([]*UnivSketch, UnivPoolCAP), size: 0, max_size: UnivPoolCAP}
 	for i := uint32(0); i < UnivPoolCAP; i++ {
-		shu.univPool.pool[i], _ = NewUnivSketch(TOPK_SIZE, CS_ROW_NO_Univ, CS_COL_NO_Univ, CS_LVLS, shu.cs_seed1, shu.cs_seed2, shu.seed3, int64(i)) // same parameters, mergability
+		shu.univPool.pool[i], _ = NewUnivSketchPyramid(TOPK_SIZE, CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, CS_LVLS, shu.cs_seed1, shu.cs_seed2, shu.seed3, int64(i)) // same parameters, mergability
 	}
 	shu.univPool.bm = roaring.New()
 
@@ -151,18 +151,18 @@ func (shu *SmoothHistogramUnivMon) StopBackgroundClean() {
 func (shu *SmoothHistogramUnivMon) GetMemory() float64 {
 	var total_mem float64 = 0
 	for i := 0; i < shu.s_count; i++ {
-		total_mem += shu.univs[i].GetMemoryKB()
+		total_mem += shu.univs[i].GetMemoryKBPyramid()
 		// fmt.Println(shu.univs[i].GetMemoryKB())
 	}
 	return total_mem
 }
 
-func (shu *SmoothHistogramUnivMon) GetUnivSketch() (UnivSketch, error) {
+func (shu *SmoothHistogramUnivMon) GetUnivSketch() (*UnivSketch, error) {
 	shu.univPool.mutex.Lock()
 	if shu.univPool.size == shu.univPool.max_size {
-		tmp, err := NewUnivSketch(TOPK_SIZE, CS_ROW_NO_Univ, CS_COL_NO_Univ, CS_LVLS, shu.cs_seed1, shu.cs_seed2, shu.seed3, int64(shu.univPool.max_size)) // New && init UnivMon
+		tmp, err := NewUnivSketchPyramid(TOPK_SIZE, CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, CS_LVLS, shu.cs_seed1, shu.cs_seed2, shu.seed3, int64(shu.univPool.max_size)) // New && init UnivMon
 		if err != nil {
-			return UnivSketch{}, errors.New("univ sketch allocation failed")
+			return nil, errors.New("univ sketch allocation failed")
 		}
 
 		shu.univPool.pool = append(shu.univPool.pool, tmp)
@@ -216,7 +216,7 @@ func (shu *SmoothHistogramUnivMon) putUnivSketch(pool_idx int64) {
 	shu.univPool.mutex.Unlock()
 }
 
-func (shu *SmoothHistogramUnivMon) PutUnivSketch(u UnivSketch) error {
+func (shu *SmoothHistogramUnivMon) PutUnivSketch(u *UnivSketch) error {
 	if u.pool_idx == -1 {
 		return nil
 	}
@@ -245,19 +245,17 @@ func (shu *SmoothHistogramUnivMon) Update(time_ int64, value string) {
 
 	shu.univs = append(shu.univs, tmp)
 	// optimization: calculate hashes for the same key among SH buckets because of mergability
-	hash := xxhash.Sum64String(value)
+	hash := xxhash.ChecksumString64S(value, uint64(tmp.seed))
 	bottom_layer_num := findBottomLayerNum(hash, CS_LVLS)
 
 	pos, sign := shu.univs[0].cs_layers[0].position_and_sign([]byte(value))
 
 	for i := 0; i < shu.s_count; i++ {
-		shu.univs[i].bucket_size += 1
-		shu.univs[i].univmon_processing(value, 1, bottom_layer_num, pos, sign)
+		shu.univs[i].univmon_processing_optimized(value, 1, bottom_layer_num, &pos, &sign)
 		shu.univs[i].max_time = time_ // time-based window
 	}
 
-	shu.univs[shu.s_count].univmon_processing(value, 1, bottom_layer_num, pos, sign)
-	shu.univs[shu.s_count].bucket_size = 1
+	shu.univs[shu.s_count].univmon_processing_optimized(value, 1, bottom_layer_num, &pos, &sign)
 	shu.univs[shu.s_count].max_time, shu.univs[shu.s_count].min_time = time_, time_
 	shu.s_count++
 
@@ -309,7 +307,7 @@ func (shu *SmoothHistogramUnivMon) Update(time_ int64, value string) {
 Merge the universal sketches to the interval of t1 to t2;
 cur_t - time_window_size <= t1 <= t2 <= cur_t
 */
-func (shu *SmoothHistogramUnivMon) QueryIntervalMergeUniv(t1, t2, t int64) (univ UnivSketch, err error) {
+func (shu *SmoothHistogramUnivMon) QueryIntervalMergeUniv(t1, t2, t int64) (univ *UnivSketch, err error) {
 	var diff1, diff2 int64 = math.MaxInt64, math.MaxInt64
 	var from_bucket, to_bucket int = shu.s_count, shu.s_count
 
@@ -353,18 +351,19 @@ func (shu *SmoothHistogramUnivMon) QueryIntervalMergeUniv(t1, t2, t int64) (univ
 
 	if from_bucket == shu.s_count {
 		// fmt.Println("[SmoothHistogram Error] failed to find buckets for queried interval.")
-		return UnivSketch{}, errors.New("bucket not found")
+		return nil, errors.New("bucket not found")
 	}
 
-	merged_univ, err_create := shu.GetUnivSketch()
-	// merged_univ, err := NewUnivSketch(TOPK_SIZE, CS_ROW_NO_Univ, CS_COL_NO_Univ, CS_LVLS, shu.cs_seed1, shu.cs_seed2, shu.seed3, -1) // new && init; seed1 and seed2 should be the same as other UnivSketch
-	if err_create != nil {
+	merged_univ, err := NewUnivSketchPyramid(TOPK_SIZE, CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, CS_LVLS, shu.cs_seed1, shu.cs_seed2, shu.seed3, -1) // new && init; seed1 and seed2 should be the same as other UnivSketch
+	if err != nil {
 		fmt.Println("[Error] failed to allocate memory for new bucket of UnivMon...")
 	}
 
 	for i := 0; i < CS_LVLS; i++ {
-		for j := 0; j < CS_ROW_NO_Univ; j++ {
-			for k := 0; k < CS_COL_NO_Univ; k++ {
+		row := len(merged_univ.cs_layers[i].count)
+		col := len(merged_univ.cs_layers[i].count[0])
+		for j := 0; j < row; j++ {
+			for k := 0; k < col; k++ {
 				if to_bucket < shu.s_count {
 					merged_univ.cs_layers[i].count[j][k] = shu.univs[from_bucket].cs_layers[i].count[j][k] - shu.univs[to_bucket].cs_layers[i].count[j][k]
 				} else {
@@ -373,37 +372,31 @@ func (shu *SmoothHistogramUnivMon) QueryIntervalMergeUniv(t1, t2, t int64) (univ
 			}
 		}
 
-		topK := NewTopKFromHeap(shu.univs[from_bucket].HH_layers[i].topK) // deep copy of heap
+		merged_univ.HH_layers[i] = NewTopKFromHeap(shu.univs[from_bucket].HH_layers[i]) // deep copy of heap
 		if to_bucket < shu.s_count {
-			for _, item := range topK.heap {
-				// fmt.Println("s_count new = ", shu.s_count)
-				item.count = merged_univ.cs_layers[i].EstimateStringCount(item.key)
-			}
-			for _, item := range topK.heap {
-				merged_univ.HH_layers[i].topK.Update(item.key, item.count)
-			}
-			merged_univ.bucket_size = shu.univs[from_bucket].bucket_size - shu.univs[to_bucket].bucket_size
-			merged_univ.max_time = shu.univs[to_bucket].min_time
-		} else {
-			merged_univ.bucket_size = shu.univs[from_bucket].bucket_size
-			merged_univ.max_time = shu.univs[from_bucket].max_time
-			for _, item := range topK.heap {
-				merged_univ.HH_layers[i].topK.Update(item.key, item.count)
+			for j, item := range merged_univ.HH_layers[i].heap {
+				merged_univ.HH_layers[i].heap[j].count = merged_univ.cs_layers[i].EstimateStringCount(item.key)
 			}
 		}
-		merged_univ.min_time = shu.univs[from_bucket].min_time
 	}
 
-	// fmt.Println("merged_univ.min_time =", merged_univ.min_time)
-	// fmt.Println("merged_univ.max_time =", merged_univ.max_time)
+	merged_univ.min_time = shu.univs[from_bucket].min_time
+	if to_bucket < shu.s_count {
+		merged_univ.bucket_size = shu.univs[from_bucket].bucket_size - shu.univs[to_bucket].bucket_size
+		merged_univ.max_time = shu.univs[to_bucket].min_time
+	} else {
+		merged_univ.bucket_size = shu.univs[from_bucket].bucket_size
+		merged_univ.max_time = shu.univs[from_bucket].max_time
+	}
 
+	/*
+		fmt.Println("merged_univ.min_time =", merged_univ.min_time)
+		fmt.Println("merged_univ.max_time =", merged_univ.max_time)
+		fmt.Println("meged_univ.bucket_size =", merged_univ.bucket_size)
+	*/
 	shu.mutex.Unlock()
 
 	return merged_univ, nil
-}
-
-func (shu *SmoothHistogramUnivMon) PutAfterQuery(univ UnivSketch) {
-	shu.PutUnivSketch(univ)
 }
 
 func (sh *SmoothHistogramUnivMon) Cover(mint, maxt int64) bool {
@@ -435,21 +428,26 @@ func SmoothInitCS(beta float64, time_window_size int64) (sh *SmoothHistogramCS) 
 		time_window_size: time_window_size,
 	}
 
-	sh.seed1 = make([]uint32, CS_ROW_NO_Univ)
-	sh.seed2 = make([]uint32, CS_ROW_NO_Univ)
+	sh.seed1 = make([]uint32, CS_ROW_NO_Univ_ELEPHANT)
+	sh.seed2 = make([]uint32, CS_ROW_NO_Univ_ELEPHANT)
 	rand.Seed(time.Now().UnixNano())
-	for i := 0; i < CS_ROW_NO_Univ; i++ {
+	for i := 0; i < CS_ROW_NO_Univ_ELEPHANT; i++ {
 		sh.seed1[i] = rand.Uint32()
 		sh.seed2[i] = rand.Uint32()
 	}
 
-	sh.cs_instances = make([]CountSketch, sh.s_count)
+	sh.cs_instances = make([]*CountSketch, sh.s_count)
 
 	return sh
 }
 
+func (sh *SmoothHistogramCS) GetMemory() float64 {
+	return float64(sh.s_count) * float64(sh.cs_instances[0].row) * float64(sh.cs_instances[0].col) * 8 / 1024 // KBytes
+}
+
 func (sh *SmoothHistogramCS) Update(time int64, key string, value float64) {
 	for i := 0; i < sh.s_count; i++ {
+		sh.cs_instances[i].bucketsize += 1
 		sh.cs_instances[i].UpdateString(key, value)
 		sh.cs_instances[i].max_time = time // time-based window
 	}
@@ -468,7 +466,7 @@ func (sh *SmoothHistogramCS) Update(time int64, key string, value float64) {
 		maxj := i + 1
 		var compare_value float64 = float64(1.0-0.5*sh.beta) * (sh.cs_instances[i].cs_l2())
 
-		for j := i + 1; j <= sh.s_count-3; j++ {
+		for j := i + 2; j <= sh.s_count-3; j++ {
 			// fmt.Println(compare_value, sh.cs_instances[j].cs_l2())
 			if (maxj < j) && (float64(sh.cs_instances[j].cs_l2()) >= compare_value) {
 				maxj = j
@@ -478,7 +476,11 @@ func (sh *SmoothHistogramCS) Update(time int64, key string, value float64) {
 		}
 
 		shift := maxj - i - 1 // offset to shift
-		// fmt.Println(shift)
+		/*
+			if shift > 0 {
+				fmt.Println(shift)
+			}
+		*/
 		if shift > 0 { // need to shift
 			sh.s_count = sh.s_count - shift
 			sh.cs_instances = append(sh.cs_instances[:i+1], sh.cs_instances[maxj:]...)
@@ -488,7 +490,7 @@ func (sh *SmoothHistogramCS) Update(time int64, key string, value float64) {
 
 	removed := 0
 	for i := 0; i < sh.s_count; i++ {
-		if sh.cs_instances[i].max_time-sh.cs_instances[i].min_time >= sh.time_window_size {
+		if sh.cs_instances[i].min_time+sh.time_window_size < time {
 			removed++
 		} else {
 			break
@@ -509,13 +511,14 @@ func (sh *SmoothHistogramCS) Update(time int64, key string, value float64) {
 Merge the universal sketches to the interval of t1 to t2;
 cur_t - time_window_size <= t1 < = t2 <= cur_t
 */
-func (sh *SmoothHistogramCS) QueryIntervalMergeCS(t1, t2 int64) CountSketch {
+func (sh *SmoothHistogramCS) QueryIntervalMergeCS(t1, t2, t int64) (*CountSketch, error) {
 	var diff1, diff2 int64 = math.MaxInt64, math.MaxInt64
 	var from_bucket, to_bucket int = sh.s_count, sh.s_count
 
 	for i := 0; i < sh.s_count; i++ {
-		curdiff1 := AbsInt64(sh.cs_instances[i].min_time - t1)
-		curdiff2 := AbsInt64(sh.cs_instances[i].min_time - t2)
+		curdiff1 := AbsInt64((t - sh.cs_instances[i].min_time) - t1)
+		curdiff2 := AbsInt64((t - sh.cs_instances[i].min_time) - t2)
+
 		if curdiff1 < diff1 {
 			diff1 = curdiff1
 			from_bucket = i
@@ -526,41 +529,69 @@ func (sh *SmoothHistogramCS) QueryIntervalMergeCS(t1, t2 int64) CountSketch {
 		}
 	}
 
+	if from_bucket == to_bucket {
+		to_bucket += 1
+	}
+
+	if to_bucket == sh.s_count-1 {
+		if AbsInt64(t2) <= AbsInt64((t-sh.cs_instances[to_bucket].min_time)-t2) {
+			to_bucket += 1
+		}
+	}
 	// fmt.Println("s_count =", sh.s_count)
 	// fmt.Println("from_bucket =", from_bucket)
 	// fmt.Println("to_bucket =", to_bucket)
 
-	if from_bucket == sh.s_count || to_bucket == sh.s_count { // TODO: handle the boundary
-		// fmt.Println("[SmoothHistogram Error] failed to find buckets for queried interval.")
-		return CountSketch{}
+	if from_bucket == sh.s_count {
+		return nil, errors.New("bucket not found")
 	}
 
-	merged_cs, err := NewCountSketch(CS_ROW_NO_Univ, CS_COL_NO_Univ, sh.seed1, sh.seed2) // new && init; seed1 and seed2 should be the same as other UnivSketch
+	merged_cs, err := NewCountSketch(CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, sh.seed1, sh.seed2) // new && init; seed1 and seed2 should be the same as other UnivSketch
 	if err != nil {
 		fmt.Println("[Error] failed to allocate memory for new bucket of CountSketch...")
 	}
 
-	for j := 0; j < CS_ROW_NO_Univ; j++ {
-		for k := 0; k < CS_COL_NO_Univ; k++ {
-			merged_cs.count[j][k] = sh.cs_instances[from_bucket].count[j][k] - sh.cs_instances[to_bucket].count[j][k]
+	for j := 0; j < CS_ROW_NO_Univ_ELEPHANT; j++ {
+		for k := 0; k < CS_COL_NO_Univ_ELEPHANT; k++ {
+			if to_bucket < sh.s_count {
+				merged_cs.count[j][k] = sh.cs_instances[from_bucket].count[j][k] - sh.cs_instances[to_bucket].count[j][k]
+			} else {
+				merged_cs.count[j][k] = sh.cs_instances[from_bucket].count[j][k]
+			}
+		}
+	}
+
+	merged_cs.topK = NewTopKFromHeap(sh.cs_instances[from_bucket].topK) // deep copy of heap
+	if to_bucket < sh.s_count {
+		for j, item := range merged_cs.topK.heap {
+			merged_cs.topK.heap[j].count = merged_cs.EstimateStringCount(item.key)
 		}
 	}
 
 	merged_cs.min_time = sh.cs_instances[from_bucket].min_time
 	merged_cs.max_time = sh.cs_instances[to_bucket].min_time
+
+	merged_cs.min_time = sh.cs_instances[from_bucket].min_time
+	if to_bucket < sh.s_count {
+		merged_cs.bucketsize = sh.cs_instances[from_bucket].bucketsize - sh.cs_instances[to_bucket].bucketsize
+		merged_cs.max_time = sh.cs_instances[to_bucket].min_time
+	} else {
+		merged_cs.bucketsize = sh.cs_instances[from_bucket].bucketsize
+		merged_cs.max_time = sh.cs_instances[from_bucket].max_time
+	}
+
 	// fmt.Println("merged_univ.min_time =", merged_univ.min_time)
 	// fmt.Println("merged_univ.max_time =", merged_univ.max_time)
 
-	return merged_cs
+	return merged_cs, nil
 }
 
 func (sh *SmoothHistogramCS) Cover(mint, maxt int64) bool {
-	// fmt.Println("s_count = ", sh.s_count)
 	if sh.s_count == 0 {
 		return false
 	}
-	// fmt.Println(sh.cs_instances[0].min_time, sh.cs_instances[sh.s_count-1])
-	return (sh.cs_instances[0].min_time <= mint) // && sh.cs_instances[sh.s_count-1].max_time >= maxt)
+
+	return (sh.cs_instances[sh.s_count-1].max_time-sh.time_window_size <= mint)
 }
 
 func (sh *SmoothHistogramCS) print_sh_cs_buckets() {
@@ -727,7 +758,7 @@ func SmoothInitSum(beta float64, seed1 []uint32, time_window_size int64) (sh *Sm
 		s_count: 0,
 		time_window_size: time_window_size,
 	}
-	sh.seed1 = make([]uint32, CS_ROW_NO_Univ)
+	sh.seed1 = make([]uint32, CS_ROW_NO_Univ_ELEPHANT)
 	copy(sh.seed1, seed1)
 
 	sh.cm_instances = make([]CountMinSketch, sh.s_count)
@@ -741,7 +772,7 @@ func (sh *SmoothHistogramCM) SmoothUpdateSum(key string, time int64, value float
 		sh.cm_instances[i].max_time = time // TODO: the max_time for different time series are not consistent
 	}
 
-	tmp, err := NewCountMinSketch(CS_ROW_NO_Univ, CS_COL_NO_Univ, sh.seed1) // new && init count sketch
+	tmp, err := NewCountMinSketch(CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, sh.seed1) // new && init count sketch
 	if err != nil {
 		fmt.Println("[Error] failed to allocate memory for countmin sketch...")
 	}
@@ -843,7 +874,7 @@ func SmoothInitSum2(beta float64, seed1 []uint32, time_window_size int64) (sh *S
 		s_count: 0,
 		time_window_size: time_window_size,
 	}
-	sh.seed1 = make([]uint32, CS_ROW_NO_Univ)
+	sh.seed1 = make([]uint32, CS_ROW_NO_Univ_ELEPHANT)
 	copy(sh.seed1, seed1)
 
 	sh.cm_instances = make([]CountMinSketch, sh.s_count)
@@ -857,7 +888,7 @@ func (sh *SmoothHistogramCM) SmoothUpdateSum2(key string, time int64, value floa
 		sh.cm_instances[i].max_time = time
 	}
 
-	tmp, err := NewCountMinSketch(CS_ROW_NO_Univ, CS_COL_NO_Univ, sh.seed1) // new && init count sketch
+	tmp, err := NewCountMinSketch(CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, sh.seed1) // new && init count sketch
 	if err != nil {
 		fmt.Println("[Error] failed to allocate memory for countmin sketch...")
 	}
@@ -932,8 +963,8 @@ func (shh *SmoothHistogramHH) smooth_init_hh(beta float64, epsilon float64, seed
 	shh.update_count_freq = update_count_freq
 	shh.time_window_size = time_window_size
 
-	shh.seed1 = make([]uint32, CS_ROW_NO_Univ)
-	shh.seed2 = make([]uint32, CS_ROW_NO_Univ)
+	shh.seed1 = make([]uint32, CS_ROW_NO_Univ_ELEPHANT)
+	shh.seed2 = make([]uint32, CS_ROW_NO_Univ_ELEPHANT)
 	copy(shh.seed1, seed1)
 	copy(shh.seed2, seed2)
 
@@ -946,18 +977,18 @@ func (shh *SmoothHistogramHH) smooth_init_hh(beta float64, epsilon float64, seed
 func (shh *SmoothHistogramHH) smooth_update_hh(key string) {
 	for i := 0; i < shh.s_count; i++ {
 		median_count := shh.instances[i].cs.UpdateAndEstimateString(key, 1)
-		shh.instances[i].topK.Update(key, median_count)
+		shh.instances[i].Update(key, median_count)
 	}
 
 	// init new CountSketch
-	tmp, err := NewCountSketch(CS_ROW_NO_Univ, CS_COL_NO_Univ, shh.seed1, shh.seed2) // new && init a count sketch
+	tmp, err := NewCountSketch(CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, shh.seed1, shh.seed2) // new && init a count sketch
 	if err != nil {
 		fmt.Println("[Error] failed to allocate memory for new count Sketch bucket...")
 	}
 	tmp_topk := NewTopKHeap(TOPK_SIZE)
 	shh.instances = append(shh.instances, &HHCountSketch{tmp, tmp_topk})
 	median_count := shh.instances[shh.s_count].cs.UpdateAndEstimateString(key, 1)
-	shh.instances[shh.s_count].topK.Update(key, median_count)
+	shh.instances[shh.s_count].Update(key, median_count)
 	shh.s_count++
 
 	for i := 0; i <= shh.s_count - 3; i++ {
@@ -991,7 +1022,7 @@ func (shh *SmoothHistogramHH) smooth_update_hh(key string) {
 
 	if removed > 0 {
 		// for j := 0; j < removed; j++ {
-			// deleteMinHeap(&shh->CSInstances[j].topK); // clean the memory for the CS heap
+			// deleteMinHeap(&shh->CSInstances[j]); // clean the memory for the CS heap
 		// }
 		shh.s_count -= removed
 		shh.instances = shh.instances[removed: ]
@@ -1000,7 +1031,7 @@ func (shh *SmoothHistogramHH) smooth_update_hh(key string) {
 	if shh.cur_time % shh.update_count_freq == 0 {
 		threshold := shh.epsilon * shh.epsilon * 3.0 / 4.0
 		for i := 0; i < shh.s_count; i++ {
-			for _, item := range shh.instances[i].topK.heap {
+			for _, item := range shh.instances[i].heap {
 				if item.count > int64(threshold * shh.instances[i].cs.cs_l2()){
 					shh.shc.smooth_insert_count(item.key)
 				}
@@ -1306,19 +1337,19 @@ func (sh * SmoothHistogramCS) query_T1T2interval_l2(key string, t1, t2 int64) fl
 	}
 
 
-	sos := make([]float64, CS_ROW_NO_Univ)
-	for j := 0; j < CS_ROW_NO_Univ; j++ {
+	sos := make([]float64, CS_ROW_NO_Univ_ELEPHANT)
+	for j := 0; j < CS_ROW_NO_Univ_ELEPHANT; j++ {
 		sos[j] = 0
 	}
-	for i := 0; i < CS_ROW_NO_Univ; i++ {
-		for j := 0; j < CS_COL_NO_Univ; j++ {
+	for i := 0; i < CS_ROW_NO_Univ_ELEPHANT; i++ {
+		for j := 0; j < CS_COL_NO_Univ_ELEPHANT; j++ {
 			var temp_dif float64 = AbsFloat64(sh.cs_instances[from_bucket].count[i][j] - sh.cs_instances[to_bucket].count[i][j]);
 			sos[i] += temp_dif * temp_dif
 		}
 	}
 
 	sort.Slice(sos, func(i, j int) bool { return sos[i] < sos[j] })
-	median := sos[CS_ROW_NO_Univ / 2]
+	median := sos[CS_ROW_NO_Univ_ELEPHANT / 2]
 	return math.Sqrt(median)
 }
 */

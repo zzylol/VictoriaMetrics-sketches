@@ -25,6 +25,74 @@ var FunctionCalls = map[string]FunctionCall{
 	"quantile_over_time": funcQuantileOverTime,
 }
 
+func calc_entropy(values *[]float64) float64 {
+	m := make(map[float64]int)
+	n := float64(len(*values))
+	for _, v := range *values {
+		if _, ok := m[v]; !ok {
+			m[v] = 1
+		} else {
+			m[v] += 1
+		}
+	}
+	var entropy float64 = 0
+	for _, v := range m {
+		entropy += float64(v) * math.Log2(float64(v))
+	}
+
+	entropy = math.Log2(n) - entropy/n
+	return entropy
+}
+
+func calc_l1(values *[]float64) float64 {
+	m := make(map[float64]int)
+	for _, v := range *values {
+		if _, ok := m[v]; !ok {
+			m[v] = 1
+		} else {
+			m[v] += 1
+		}
+	}
+	var l1 float64 = 0
+	for _, v := range m {
+		l1 += float64(v)
+
+	}
+
+	return l1
+}
+
+func calc_distinct(values *[]float64) float64 {
+	m := make(map[float64]int)
+	for _, v := range *values {
+		if _, ok := m[v]; !ok {
+			m[v] = 1
+		} else {
+			m[v] += 1
+		}
+	}
+	distinct := float64(len(m))
+	return distinct
+}
+
+func calc_l2(values *[]float64) float64 {
+	m := make(map[float64]int)
+	for _, v := range *values {
+		if _, ok := m[v]; !ok {
+			m[v] = 1
+		} else {
+			m[v] += 1
+		}
+	}
+	var l2 float64 = 0
+	for _, v := range m {
+		l2 += float64(v * v)
+	}
+
+	l2 = math.Sqrt(l2)
+	return l2
+}
+
 // TODO: add last item value in the change data structure
 func funcChangeOverTime(ctx context.Context, series *memSeries, c float64, t1, t2, t int64) Vector {
 	count := series.sketchInstances.sampling.QueryCount(t1, t2)
@@ -84,53 +152,68 @@ func funcStdvarOverTime(ctx context.Context, series *memSeries, c float64, t1, t
 }
 
 func funcEntropyOverTime(ctx context.Context, series *memSeries, c float64, t1, t2, t int64) Vector {
-	merged_univ, err := series.sketchInstances.shuniv.QueryIntervalMergeUniv(t-t2, t-t1, t)
+	merged_univ, samples, err := series.sketchInstances.ehuniv.QueryIntervalMergeUniv(t-t2, t-t1, t)
 	if err != nil {
 		return make(Vector, 0)
 	}
-	entropynorm := merged_univ.calcEntropy()
 
-	// m := series.sketchInstances.sampling.QueryCount(t1, t2)
-	m := merged_univ.calcL1()
-	series.sketchInstances.shuniv.PutAfterQuery(merged_univ)
+	var entropy float64 = 0
+	if merged_univ != nil && samples == nil {
+		entropy = merged_univ.calcEntropy()
+	} else {
+		entropy = calc_entropy(samples)
+	}
 
-	entropy := math.Log(m)/math.Log(2) - entropynorm/m
 	return Vector{Sample{
 		F: entropy,
 	}}
 }
 
 func funcCardOverTime(ctx context.Context, series *memSeries, c float64, t1, t2, t int64) Vector {
-	merged_univ, err := series.sketchInstances.shuniv.QueryIntervalMergeUniv(t-t2, t-t1, t)
+	merged_univ, samples, err := series.sketchInstances.ehuniv.QueryIntervalMergeUniv(t-t2, t-t1, t)
 	if err != nil {
 		return make(Vector, 0)
 	}
-	card := merged_univ.calcCard()
-	series.sketchInstances.shuniv.PutAfterQuery(merged_univ)
+	var card float64 = 0
+	if merged_univ != nil && samples == nil {
+		card = merged_univ.calcCard()
+	} else {
+		card = calc_distinct(samples)
+	}
 	return Vector{Sample{
 		F: card,
 	}}
 }
 
 func funcL1OverTime(ctx context.Context, series *memSeries, c float64, t1, t2, t int64) Vector {
-	merged_univ, err := series.sketchInstances.shuniv.QueryIntervalMergeUniv(t-t2, t-t1, t)
+	merged_univ, samples, err := series.sketchInstances.ehuniv.QueryIntervalMergeUniv(t-t2, t-t1, t)
 	if err != nil {
 		return make(Vector, 0)
 	}
-	l1 := merged_univ.calcL1()
-	series.sketchInstances.shuniv.PutAfterQuery(merged_univ)
+	var l1 float64 = 0
+	if merged_univ != nil && samples == nil {
+		l1 = merged_univ.calcL1()
+	} else {
+		l1 = calc_l1(samples)
+	}
+
 	return Vector{Sample{
 		F: l1,
 	}}
 }
 
 func funcL2OverTime(ctx context.Context, series *memSeries, c float64, t1, t2, t int64) Vector {
-	merged_univ, err := series.sketchInstances.shuniv.QueryIntervalMergeUniv(t-t2, t-t1, t)
+	merged_univ, samples, err := series.sketchInstances.ehuniv.QueryIntervalMergeUniv(t-t2, t-t1, t)
 	if err != nil {
 		return make(Vector, 0)
 	}
-	l2 := merged_univ.calcL2()
-	series.sketchInstances.shuniv.PutAfterQuery(merged_univ)
+	var l2 float64 = 0
+	if merged_univ != nil && samples == nil {
+		l2 = merged_univ.calcL2()
+	} else {
+		l2 = calc_l2(samples)
+	}
+
 	return Vector{Sample{
 		F: l2,
 	}}

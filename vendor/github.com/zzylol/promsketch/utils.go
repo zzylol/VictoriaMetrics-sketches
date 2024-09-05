@@ -14,17 +14,22 @@ const HASH_SEED int = 2147483647
 const CM_ROW_NO int = 5
 const CM_COL_NO int = 1000
 
-// for UnivMon
-const CS_ROW_NO_Univ int = 3
-const CS_COL_NO_Univ int = 4096
-const CS_LVLS int = 16
-
 const CS_ROW_NO int = 5
 const CS_COL_NO int = 4096
 const CS_ONE_COL_NO int = 100000
 
-const TOPK int = 1
+// for UnivMon
+// for SHUniv, use larger config; for EHUniv, use smaller config
+const ELEPHANT_LAYER = 8
+const MICE_LAYER = 8
+const CS_LVLS int = 16 // total layers
+const CS_ROW_NO_Univ_ELEPHANT int = 3
+const CS_COL_NO_Univ_ELEPHANT int = 1024
+const CS_ROW_NO_Univ_MICE int = 3
+const CS_COL_NO_Univ_MICE int = 256
+
 const TOPK_SIZE int = 100
+const TOPK_SIZE_MICE int = 100
 const TOPK_SIZE2 int = 200
 
 const INTERVAL int = 1000 // ms
@@ -35,12 +40,18 @@ const UnivPoolCAP uint32 = 10
 
 const maxPointsSliceSize = 5000
 
-var zero_int64_uarr []int64
+var zero_int64_uarr_ele []int64
+var zero_int64_uarr_mice []int64
 
 func init() {
-	zero_int64_uarr = make([]int64, CS_COL_NO_Univ)
-	for i := 0; i < CS_COL_NO_Univ; i++ {
-		zero_int64_uarr[i] = 0
+	zero_int64_uarr_ele = make([]int64, CS_COL_NO_Univ_ELEPHANT)
+	for i := 0; i < CS_COL_NO_Univ_ELEPHANT; i++ {
+		zero_int64_uarr_ele[i] = 0
+	}
+
+	zero_int64_uarr_mice = make([]int64, CS_COL_NO_Univ_MICE)
+	for i := 0; i < CS_COL_NO_Univ_MICE; i++ {
+		zero_int64_uarr_mice[i] = 0
 	}
 }
 
@@ -55,40 +66,60 @@ type CountBucket struct {
 
 var (
 	farr2Pool = zeropool.New(func() [][]float64 {
-		tmp := make([][]float64, CS_ROW_NO_Univ)
-		for r := 0; r < CS_ROW_NO_Univ; r++ {
-			tmp[r] = make([]float64, CS_COL_NO_Univ)
+		tmp := make([][]float64, CS_ROW_NO_Univ_ELEPHANT)
+		for r := 0; r < CS_ROW_NO_Univ_ELEPHANT; r++ {
+			tmp[r] = make([]float64, CS_COL_NO_Univ_ELEPHANT)
 			tmp[r][0] = 0
-			for c := 1; c < CS_COL_NO_Univ; c *= 2 {
+			for c := 1; c < CS_COL_NO_Univ_ELEPHANT; c *= 2 {
 				copy(tmp[r][c:], tmp[r][:c])
 			}
 		}
 		return tmp
 	})
 
-	iarr2Pool = zeropool.New(func() [][]int64 {
-		tmp := make([][]int64, CS_ROW_NO_Univ)
-		for r := 0; r < CS_ROW_NO_Univ; r++ {
-			tmp[r] = make([]int64, CS_COL_NO_Univ)
+	iarr2Pool_ele = zeropool.New(func() [][]int64 {
+		tmp := make([][]int64, CS_ROW_NO_Univ_ELEPHANT)
+		for r := 0; r < CS_ROW_NO_Univ_ELEPHANT; r++ {
+			tmp[r] = make([]int64, CS_COL_NO_Univ_ELEPHANT)
 			tmp[r][0] = 0
-			for c := 1; c < CS_COL_NO_Univ; c *= 2 {
+			for c := 1; c < CS_COL_NO_Univ_ELEPHANT; c *= 2 {
 				copy(tmp[r][c:], tmp[r][:c])
 			}
 		}
 		return tmp
 	})
 
-	iarrPool = zeropool.New(func() []int64 {
-		tmp := make([]int64, CS_ROW_NO_Univ)
-		for r := 0; r < CS_ROW_NO_Univ; r++ {
+	iarrPool_ele = zeropool.New(func() []int64 {
+		tmp := make([]int64, CS_ROW_NO_Univ_ELEPHANT)
+		for r := 0; r < CS_ROW_NO_Univ_ELEPHANT; r++ {
+			tmp[r] = 0
+		}
+		return tmp
+	})
+
+	iarr2Pool_mice = zeropool.New(func() [][]int64 {
+		tmp := make([][]int64, CS_ROW_NO_Univ_MICE)
+		for r := 0; r < CS_ROW_NO_Univ_MICE; r++ {
+			tmp[r] = make([]int64, CS_COL_NO_Univ_MICE)
+			tmp[r][0] = 0
+			for c := 1; c < CS_COL_NO_Univ_MICE; c *= 2 {
+				copy(tmp[r][c:], tmp[r][:c])
+			}
+		}
+		return tmp
+	})
+
+	iarrPool_mice = zeropool.New(func() []int64 {
+		tmp := make([]int64, CS_ROW_NO_Univ_MICE)
+		for r := 0; r < CS_ROW_NO_Univ_MICE; r++ {
 			tmp[r] = 0
 		}
 		return tmp
 	})
 
 	farrPool = zeropool.New(func() []float64 {
-		tmp := make([]float64, CS_ROW_NO_Univ)
-		for r := 0; r < CS_ROW_NO_Univ; r++ {
+		tmp := make([]float64, CS_ROW_NO_Univ_ELEPHANT)
+		for r := 0; r < CS_ROW_NO_Univ_ELEPHANT; r++ {
 			tmp[r] = 0
 		}
 		return tmp

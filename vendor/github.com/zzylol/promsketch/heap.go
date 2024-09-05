@@ -4,79 +4,107 @@ import (
 	"fmt"
 )
 
-// https://pkg.go.dev/container/heap#pkg-constants
-
-// TODO: define Item type by our sketch needs!
 type Item struct {
 	key   string
-	count int64 // The value of the item; arbitrary.
-	// The index is needed by update and is maintained by the heap.Interface methods.
+	count int64
 }
 
-// A minHeap implements heap.Interface and holds Items.
-type minHeap []*Item
-
-// TopK implementation
 type TopKHeap struct {
-	heap      minHeap
-	k         int
-	key_index map[string]int // map a key to index in the heap
-	totalMem  float64        // Bytes
-}
-
-func (topkheap *TopKHeap) InitKeyIndex() {
-	topkheap.key_index = make(map[string]int)
-	for i, item := range topkheap.heap {
-		topkheap.key_index[item.key] = i
-	}
+	heap     []Item
+	k        int
+	totalMem float64 // Bytes
 }
 
 func (topkheap *TopKHeap) Clean() {
-	clear(topkheap.key_index)
 	topkheap.heap = topkheap.heap[:0]
 }
 
 func (topkheap *TopKHeap) GetMemoryBytes() float64 {
-	return topkheap.totalMem*2 + 12 // Bytes
+	return topkheap.totalMem // Bytes
 }
 
 func NewTopKHeap(k int) (topkheap *TopKHeap) {
 	topkheap = &TopKHeap{
-		heap:      make(minHeap, 0, k),
-		k:         k,
-		totalMem:  0,
-		key_index: make(map[string]int),
+		heap:     make([]Item, 0, k),
+		k:        k,
+		totalMem: 0,
 	}
 	return topkheap
 }
 
 func NewTopKFromHeap(from *TopKHeap) (topkheap *TopKHeap) {
 	topkheap = &TopKHeap{
-		k:         from.k,
-		key_index: make(map[string]int),
-		heap:      make(minHeap, len(from.heap)),
+		k:    from.k,
+		heap: make([]Item, len(from.heap)),
 	}
-	copy(topkheap.heap, from.heap)
-	// Didn't copy key_index here for performance consideration; if needed, should add for correctness.
+	for i, item := range from.heap {
+		topkheap.heap[i].key = item.key
+		topkheap.heap[i].count = item.count
+	}
 
 	return topkheap
 }
 
 func (topkheap *TopKHeap) Print() {
 	for _, item := range topkheap.heap {
-		fmt.Println(item.key, ":", item.count, " ", topkheap.key_index[item.key])
+		fmt.Println(item.key, ":", item.count)
+	}
+}
+
+func (topkheap *TopKHeap) Find(key string) (int, bool) {
+	for i, item := range topkheap.heap {
+		if item.key == key {
+			return i, true
+		}
+	}
+	return -1, false
+}
+
+func (topkheap *TopKHeap) leftChild(i int) int {
+	return 2*i + 1
+}
+
+func (topkheap *TopKHeap) rightChild(i int) int {
+	return 2*i + 2
+}
+
+func (topkheap *TopKHeap) parent(i int) int {
+	return (i - 1) / 2
+}
+
+func (topkheap *TopKHeap) swap(i, j int) {
+	var key string
+	var count int64
+	key = topkheap.heap[i].key
+	topkheap.heap[i].key = topkheap.heap[j].key
+	topkheap.heap[j].key = key
+
+	count = topkheap.heap[i].count
+	topkheap.heap[i].count = topkheap.heap[j].count
+	topkheap.heap[j].count = count
+}
+
+// update modifies the priority and value of an Item in the queue.
+func (topkheap *TopKHeap) UpdateCS(key string, count int64) bool {
+
+	index, find := topkheap.Find(key)
+
+	if find {
+		topkheap.heap[index].count = topkheap.heap[index].count + 1
+		topkheap.updateOrder(index)
+		return true
+	} else {
+		topkheap.Insert(key, count)
+		return true
 	}
 }
 
 // update modifies the priority and value of an Item in the queue.
 func (topkheap *TopKHeap) Update(key string, count int64) bool {
-	//if topkheap.key_index == nil {
-	// topkheap.InitKeyIndex()
-	//}
 
-	index, find := topkheap.key_index[key]
+	index, find := topkheap.Find(key)
 
-	if find == true {
+	if find {
 		topkheap.heap[index].count = count
 		topkheap.updateOrder(index)
 		return true
@@ -88,21 +116,17 @@ func (topkheap *TopKHeap) Update(key string, count int64) bool {
 
 func (topkheap *TopKHeap) Insert(key string, count int64) {
 	if int(len(topkheap.heap)) < topkheap.k {
-		topkheap.heap = append(topkheap.heap, &Item{
+		topkheap.heap = append(topkheap.heap, Item{
 			key:   key,
 			count: count,
 		})
-		topkheap.totalMem += float64(len(key)) + 12
-		topkheap.key_index[key] = len(topkheap.heap) - 1
+		topkheap.totalMem += float64(len(key)) + 8
 		topkheap.updateOrderUp(len(topkheap.heap) - 1)
 	} else {
 		if topkheap.heap[0].count < count {
 			topkheap.heap[0].count = count
 			topkheap.heap[0].key = key
-			topkheap.key_index[key] = 0
-			if topkheap.k > 1 {
-				topkheap.updateOrderDown(0)
-			}
+			topkheap.updateOrderDown(0)
 		}
 	}
 }
@@ -120,8 +144,8 @@ func (topkheap *TopKHeap) updateOrderDown(i int) bool {
 		l, r, smallest int = 0, 0, 0
 	)
 	for i < n {
-		l = 2*i + 1
-		r = 2*i + 2
+		l = topkheap.leftChild(i)
+		r = topkheap.rightChild(i)
 		smallest = i
 
 		if l < n && topkheap.heap[smallest].count > topkheap.heap[l].count {
@@ -132,8 +156,7 @@ func (topkheap *TopKHeap) updateOrderDown(i int) bool {
 		}
 
 		if smallest != i {
-			topkheap.key_index[topkheap.heap[smallest].key], topkheap.key_index[topkheap.heap[i].key] = topkheap.key_index[topkheap.heap[i].key], topkheap.key_index[topkheap.heap[smallest].key]
-			topkheap.heap[smallest], topkheap.heap[i] = topkheap.heap[i], topkheap.heap[smallest]
+			topkheap.swap(smallest, i)
 		} else {
 			break
 		}
@@ -145,10 +168,9 @@ func (topkheap *TopKHeap) updateOrderDown(i int) bool {
 func (topkheap *TopKHeap) updateOrderUp(i int) {
 	var par int = 0
 	for i > 0 {
-		par = (i - 1) / 2
+		par = topkheap.parent(i)
 		if topkheap.heap[par].count > topkheap.heap[i].count {
-			topkheap.key_index[topkheap.heap[par].key], topkheap.key_index[topkheap.heap[i].key] = topkheap.key_index[topkheap.heap[i].key], topkheap.key_index[topkheap.heap[par].key]
-			topkheap.heap[par], topkheap.heap[i] = topkheap.heap[i], topkheap.heap[par]
+			topkheap.swap(par, i)
 			i = par
 		} else {
 			break
