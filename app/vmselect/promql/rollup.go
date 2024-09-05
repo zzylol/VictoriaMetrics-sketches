@@ -688,8 +688,8 @@ func (rc *rollupConfig) Do(dstValues []float64, mnSrc *storage.MetricName, value
 	return rc.doInternal(dstValues, nil, mnSrc, values, timestamps)
 }
 
-func (rc *rollupConfig) DoSketch(dstValues []float64, sr *vmsketch.SketchResult) ([]float64, uint64) {
-	return rc.doInternalSketch(dstValues, nil, sr)
+func (rc *rollupConfig) DoSketch(dstValues []float64, rargs []interface{}, sr *vmsketch.SketchResult) ([]float64, uint64) {
+	return rc.doInternalSketch(dstValues, nil, rargs, sr)
 }
 
 // DoTimeseriesMap calculates rollups for the given timestamps and values and puts them to tsm.
@@ -817,7 +817,7 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSr
 	return dstValues, samplesScanned
 }
 
-func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap, sr *vmsketch.SketchResult) ([]float64, uint64) {
+func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap, rargs []interface{}, sr *vmsketch.SketchResult) ([]float64, uint64) {
 	// Sanity checks.
 	if rc.Step <= 0 {
 		logger.Panicf("BUG: Step must be bigger than 0; got %d", rc.Step)
