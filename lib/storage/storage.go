@@ -15,6 +15,8 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/VictoriaMetrics/fastcache"
+	"github.com/VictoriaMetrics/metricsql"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/backupnames"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bloomfilter"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
@@ -29,8 +31,6 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/timeutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/uint64set"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/workingsetcache"
-	"github.com/VictoriaMetrics/fastcache"
-	"github.com/VictoriaMetrics/metricsql"
 )
 
 const (
@@ -1710,7 +1710,7 @@ func (s *Storage) RegisterMetricNames(qt *querytracer.Tracer, mrs []MetricRow) {
 					}
 					continue
 				}
-				mn.sortTags()
+				mn.SortTags()
 
 				createAllIndexesForMetricName(is, mn, &genTSID.TSID, date)
 				genTSID.generation = generation
@@ -1732,7 +1732,7 @@ func (s *Storage) RegisterMetricNames(qt *querytracer.Tracer, mrs []MetricRow) {
 			}
 			continue
 		}
-		mn.sortTags()
+		mn.SortTags()
 		metricNameBuf = mn.Marshal(metricNameBuf[:0])
 
 		if is.getTSIDByMetricName(&genTSID, metricNameBuf, date) {
@@ -1878,7 +1878,7 @@ func (s *Storage) add(rows []rawRow, dstMrs []*MetricRow, mrs []MetricRow, preci
 					j--
 					continue
 				}
-				mn.sortTags()
+				mn.SortTags()
 
 				createAllIndexesForMetricName(is, mn, &genTSID.TSID, date)
 				genTSID.generation = generation
@@ -1902,7 +1902,7 @@ func (s *Storage) add(rows []rawRow, dstMrs []*MetricRow, mrs []MetricRow, preci
 			j--
 			continue
 		}
-		mn.sortTags()
+		mn.SortTags()
 		metricNameBuf = mn.Marshal(metricNameBuf[:0])
 
 		// Search for TSID for the given mr.MetricNameRaw in the indexdb.
@@ -2107,7 +2107,7 @@ func (s *Storage) prefillNextIndexDB(rows []rawRow, mrs []*MetricRow) error {
 			}
 			continue
 		}
-		mn.sortTags()
+		mn.SortTags()
 
 		createAllIndexesForMetricName(isNext, mn, &r.TSID, date)
 		genTSID.TSID = r.TSID
@@ -2252,7 +2252,7 @@ func (s *Storage) updatePerDateData(rows []rawRow, mrs []*MetricRow) error {
 				}
 				continue
 			}
-			mn.sortTags()
+			mn.SortTags()
 			is.createPerDayIndexes(date, dmid.tsid, mn)
 		}
 		dateMetricIDsForCache = append(dateMetricIDsForCache, dateMetricID{

@@ -398,7 +398,7 @@ func hasTag(tags []string, key []byte) bool {
 func (mn *MetricName) String() string {
 	var mnCopy MetricName
 	mnCopy.CopyFrom(mn)
-	mnCopy.sortTags()
+	mnCopy.SortTags()
 	var tags []string
 	for i := range mnCopy.Tags {
 		t := &mnCopy.Tags[i]
@@ -628,7 +628,7 @@ func (mn *MetricName) marshalRaw(dst []byte) []byte {
 	dst = marshalBytesFast(dst, nil)
 	dst = marshalBytesFast(dst, mn.MetricGroup)
 
-	mn.sortTags()
+	mn.SortTags()
 	for i := range mn.Tags {
 		tag := &mn.Tags[i]
 		dst = marshalBytesFast(dst, tag.Key)
@@ -699,7 +699,7 @@ func unmarshalBytesFast(src []byte) ([]byte, []byte, error) {
 //
 // Tags sorting is quite slow, so try avoiding it by caching mn
 // with sorted tags.
-func (mn *MetricName) sortTags() {
+func (mn *MetricName) SortTags() {
 	if len(mn.Tags) == 0 {
 		return
 	}

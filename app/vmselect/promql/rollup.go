@@ -879,12 +879,8 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 
 		rfa.currTimestamp = tEnd
 
-		// inArgs, e.Args, enh
-		var c float64 = 0
-		if vec, ok := inArgs[0].(Vector); ok {
-			c = vec[0].F
-		}
-		value := sr.Eval(sr.MetricName, rc.FuncName, tStart, tEnd, rfa.currTimestamp)
+		// TODO: find where c is parsed, for quantiles, quantile_over_time
+		value := sr.Eval(sr.MetricName, rc.FuncName, c, tStart, tEnd, rfa.currTimestamp)
 
 		rfa.idx++
 		if samplesScannedPerCall > 0 {

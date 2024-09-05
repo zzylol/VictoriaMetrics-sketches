@@ -14,6 +14,8 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/VictoriaMetrics/fastcache"
+	"github.com/cespare/xxhash/v2"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
@@ -25,8 +27,6 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/slicesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/uint64set"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/workingsetcache"
-	"github.com/VictoriaMetrics/fastcache"
-	"github.com/cespare/xxhash/v2"
 )
 
 const (
@@ -493,7 +493,7 @@ func (db *indexDB) putIndexSearch(is *indexSearch) {
 func generateTSID(dst *TSID, mn *MetricName) {
 	dst.MetricGroupID = xxhash.Sum64(mn.MetricGroup)
 	// Assume that the job-like metric is put at mn.Tags[0], while instance-like metric is put at mn.Tags[1]
-	// This assumption is true because mn.Tags must be sorted with mn.sortTags() before calling generateTSID() function.
+	// This assumption is true because mn.Tags must be sorted with mn.SortTags() before calling generateTSID() function.
 	// This allows grouping data blocks for the same (job, instance) close to each other on disk.
 	// This reduces disk seeks and disk read IO when data blocks are read from disk for the same job and/or instance.
 	// For example, data blocks for time series matching `process_resident_memory_bytes{job="vmstorage"}` are physically adjacent on disk.

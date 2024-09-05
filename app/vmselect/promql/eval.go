@@ -1697,26 +1697,28 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 		minTimestamp -= ec.Step
 	}
 
+	// Fetch the result.
+	sq := storage.NewSearchQuery(minTimestamp, ec.End, tfss, ec.MaxSeries)
+	rss, err := netstorage.ProcessSearchQuery(qt, sq, ec.Deadline)
+	if err != nil {
+		return nil, err
+	}
+	rssLen := rss.Len()
+	if rssLen == 0 {
+		rss.Cancel()
+		return nil, nil
+	}
+	ec.QueryStats.addSeriesFetched(rssLen)
+
 	// Check whether sketch cache has all queried data and funcName (queried types) covered
 	funcNames := getRollupFuncNames(rcs)
-	scs, isCovered := vmsketch.ProcessSearchQuery(minTimestamp, ec.End, tfss, funcNames, ec.MaxSeries)
-	if isCovered {
+	mns := rss.GetMetricNames()
+	scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries)
+
+	if err == nil && isCovered {
 		keepMetricNames := getKeepMetricNames(expr)
 		return evalRollupSketchCache(qt, funcName, keepMetricNames, scs, rcs, sharedTimestamps)
 	} else {
-
-		// Fetch the result.
-		sq := storage.NewSearchQuery(minTimestamp, ec.End, tfss, ec.MaxSeries)
-		rss, err := netstorage.ProcessSearchQuery(qt, sq, ec.Deadline)
-		if err != nil {
-			return nil, err
-		}
-		rssLen := rss.Len()
-		if rssLen == 0 {
-			rss.Cancel()
-			return nil, nil
-		}
-		ec.QueryStats.addSeriesFetched(rssLen)
 
 		// Verify timeseries fit available memory during rollup calculations.
 		timeseriesLen := rssLen
@@ -1891,7 +1893,7 @@ func evalRollupSketchCache(qt *querytracer.Tracer, funcName string, keepMetricNa
 	seriesLen := srs.Len() // number of timeseries for querying
 	err := srs.RunParallel(qt, func(sr *vmsketch.SketchResult, workerID uint) error {
 		for _, rc := range rcs {
-			if tsm := newTimeseriesMap(funcName, keepMetricNames, sharedTimestamps, &sr.MetricName); tsm != nil {
+			if tsm := newTimeseriesMap(funcName, keepMetricNames, sharedTimestamps, sr.MetricName); tsm != nil {
 				seriesByWorkerID[workerID].tss = tsm.AppendTimeseriesTo(seriesByWorkerID[workerID].tss)
 				continue
 			}
@@ -1933,7 +1935,7 @@ func doRollupForTimeseries(funcName string, keepMetricNames bool, rc *rollupConf
 }
 
 func doRollupForTimeseriesSketch(funcName string, keepMetricNames bool, rc *rollupConfig, tsDst *timeseries, sr *vmsketch.SketchResult, sharedTimestamps []int64) uint64 {
-	tsDst.MetricName.CopyFrom(&sr.MetricName)
+	tsDst.MetricName.CopyFrom(sr.MetricName)
 	if len(rc.TagValue) > 0 {
 		tsDst.MetricName.AddTag("rollup", rc.TagValue)
 	}

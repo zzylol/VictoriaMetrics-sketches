@@ -8,6 +8,7 @@ import (
 
 	"github.com/VictoriaMetrics/metrics"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
+	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/querytracer"
@@ -74,7 +75,7 @@ func RegisterMetricNames(qt *querytracer.Tracer, mrs []storage.MetricRow) {
 // RegisterMetricNames registers all the metrics from mrs in the storage.
 func RegisterMetricNameFuncName(mn *storage.MetricName, funcName string, window int64, item_window int64) error {
 	WG.Add(1)
-	err := SketchCache.RegisterMetricNames(mn, funcName, window, item_window)
+	err := SketchCache.NewVMSketchCacheInstance(mn, funcName, window, item_window)
 	WG.Done()
 	return err
 }
@@ -117,15 +118,18 @@ func GetSeriesCount(deadline uint64) (uint64, error) {
 //
 // Search returns Result slice.
 type SketchResult struct {
-	MetricName storage.MetricName
+	MetricName *storage.MetricName
 	sketchIns  *promsketch.SketchInstances
 }
 
 // Results holds results returned from ProcessSearchQuery.
 type SketchResults struct {
-	tr         storage.TimeRange
 	deadline   searchutils.Deadline
 	sketchInss []SketchResult
+}
+
+func (sr *SketchResult) Eval(mn *storage.MetricName, funcName string, otherArgs float64, mint, maxt, cur_time int64) float64 {
+	return sr.sketchIns.Eval(mn, funcName, otherArgs, mint, maxt, cur_time)
 }
 
 // Len returns the number of results in srs.
@@ -337,8 +341,24 @@ func (srs *SketchResults) runParallel(qt *querytracer.Tracer, f func(sr *SketchR
 	return rowsProcessedTotal, firstErr
 }
 
-func ProcessSearchQuery(start, end int64, tagFiltesrs [][]storage.TagFilter, funcNames []string, maxMetrics int) (*SketchResults, bool) {
-	return nil, false
+func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string, maxMetrics int) (*SketchResults, bool, error) {
+	srs := &SketchResults{
+		sketchInss: make([]SketchResult, 0),
+	}
+
+	for _, mnstr := range mns {
+		mn := storage.GetMetricName()
+		defer storage.PutMetricName(mn)
+		if err := mn.Unmarshal(bytesutil.ToUnsafeBytes(mnstr)); err != nil {
+			return nil, false, fmt.Errorf("cannot unmarshal metricName %q: %w", mnstr, err)
+		}
+		sketchIns, lookup := SketchCache.LookupMetricNameFuncNamesTimeRange(mn, funcNames, start, end)
+		if lookup == false {
+			return nil, false, fmt.Errorf("sketch cache doesn't cover metricName %q", mnstr)
+		}
+		srs.sketchInss = append(srs.sketchInss, sketchIns)
+	}
+	return srs, true, nil
 }
 
 // AddRows adds mrs to the sketch cache.
@@ -346,7 +366,33 @@ func ProcessSearchQuery(start, end int64, tagFiltesrs [][]storage.TagFilter, fun
 // The caller should limit the number of concurrent calls to AddRows() in order to limit memory usage.
 func AddRows(mrs []storage.MetricRow) error {
 	WG.Add(1)
-	err := SketchCache.AddRows(mrs)
+
+	var firstWarn error
+	mn := storage.GetMetricName()
+	defer storage.PutMetricName(mn)
+
+	for i := range mrs {
+		if err := mn.UnmarshalRaw(mrs[i].MetricNameRaw); err != nil {
+			if firstWarn != nil {
+				firstWarn = fmt.Errorf("cannot umarshal MetricNameRaw %q: %w", mrs[i].MetricNameRaw, err)
+			}
+		}
+
+		err := SketchCache.AddRow(mn, mrs[i].Timestamp, mrs[i].Value)
+		if err != nil && firstWarn != nil {
+			firstWarn = fmt.Errorf("cannot add row to sketch cache MetricNameRaw %q: %w", mrs[i].MetricNameRaw, err)
+		}
+	}
 	WG.Done()
-	return err
+	return firstWarn
+}
+
+func AddRow(metricNameRaw []byte, timestamp int64, value float64) error {
+	mn := storage.GetMetricName()
+	defer storage.PutMetricName(mn)
+	if err := mn.UnmarshalRaw(metricNameRaw); err != nil {
+		return fmt.Errorf("cannot umarshal MetricNameRaw %q: %w", metricNameRaw, err)
+	}
+
+	return SketchCache.AddRow(metricNameRaw, timestamp, value)
 }
