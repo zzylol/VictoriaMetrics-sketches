@@ -312,7 +312,7 @@ func (vs *VMSketches) AddRow(mn *storage.MetricName, t int64, value float64) err
 	hash := MetricNameHash(mn)
 	s := vs.series.getByHash(hash, mn)
 	if s == nil {
-		return fmt.Errorf("not find timeseries")
+		return nil // fmt.Errorf("not find timeseries")
 	}
 
 	if s.sketchInstances.ehkll != nil {
