@@ -853,6 +853,8 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 		logger.Panicf("BUG: %s; this must be validated before the call to rollupConfig.DoSketch", err)
 	}
 
+	fmt.Println("inside doInternalSketch")
+
 	// Extend dstValues in order to remove mallocs below.
 	dstValues = decimal.ExtendFloat64sCapacity(dstValues, len(rc.Timestamps))
 
@@ -902,6 +904,7 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 
 		sargs := getRollupArgForSketches(rargs, rfa.idx)
 		value := sr.Eval(sr.MetricName, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
+		fmt.Println("evaled value=", value)
 
 		rfa.idx++
 		if samplesScannedPerCall > 0 {

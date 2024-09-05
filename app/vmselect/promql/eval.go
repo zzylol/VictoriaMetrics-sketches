@@ -1714,12 +1714,12 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 	funcNames := getRollupFuncNames(rcs)
 	mns := rss.GetMetricNames()
 
-	fmt.Println("!!!", minTimestamp, ec.End, window, ec.Step, funcNames, len(mns), ec.MaxSeries)
+	// fmt.Println("!!!", minTimestamp, ec.End, window, ec.Step, funcNames, len(mns), ec.MaxSeries)
 	// vmsketch.OutputTimeseriesCoverage(mns, funcNames)
 
-	scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries)
+	scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries, ec.Deadline)
 
-	fmt.Println("****", scs, isCovered, err)
+	// fmt.Println("****", isCovered, err)
 
 	if err == nil && isCovered {
 		keepMetricNames := getKeepMetricNames(expr)
@@ -1893,16 +1893,16 @@ func evalRollupSketchCache(qt *querytracer.Tracer, funcName string, keepMetricNa
 	qt = qt.NewChild("rollup %s() over %d series; rollupConfigs=%s", funcName, srs.Len(), rcs)
 	defer qt.Done()
 
+	fmt.Println("inside evalRollupSketchCache")
+
 	var samplesScannedTotal atomic.Uint64
 	tsw := getTimeseriesByWorkerID()
 	seriesByWorkerID := tsw.byWorkerID
 	seriesLen := srs.Len() // number of timeseries for querying
 	err := srs.RunParallel(qt, func(sr *vmsketch.SketchResult, workerID uint) error {
+		fmt.Println("inside srs.RunParallel")
+		fmt.Println("len(rcs)=", len(rcs))
 		for _, rc := range rcs {
-			if tsm := newTimeseriesMap(funcName, keepMetricNames, sharedTimestamps, sr.MetricName); tsm != nil {
-				seriesByWorkerID[workerID].tss = tsm.AppendTimeseriesTo(seriesByWorkerID[workerID].tss)
-				continue
-			}
 			var ts timeseries
 			samplesScanned := doRollupForTimeseriesSketch(funcName, keepMetricNames, rargs, rc, &ts, sr, sharedTimestamps)
 			samplesScannedTotal.Add(samplesScanned)
@@ -1941,6 +1941,9 @@ func doRollupForTimeseries(funcName string, keepMetricNames bool, rc *rollupConf
 }
 
 func doRollupForTimeseriesSketch(funcName string, keepMetricNames bool, rargs []interface{}, rc *rollupConfig, tsDst *timeseries, sr *vmsketch.SketchResult, sharedTimestamps []int64) uint64 {
+
+	fmt.Println("inside doRollupForTimeseriesSketch")
+
 	tsDst.MetricName.CopyFrom(sr.MetricName)
 	if len(rc.TagValue) > 0 {
 		tsDst.MetricName.AddTag("rollup", rc.TagValue)

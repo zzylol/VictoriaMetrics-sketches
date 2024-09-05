@@ -129,6 +129,9 @@ type timeseriesWork struct {
 }
 
 func (tsw *timeseriesWork) do(sr *SketchResult, workerID uint) error {
+
+	fmt.Println("inside tsw.do()")
+
 	if tsw.mustStop.Load() {
 		return nil
 	}
@@ -138,14 +141,19 @@ func (tsw *timeseriesWork) do(sr *SketchResult, workerID uint) error {
 		return fmt.Errorf("timeout exceeded during query execution: %s", srs.deadline.String())
 	}
 
+	fmt.Println("tsw.do before f")
 	if err := tsw.f(sr, workerID); err != nil {
 		tsw.mustStop.Store(true)
 		return err
 	}
+	fmt.Println("tsw.do finished")
 	return nil
 }
 
 func timeseriesWorker(qt *querytracer.Tracer, workChs []chan *timeseriesWork, workerID uint) {
+
+	fmt.Println("inside timeseriesWorker")
+
 	tmpResult := getTmpResult()
 
 	// Perform own work at first.
@@ -240,6 +248,9 @@ func (srs *SketchResults) runParallel(qt *querytracer.Tracer, f func(sr *SketchR
 		tsw.mustStop = &mustStop
 	}
 	maxWorkers := MaxWorkers()
+
+	fmt.Println("maxWorkers=", maxWorkers)
+	fmt.Println("tswsLen=", tswsLen)
 	if maxWorkers == 1 || tswsLen == 1 {
 		// It is faster to process time series in the current goroutine.
 		var tsw timeseriesWork
@@ -268,6 +279,8 @@ func (srs *SketchResults) runParallel(qt *querytracer.Tracer, f func(sr *SketchR
 	for i := range srs.sketchInss {
 		initTimeseriesWork(&tsws[i], &srs.sketchInss[i])
 	}
+
+	fmt.Println("after initTimeseriesWork")
 
 	// Prepare worker channels.
 	workers := len(tsws)
@@ -327,8 +340,9 @@ func OutputTimeseriesCoverage(mns []string, funcNames []string) {
 	}
 }
 
-func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string, maxMetrics int) (*SketchResults, bool, error) {
+func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string, maxMetrics int, deadline searchutils.Deadline) (*SketchResults, bool, error) {
 	srs := &SketchResults{
+		deadline:   deadline,
 		sketchInss: make([]SketchResult, 0),
 	}
 
@@ -338,8 +352,12 @@ func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string
 		if err := mn.Unmarshal(bytesutil.ToUnsafeBytes(mnstr)); err != nil {
 			return nil, false, fmt.Errorf("cannot unmarshal metricName %q: %w", mnstr, err)
 		}
+		if deadline.Exceeded() {
+			return nil, false, fmt.Errorf("timeout exceeded before starting the query processing: %s", deadline.String())
+		}
+
 		sketchIns, lookup := SketchCache.LookupMetricNameFuncNamesTimeRange(mn, funcNames, start, end)
-		if lookup == false {
+		if !lookup {
 			return nil, false, fmt.Errorf("sketch cache doesn't cover metricName %q", mnstr)
 		}
 		srs.sketchInss = append(srs.sketchInss, SketchResult{sketchIns: sketchIns, MetricName: mn})
