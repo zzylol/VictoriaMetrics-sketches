@@ -180,10 +180,11 @@ func NewVMSketches() *VMSketches {
 
 func newVMMemSeries(mn *storage.MetricName, id TSId) *vmMemSeries {
 	s := &vmMemSeries{
-		mn:              mn,
+		mn:              &storage.MetricName{},
 		id:              id,
 		sketchInstances: nil,
 	}
+	s.mn.CopyFrom(mn)
 	return s
 }
 

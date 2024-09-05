@@ -153,6 +153,10 @@ func (mn *MetricName) Equal(other *MetricName) bool {
 		return false
 	}
 
+	if len(mn.Tags) == 0 {
+		return true
+	}
+
 	for i := range mn.Tags {
 		if string(mn.Tags[i].Key) != string(other.Tags[i].Key) || string(mn.Tags[i].Value) != string(other.Tags[i].Value) {
 			return false
