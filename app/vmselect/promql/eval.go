@@ -1893,15 +1893,11 @@ func evalRollupSketchCache(qt *querytracer.Tracer, funcName string, keepMetricNa
 	qt = qt.NewChild("rollup %s() over %d series; rollupConfigs=%s", funcName, srs.Len(), rcs)
 	defer qt.Done()
 
-	fmt.Println("inside evalRollupSketchCache")
-
 	var samplesScannedTotal atomic.Uint64
 	tsw := getTimeseriesByWorkerID()
 	seriesByWorkerID := tsw.byWorkerID
 	seriesLen := srs.Len() // number of timeseries for querying
 	err := srs.RunParallel(qt, func(sr *vmsketch.SketchResult, workerID uint) error {
-		fmt.Println("inside srs.RunParallel")
-		fmt.Println("len(rcs)=", len(rcs))
 		for _, rc := range rcs {
 			var ts timeseries
 			samplesScanned := doRollupForTimeseriesSketch(funcName, keepMetricNames, rargs, rc, &ts, sr, sharedTimestamps)
@@ -1941,8 +1937,6 @@ func doRollupForTimeseries(funcName string, keepMetricNames bool, rc *rollupConf
 }
 
 func doRollupForTimeseriesSketch(funcName string, keepMetricNames bool, rargs []interface{}, rc *rollupConfig, tsDst *timeseries, sr *vmsketch.SketchResult, sharedTimestamps []int64) uint64 {
-
-	fmt.Println("inside doRollupForTimeseriesSketch")
 
 	tsDst.MetricName.CopyFrom(sr.MetricName)
 	if len(rc.TagValue) > 0 {

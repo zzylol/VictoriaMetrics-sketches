@@ -33,7 +33,13 @@ var defaultMaxWorkersPerQuery = func() int {
 
 // MaxWorkers returns the maximum number of concurrent goroutines, which can be used by RunParallel()
 func MaxWorkers() int {
-	return defaultMaxWorkersPerQuery
+	n := defaultMaxWorkersPerQuery
+	if n > gomaxprocs {
+		// There is no sense in running more than gomaxprocs CPU-bound concurrent workers,
+		// since this may worsen the query performance.
+		n = gomaxprocs
+	}
+	return n
 }
 
 var (
@@ -123,30 +129,28 @@ func (srs *SketchResults) mustClose() {
 
 type timeseriesWork struct {
 	mustStop *atomic.Bool
-	srs      *SketchResults
+	deadline searchutils.Deadline
+	sr       *SketchResult
 	f        func(sr *SketchResult, workerID uint) error
 	err      error
 }
 
-func (tsw *timeseriesWork) do(sr *SketchResult, workerID uint) error {
-
-	fmt.Println("inside tsw.do()")
+func (tsw *timeseriesWork) do(workerID uint) error {
 
 	if tsw.mustStop.Load() {
 		return nil
 	}
-	srs := tsw.srs
-	if srs.deadline.Exceeded() {
+
+	if tsw.deadline.Exceeded() {
 		tsw.mustStop.Store(true)
-		return fmt.Errorf("timeout exceeded during query execution: %s", srs.deadline.String())
+		return fmt.Errorf("timeout exceeded during query execution: %s", tsw.deadline.String())
 	}
 
-	fmt.Println("tsw.do before f")
-	if err := tsw.f(sr, workerID); err != nil {
+	if err := tsw.f(tsw.sr, workerID); err != nil {
 		tsw.mustStop.Store(true)
 		return err
 	}
-	fmt.Println("tsw.do finished")
+
 	return nil
 }
 
@@ -154,14 +158,12 @@ func timeseriesWorker(qt *querytracer.Tracer, workChs []chan *timeseriesWork, wo
 
 	fmt.Println("inside timeseriesWorker")
 
-	tmpResult := getTmpResult()
-
 	// Perform own work at first.
 	rowsProcessed := 0
 	seriesProcessed := 0
 	ch := workChs[workerID]
 	for tsw := range ch {
-		tsw.err = tsw.do(&tmpResult.rs, workerID)
+		tsw.err = tsw.do(workerID)
 		seriesProcessed++
 	}
 	qt.Printf("own work processed: series=%d, samples=%d", seriesProcessed, rowsProcessed)
@@ -184,34 +186,14 @@ func timeseriesWorker(qt *querytracer.Tracer, workChs []chan *timeseriesWork, wo
 			if !ok {
 				break
 			}
-			tsw.err = tsw.do(&tmpResult.rs, workerID)
+			tsw.err = tsw.do(workerID)
 
 			seriesProcessed++
 		}
 	}
 	qt.Printf("others work processed: series=%d, samples=%d", seriesProcessed, rowsProcessed)
 
-	putTmpResult(tmpResult)
 }
-
-func getTmpResult() *result {
-	v := resultPool.Get()
-	if v == nil {
-		v = &result{}
-	}
-	return v.(*result)
-}
-
-func putTmpResult(r *result) {
-	resultPool.Put(r)
-}
-
-type result struct {
-	rs            SketchResult
-	lastResetTime uint64
-}
-
-var resultPool sync.Pool
 
 // RunParallel runs f in parallel for all the results from srs.
 //
@@ -243,29 +225,27 @@ func (srs *SketchResults) runParallel(qt *querytracer.Tracer, f func(sr *SketchR
 
 	var mustStop atomic.Bool
 	initTimeseriesWork := func(tsw *timeseriesWork, sr *SketchResult) {
-		tsw.srs = srs
+		tsw.deadline = srs.deadline
+		tsw.sr = sr
 		tsw.f = f
 		tsw.mustStop = &mustStop
 	}
 	maxWorkers := MaxWorkers()
 
-	fmt.Println("maxWorkers=", maxWorkers)
-	fmt.Println("tswsLen=", tswsLen)
 	if maxWorkers == 1 || tswsLen == 1 {
 		// It is faster to process time series in the current goroutine.
 		var tsw timeseriesWork
-		tmpResult := getTmpResult()
+
 		rowsProcessedTotal := 0
 		var err error
 		for i := range srs.sketchInss {
 			initTimeseriesWork(&tsw, &srs.sketchInss[i])
-			err = tsw.do(&tmpResult.rs, 0)
+			err = tsw.do(0)
 
 			if err != nil {
 				break
 			}
 		}
-		putTmpResult(tmpResult)
 
 		return rowsProcessedTotal, err
 	}
@@ -277,6 +257,7 @@ func (srs *SketchResults) runParallel(qt *querytracer.Tracer, f func(sr *SketchR
 	// Prepare the work for workers.
 	tsws := make([]timeseriesWork, len(srs.sketchInss))
 	for i := range srs.sketchInss {
+		fmt.Println("before initTimeseriesWork", srs.sketchInss[i])
 		initTimeseriesWork(&tsws[i], &srs.sketchInss[i])
 	}
 
@@ -347,8 +328,7 @@ func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string
 	}
 
 	for _, mnstr := range mns {
-		mn := storage.GetMetricName()
-		defer storage.PutMetricName(mn)
+		mn := &storage.MetricName{}
 		if err := mn.Unmarshal(bytesutil.ToUnsafeBytes(mnstr)); err != nil {
 			return nil, false, fmt.Errorf("cannot unmarshal metricName %q: %w", mnstr, err)
 		}
