@@ -83,6 +83,14 @@ func (rss *Results) mustClose() {
 	rss.tbf = nil
 }
 
+func (rss *Results) GetMetricNames() []string {
+	mns := make([]string, 0)
+	for i := range rss.packedTimeseries {
+		mns = append(mns, rss.packedTimeseries[i].metricName)
+	}
+	return mns
+}
+
 type timeseriesWork struct {
 	mustStop *atomic.Bool
 	rss      *Results
