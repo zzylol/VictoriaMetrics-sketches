@@ -175,6 +175,14 @@ func (ehkll *ExpoHistogramKLL) Cover(mint, maxt int64) bool {
 	return ehkll.max_time[ehkll.s_count-1]-ehkll.time_window_size <= mint
 }
 
+func (ehkll *ExpoHistogramKLL) GetMaxTime() int64 {
+	if ehkll.s_count == 0 {
+		return -1
+	}
+
+	return ehkll.max_time[ehkll.s_count-1]
+}
+
 func (ehkll *ExpoHistogramKLL) GetMemory() float64 {
 	var total_mem float64 = 0
 	for i := 0; i < ehkll.s_count; i++ {

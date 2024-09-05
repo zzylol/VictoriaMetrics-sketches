@@ -344,6 +344,13 @@ func (eh *ExpoHistogramUnivOptimized) Cover(mint, maxt int64) bool {
 	return (eh.array[eh.arr_count-1].max_time-eh.time_window_size <= mint)
 }
 
+func (eh *ExpoHistogramUnivOptimized) GetMaxTime() int64 {
+	if eh.s_count+eh.arr_count == 0 {
+		return -1
+	}
+	return eh.array[eh.arr_count-1].max_time
+}
+
 func (ehu *ExpoHistogramUnivOptimized) print_buckets() {
 	fmt.Println("k =", ehu.k)
 	fmt.Println("s_count =", ehu.s_count)

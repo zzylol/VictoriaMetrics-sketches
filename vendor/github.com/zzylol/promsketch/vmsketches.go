@@ -223,7 +223,7 @@ func (vs *VMSketches) LookupMetricNameFuncName(mn *storage.MetricName, funcName 
 	mn.SortTags()
 	hash := MetricNameHash(mn)
 	series := vs.series.getByHash(hash, mn)
-	if series == nil {
+	if series == nil || series.sketchInstances == nil {
 		// fmt.Println("[lookup] no timeseries")
 		return false
 	}
@@ -312,7 +312,7 @@ func (vs *VMSketches) AddRow(mn *storage.MetricName, t int64, value float64) err
 	mn.SortTags()
 	hash := MetricNameHash(mn)
 	s := vs.series.getByHash(hash, mn)
-	if s == nil {
+	if s == nil || s.sketchInstances == nil {
 		return nil // fmt.Errorf("not find timeseries")
 	}
 
@@ -340,7 +340,7 @@ func (vs *VMSketches) LookupMetricNameFuncNamesTimeRange(mn *storage.MetricName,
 	mn.SortTags()
 	hash := MetricNameHash(mn)
 	series := vs.series.getByHash(hash, mn)
-	if series == nil {
+	if series == nil || series.sketchInstances == nil {
 		// fmt.Println("[lookup] no timeseries")
 		return nil, false
 	}
@@ -374,4 +374,45 @@ func (vs *VMSketches) LookupMetricNameFuncNamesTimeRange(mn *storage.MetricName,
 		}
 	}
 	return series.sketchInstances, true
+}
+
+func (vs *VMSketches) OutputTimeseriesCoverage(mn *storage.MetricName, funcNames []string) {
+	mn.SortTags()
+	hash := MetricNameHash(mn)
+	series := vs.series.getByHash(hash, mn)
+
+	if series == nil || series.sketchInstances == nil {
+		fmt.Println("[OutputTimeseriesCoverage] series not found", series)
+		return
+	}
+
+	stypes := make([]SketchType, 0)
+	for _, funcName := range funcNames {
+		stypes = append(stypes, funcSketchMap[funcName]...)
+	}
+
+	for _, stype := range stypes {
+		switch stype {
+		case EHUniv:
+			if series.sketchInstances.ehuniv == nil {
+				fmt.Println("[OutputTimeseriesCoverage] EHuniv not found for series", mn)
+			} else {
+				fmt.Println("[OutputTimeseriesCoverage] funcName", "EHUniv found for series", mn, series.sketchInstances.ehuniv.time_window_size, series.sketchInstances.ehuniv.GetMaxTime())
+			}
+		case EHKLL:
+			if series.sketchInstances.ehkll == nil {
+				fmt.Println("[OutputTimeseriesCoverage] EHKLL not found for series", mn)
+			} else {
+				fmt.Println("[OutputTimeseriesCoverage] funcName", "EHKLL found for series", mn, series.sketchInstances.ehkll.time_window_size, series.sketchInstances.ehkll.GetMaxTime())
+			}
+		case USampling:
+			if series.sketchInstances.sampling == nil {
+				fmt.Println("[OutputTimeseriesCoverage] Sampling not found for series", mn)
+			} else {
+				fmt.Println("[OutputTimeseriesCoverage] funcName", "Sampling found for series", mn, series.sketchInstances.sampling.Time_window_size, series.sketchInstances.sampling.GetMaxTime())
+			}
+		default:
+			continue
+		}
+	}
 }

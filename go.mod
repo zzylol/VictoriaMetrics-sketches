@@ -30,7 +30,7 @@ require (
 	github.com/valyala/gozstd v1.21.1
 	github.com/valyala/histogram v1.2.0
 	github.com/valyala/quicktemplate v1.8.0
-	github.com/zzylol/promsketch v0.2.61
+	github.com/zzylol/promsketch v0.2.64
 	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sys v0.25.0
 	google.golang.org/api v0.187.0

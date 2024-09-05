@@ -760,8 +760,11 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSr
 		// It will be the best to check if it's a query from rules.
 		// A sketch instance is not allocated but when a rule query appears,
 		// we should allocate a sketch cache for the rule.
-
-		err := vmsketch.RegisterMetricNameFuncName(mnSrc, rc.FuncName, window*2, int64(float64(window)/float64(scrapeInterval))*2)
+		maxWindow := window
+		if window < rc.Step {
+			maxWindow = rc.Step
+		}
+		err := vmsketch.RegisterMetricNameFuncName(mnSrc, rc.FuncName, maxWindow*3, int64(float64(maxWindow)/float64(scrapeInterval))*3)
 
 		if err != nil {
 			fmt.Errorf("Failed to create new VMSketch cache for %s %s", mnSrc, rc.FuncName)

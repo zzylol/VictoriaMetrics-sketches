@@ -178,6 +178,10 @@ func (s *UniformSampling) Cover(t1, t2 int64) bool {
 	return false
 }
 
+func (s *UniformSampling) GetMaxTime() int64 {
+	return s.Cur_time
+}
+
 func (s *UniformSampling) GetSamples(t1, t2 int64) []float64 {
 	values := make([]float64, 0)
 	for _, v := range s.Arr {

@@ -316,6 +316,17 @@ func (srs *SketchResults) runParallel(qt *querytracer.Tracer, f func(sr *SketchR
 	return rowsProcessedTotal, firstErr
 }
 
+func OutputTimeseriesCoverage(mns []string, funcNames []string) {
+	for _, mnstr := range mns {
+		mn := storage.GetMetricName()
+		defer storage.PutMetricName(mn)
+		if err := mn.Unmarshal(bytesutil.ToUnsafeBytes(mnstr)); err != nil {
+			return
+		}
+		SketchCache.OutputTimeseriesCoverage(mn, funcNames)
+	}
+}
+
 func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string, maxMetrics int) (*SketchResults, bool, error) {
 	srs := &SketchResults{
 		sketchInss: make([]SketchResult, 0),
