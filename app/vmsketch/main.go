@@ -80,24 +80,6 @@ func RegisterMetricNameFuncName(mn *storage.MetricName, funcName string, window 
 	return err
 }
 
-// DeleteSeries deletes series matching tfss.
-//
-// Returns the number of deleted series.
-func DeleteSeries(qt *querytracer.Tracer, tfss []*storage.TagFilters) (int, error) {
-	WG.Add(1)
-	n, err := SketchCache.DeleteSeries(tfss)
-	WG.Done()
-	return n, err
-}
-
-// SearchMetricNames returns metric names for the given tfss on the given tr.
-func SearchMetricNames(qt *querytracer.Tracer, tfss []*storage.TagFilters, tr storage.TimeRange, maxMetrics int, deadline uint64) ([]string, error) {
-	WG.Add(1)
-	metricNames, err := SketchCache.SearchMetricNames(tfss, tr, maxMetrics, deadline)
-	WG.Done()
-	return metricNames, err
-}
-
 // SearchMetricNames returns metric names for the given tfss on the given tr.
 func SearchMetricNameFuncName(mn *storage.MetricName, funcName string) bool {
 	WG.Add(1)
@@ -107,9 +89,9 @@ func SearchMetricNameFuncName(mn *storage.MetricName, funcName string) bool {
 }
 
 // GetSeriesCount returns the number of time series in the storage.
-func GetSeriesCount(deadline uint64) (uint64, error) {
+func GetSeriesCount() (uint64, error) {
 	WG.Add(1)
-	n := SketchCache.GetSeriesCount(deadline)
+	n := SketchCache.GetSeriesCount()
 	WG.Done()
 	return n, nil
 }
@@ -356,7 +338,7 @@ func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string
 		if lookup == false {
 			return nil, false, fmt.Errorf("sketch cache doesn't cover metricName %q", mnstr)
 		}
-		srs.sketchInss = append(srs.sketchInss, sketchIns)
+		srs.sketchInss = append(srs.sketchInss, SketchResult{sketchIns: sketchIns, MetricName: mn})
 	}
 	return srs, true, nil
 }
@@ -394,5 +376,5 @@ func AddRow(metricNameRaw []byte, timestamp int64, value float64) error {
 		return fmt.Errorf("cannot umarshal MetricNameRaw %q: %w", metricNameRaw, err)
 	}
 
-	return SketchCache.AddRow(metricNameRaw, timestamp, value)
+	return SketchCache.AddRow(mn, timestamp, value)
 }

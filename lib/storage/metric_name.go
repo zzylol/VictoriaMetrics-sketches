@@ -149,7 +149,7 @@ func (mn *MetricName) Equal(other *MetricName) bool {
 		return false
 	}
 
-	if !bytesutil.Equal(mn.MetricGroup, other.MetricGroup) {
+	if !bytes.Equal(mn.MetricGroup, other.MetricGroup) {
 		return false
 	}
 

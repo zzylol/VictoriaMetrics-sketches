@@ -6,11 +6,11 @@ import (
 	"sync"
 	"time"
 
+	"github.com/VictoriaMetrics/metrics"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
-	"github.com/VictoriaMetrics/metrics"
 )
 
 // Deduplicator deduplicates samples per each time series.
@@ -71,7 +71,7 @@ func NewDeduplicator(pushFunc PushFunc, dedupInterval time.Duration, dropLabels 
 
 // MustStop stops d.
 func (d *Deduplicator) MustStop() {
-	metrics.UnregisterSet(d.ms)
+	metrics.UnregisterSet(d.ms, true)
 	d.ms = nil
 
 	close(d.stopCh)

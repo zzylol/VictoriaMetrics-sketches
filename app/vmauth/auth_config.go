@@ -698,7 +698,7 @@ func loadAuthConfig() (bool, error) {
 
 	prevAc := authConfig.Load()
 	if prevAc != nil {
-		metrics.UnregisterSet(prevAc.ms)
+		metrics.UnregisterSet(prevAc.ms, true)
 	}
 	metrics.RegisterSet(ac.ms)
 	authConfig.Store(ac)

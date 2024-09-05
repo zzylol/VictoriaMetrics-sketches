@@ -12,6 +12,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/VictoriaMetrics/metrics"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
@@ -22,7 +23,6 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/promrelabel"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/timerpool"
-	"github.com/VictoriaMetrics/metrics"
 	"gopkg.in/yaml.v2"
 )
 
@@ -323,7 +323,7 @@ func (a *Aggregators) MustStop() {
 		return
 	}
 
-	metrics.UnregisterSet(a.ms)
+	metrics.UnregisterSet(a.ms, true)
 	a.ms = nil
 
 	for _, aggr := range a.as {
