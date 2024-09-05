@@ -128,8 +128,8 @@ type SketchResults struct {
 	sketchInss []SketchResult
 }
 
-func (sr *SketchResult) Eval(mn *storage.MetricName, funcName string, otherArgs float64, mint, maxt, cur_time int64) float64 {
-	return sr.sketchIns.Eval(mn, funcName, otherArgs, mint, maxt, cur_time)
+func (sr *SketchResult) Eval(mn *storage.MetricName, funcName string, args []float64, mint, maxt, cur_time int64) float64 {
+	return sr.sketchIns.Eval(mn, funcName, args, mint, maxt, cur_time)
 }
 
 // Len returns the number of results in srs.

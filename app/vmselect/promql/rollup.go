@@ -817,6 +817,23 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSr
 	return dstValues, samplesScanned
 }
 
+// Currently only parse 1 argNum or 2 argNum functions; not support quantiles_over_time yet
+func getRollupArgForSketches(args []interface{}, idx int) []float64 {
+	argNum := len(args)
+	switch argNum {
+	case 1:
+		return []float64{}
+	case 2:
+		phis, err := getScalar(args[0], 0)
+		if err != nil {
+			return nil
+		}
+		return []float64{phis[idx]}
+	default:
+		return nil
+	}
+}
+
 func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap, rargs []interface{}, sr *vmsketch.SketchResult) ([]float64, uint64) {
 	// Sanity checks.
 	if rc.Step <= 0 {
@@ -879,8 +896,8 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 
 		rfa.currTimestamp = tEnd
 
-		// TODO: find where c is parsed, for quantiles, quantile_over_time
-		value := sr.Eval(sr.MetricName, rc.FuncName, c, tStart, tEnd, rfa.currTimestamp)
+		sargs := getRollupArgForSketches(rargs, rfa.idx)
+		value := sr.Eval(sr.MetricName, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
 
 		rfa.idx++
 		if samplesScannedPerCall > 0 {
