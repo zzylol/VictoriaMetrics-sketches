@@ -2,7 +2,6 @@ package promsketch
 
 import (
 	"context"
-	"fmt"
 	"math"
 )
 
@@ -34,8 +33,8 @@ func funcVMChangeOverTime(ctx context.Context, sketchIns *SketchInstances, c []f
 }
 
 func funcVMAvgOverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
-	fmt.Println("in VM avg_over_time", sketchIns.sampling.Sampling_rate, len(sketchIns.sampling.Arr), sketchIns.sampling.Max_size)
-	fmt.Println("in VM avg_over_time", sketchIns.sampling.Time_window_size, sketchIns.sampling.GetMinTime(), sketchIns.sampling.GetMaxTime(), t1, t2)
+	// fmt.Println("in VM avg_over_time", sketchIns.sampling.Sampling_rate, len(sketchIns.sampling.Arr), sketchIns.sampling.Max_size)
+	// fmt.Println("in VM avg_over_time", sketchIns.sampling.Time_window_size, sketchIns.sampling.GetMinTime(), sketchIns.sampling.GetMaxTime(), t1, t2)
 	avg := sketchIns.sampling.QueryAvg(t1, t2)
 	return avg
 }

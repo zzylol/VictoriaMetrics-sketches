@@ -575,6 +575,8 @@ github.com/zzylol/promsketch v0.2.68 h1:g1OVGudKcys3L1EUwtdfLKO9fHvp+BGRUyYmGTAO
 github.com/zzylol/promsketch v0.2.68/go.mod h1:QSfGBeMmMIgOU8ugbLheMJs43QX0qrJ6eqqaSr4lErw=
 github.com/zzylol/promsketch v0.2.69 h1:fislMfI0qUYIQZ22WzP+uJIZHurLjkFGMMC6PI4xuoE=
 github.com/zzylol/promsketch v0.2.69/go.mod h1:QSfGBeMmMIgOU8ugbLheMJs43QX0qrJ6eqqaSr4lErw=
+github.com/zzylol/promsketch v0.2.70 h1:7Q5bZLM25Uqb8c500B63CBRzBv2WrAj8yYeHJTmieIg=
+github.com/zzylol/promsketch v0.2.70/go.mod h1:QSfGBeMmMIgOU8ugbLheMJs43QX0qrJ6eqqaSr4lErw=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=

@@ -905,7 +905,7 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 		sargs := getRollupArgForSketches(rargs, rfa.idx)
 
 		value := sr.Eval(sr.MetricName, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
-		fmt.Println("evaled value=", value)
+		// fmt.Println("evaled value=", value)
 
 		rfa.idx++
 		if samplesScannedPerCall > 0 {
