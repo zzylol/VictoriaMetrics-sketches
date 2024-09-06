@@ -113,7 +113,7 @@ type EHDDConfig struct {
 type SamplingConfig struct {
 	Sampling_rate    float64
 	Time_window_size int64
-	max_size         int
+	Max_size         int
 }
 
 type EffSumConfig struct {
@@ -261,7 +261,7 @@ func newSlidingHistorgrams(s *memSeries, stype SketchType, sc *SketchConfig) err
 	}
 
 	if stype == USampling && s.sketchInstances.sampling == nil {
-		s.sketchInstances.sampling = NewUniformSampling(sc.Sampling_config.Time_window_size, sc.Sampling_config.Sampling_rate, int(sc.Sampling_config.max_size))
+		s.sketchInstances.sampling = NewUniformSampling(sc.Sampling_config.Time_window_size, sc.Sampling_config.Sampling_rate, int(sc.Sampling_config.Max_size))
 	}
 
 	if stype == EHKLL && s.sketchInstances.ehkll == nil {
@@ -378,7 +378,7 @@ func (ps *PromSketches) NewSketchCacheInstance(lset labels.Labels, funcName stri
 		case EHUniv:
 			sc.EH_univ_config = EHUnivConfig{K: 20, Time_window_size: time_window_size}
 		case USampling:
-			sc.Sampling_config = SamplingConfig{Sampling_rate: 0.05, Time_window_size: time_window_size, max_size: int(float64(item_window_size) * 0.05)}
+			sc.Sampling_config = SamplingConfig{Sampling_rate: 0.1, Time_window_size: time_window_size, Max_size: int(float64(item_window_size) * 0.1)}
 		case EHKLL:
 			sc.EH_kll_config = EHKLLConfig{K: 100, Time_window_size: time_window_size, Kll_k: 256}
 			/*
@@ -547,7 +547,7 @@ func (ps *PromSketches) SketchInsertInsertionThroughputTest(lset labels.Labels, 
 			// SH_univ_config:  SHUnivConfig{Beta: 0.1, Time_window_size: 1000000},
 			EH_univ_config:  EHUnivConfig{K: 20, Time_window_size: 1000000},
 			EH_kll_config:   EHKLLConfig{K: 100, Kll_k: 256, Time_window_size: 1000000},
-			Sampling_config: SamplingConfig{Sampling_rate: 0.05, Time_window_size: 1000000, max_size: int(50000)},
+			Sampling_config: SamplingConfig{Sampling_rate: 0.05, Time_window_size: 1000000, Max_size: int(50000)},
 			// EH_count_config: EHCountConfig{K: 100, Time_window_size: 100000},
 			// EffSum_config:   EffSumConfig{Time_window_size: 100000, Item_window_size: 100000, Epsilon: 0.01, R: 10000},
 			// EH_dd_config:    EHDDConfig{K: 100, DDAccuracy: 0.01, Time_window_size: 100000},

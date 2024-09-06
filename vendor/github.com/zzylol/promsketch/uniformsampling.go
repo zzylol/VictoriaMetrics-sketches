@@ -178,6 +178,14 @@ func (s *UniformSampling) Cover(t1, t2 int64) bool {
 	return false
 }
 
+func (s *UniformSampling) GetMinTime() int64 {
+	if len(s.Arr) > 0 {
+		return s.Arr[0].T
+	} else {
+		return -1
+	}
+}
+
 func (s *UniformSampling) GetMaxTime() int64 {
 	return s.Cur_time
 }

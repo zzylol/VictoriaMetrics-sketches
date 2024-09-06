@@ -133,7 +133,7 @@ func newVMSlidingHistorgrams(s *vmMemSeries, stype SketchType, sc *SketchConfig)
 	}
 
 	if stype == USampling && s.sketchInstances.sampling == nil {
-		s.sketchInstances.sampling = NewUniformSampling(sc.Sampling_config.Time_window_size, sc.Sampling_config.Sampling_rate, int(sc.Sampling_config.max_size))
+		s.sketchInstances.sampling = NewUniformSampling(sc.Sampling_config.Time_window_size, sc.Sampling_config.Sampling_rate, int(sc.Sampling_config.Max_size))
 	}
 
 	if stype == EHKLL && s.sketchInstances.ehkll == nil {
@@ -204,7 +204,8 @@ func (vs *VMSketches) NewVMSketchCacheInstance(mn *storage.MetricName, funcName 
 		case EHUniv:
 			sc.EH_univ_config = EHUnivConfig{K: 20, Time_window_size: time_window_size}
 		case USampling:
-			sc.Sampling_config = SamplingConfig{Sampling_rate: 0.05, Time_window_size: time_window_size, max_size: int(float64(item_window_size) * 0.05)}
+			sc.Sampling_config = SamplingConfig{Sampling_rate: 0.1, Time_window_size: time_window_size, Max_size: int(float64(item_window_size) * 0.1)}
+			fmt.Println("max_size:", sc.Sampling_config.Max_size)
 		case EHKLL:
 			sc.EH_kll_config = EHKLLConfig{K: 100, Time_window_size: time_window_size, Kll_k: 256}
 		default:

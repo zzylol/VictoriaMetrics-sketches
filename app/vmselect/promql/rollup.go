@@ -719,7 +719,7 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSr
 	// Extend dstValues in order to remove mallocs below.
 	dstValues = decimal.ExtendFloat64sCapacity(dstValues, len(rc.Timestamps))
 
-	scrapeInterval := getScrapeInterval(timestamps, rc.Step)
+	scrapeInterval, isDefault := getScrapeInterval(timestamps, rc.Step)
 	maxPrevInterval := getMaxPrevInterval(scrapeInterval)
 	if rc.LookbackDelta > 0 && maxPrevInterval > rc.LookbackDelta {
 		maxPrevInterval = rc.LookbackDelta
@@ -755,7 +755,7 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSr
 	rfa.tsm = tsm
 
 	lookup := vmsketch.SearchMetricNameFuncName(mnSrc, rc.FuncName)
-	if !lookup {
+	if !lookup && !isDefault {
 		// Initiate a VMSketch cache
 		// It will be the best to check if it's a query from rules.
 		// A sketch instance is not allocated but when a rule query appears,
@@ -764,6 +764,8 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSr
 		if window < rc.Step {
 			maxWindow = rc.Step
 		}
+
+		fmt.Println("before register sketch:", maxWindow, scrapeInterval, int64(float64(maxWindow)/float64(scrapeInterval))*3)
 		err := vmsketch.RegisterMetricNameFuncName(mnSrc, rc.FuncName, maxWindow*3, int64(float64(maxWindow)/float64(scrapeInterval))*3)
 
 		if err != nil {
@@ -853,8 +855,6 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 		logger.Panicf("BUG: %s; this must be validated before the call to rollupConfig.DoSketch", err)
 	}
 
-	fmt.Println("inside doInternalSketch")
-
 	// Extend dstValues in order to remove mallocs below.
 	dstValues = decimal.ExtendFloat64sCapacity(dstValues, len(rc.Timestamps))
 
@@ -903,6 +903,7 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 		rfa.currTimestamp = tEnd
 
 		sargs := getRollupArgForSketches(rargs, rfa.idx)
+
 		value := sr.Eval(sr.MetricName, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
 		fmt.Println("evaled value=", value)
 
@@ -971,11 +972,11 @@ func binarySearchInt64(a []int64, v int64) uint {
 	return i
 }
 
-func getScrapeInterval(timestamps []int64, defaultInterval int64) int64 {
+func getScrapeInterval(timestamps []int64, defaultInterval int64) (int64, bool) {
 	if len(timestamps) < 2 {
 		// can't calculate scrape interval with less than 2 timestamps
 		// return defaultInterval
-		return defaultInterval
+		return defaultInterval, true
 	}
 
 	// Estimate scrape interval as 0.6 quantile for the first 20 intervals.
@@ -994,9 +995,9 @@ func getScrapeInterval(timestamps []int64, defaultInterval int64) int64 {
 	a.A = intervals
 	putFloat64s(a)
 	if scrapeInterval <= 0 {
-		return defaultInterval
+		return defaultInterval, false
 	}
-	return scrapeInterval
+	return scrapeInterval, false
 }
 
 func getMaxPrevInterval(scrapeInterval int64) int64 {

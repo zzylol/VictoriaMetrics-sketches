@@ -95,8 +95,8 @@ func (ctx *InsertCtx) addRow(metricNameRaw []byte, timestamp int64, value float6
 		}
 	}
 
-	// err := vmsketch.AddRow(metricNameRaw, timestamp, value)
-	return nil
+	err := vmsketch.AddRow(metricNameRaw, timestamp, value)
+	return err
 }
 
 // AddLabelBytes adds (name, value) label to ctx.Labels.
@@ -153,7 +153,7 @@ func (ctx *InsertCtx) FlushBufs() error {
 		matchIdxsPool.Put(matchIdxs)
 	}
 
-	_ = vmsketch.AddRows(ctx.mrs) // TODO: or move this before crx.addRows?
+	// _ = vmsketch.AddRows(ctx.mrs) // TODO: or move this before crx.addRows?
 
 	// There is no need in limiting the number of concurrent calls to vmstorage.AddRows() here,
 	// since the number of concurrent FlushBufs() calls should be already limited via writeconcurrencylimiter

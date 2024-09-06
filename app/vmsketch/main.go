@@ -156,8 +156,6 @@ func (tsw *timeseriesWork) do(workerID uint) error {
 
 func timeseriesWorker(qt *querytracer.Tracer, workChs []chan *timeseriesWork, workerID uint) {
 
-	fmt.Println("inside timeseriesWorker")
-
 	// Perform own work at first.
 	rowsProcessed := 0
 	seriesProcessed := 0
@@ -257,11 +255,8 @@ func (srs *SketchResults) runParallel(qt *querytracer.Tracer, f func(sr *SketchR
 	// Prepare the work for workers.
 	tsws := make([]timeseriesWork, len(srs.sketchInss))
 	for i := range srs.sketchInss {
-		fmt.Println("before initTimeseriesWork", srs.sketchInss[i])
 		initTimeseriesWork(&tsws[i], &srs.sketchInss[i])
 	}
-
-	fmt.Println("after initTimeseriesWork")
 
 	// Prepare worker channels.
 	workers := len(tsws)
@@ -378,5 +373,6 @@ func AddRow(metricNameRaw []byte, timestamp int64, value float64) error {
 		return fmt.Errorf("cannot umarshal MetricNameRaw %q: %w", metricNameRaw, err)
 	}
 
+	// fmt.Println(mn, timestamp, value)
 	return SketchCache.AddRow(mn, timestamp, value)
 }

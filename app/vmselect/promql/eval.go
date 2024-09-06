@@ -1714,12 +1714,7 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 	funcNames := getRollupFuncNames(rcs)
 	mns := rss.GetMetricNames()
 
-	// fmt.Println("!!!", minTimestamp, ec.End, window, ec.Step, funcNames, len(mns), ec.MaxSeries)
-	// vmsketch.OutputTimeseriesCoverage(mns, funcNames)
-
 	scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries, ec.Deadline)
-
-	// fmt.Println("****", isCovered, err)
 
 	if err == nil && isCovered {
 		keepMetricNames := getKeepMetricNames(expr)
