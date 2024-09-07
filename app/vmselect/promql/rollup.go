@@ -754,19 +754,23 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSr
 	rfa.window = window
 	rfa.tsm = tsm
 
-	lookup := vmsketch.SearchMetricNameFuncName(mnSrc, rc.FuncName)
+	// fmt.Println("!!!! rc.window=", window, "rc.Step=", rc.Step)
+
+	maxWindow := window
+	if window < rc.Step {
+		maxWindow = rc.Step
+	}
+
+	// fmt.Println("beforen SearchAndUpdateWindowMetricNameFuncName window=", window)
+	lookup := vmsketch.SearchAndUpdateWindowMetricNameFuncName(mnSrc, rc.FuncName, maxWindow)
 	if !lookup && !isDefault {
 		// Initiate a VMSketch cache
 		// It will be the best to check if it's a query from rules.
 		// A sketch instance is not allocated but when a rule query appears,
 		// we should allocate a sketch cache for the rule.
-		maxWindow := window
-		if window < rc.Step {
-			maxWindow = rc.Step
-		}
 
-		fmt.Println("before register sketch:", maxWindow, scrapeInterval, int64(float64(maxWindow)/float64(scrapeInterval))*3)
-		err := vmsketch.RegisterMetricNameFuncName(mnSrc, rc.FuncName, maxWindow*3, int64(float64(maxWindow)/float64(scrapeInterval))*3)
+		// fmt.Println("before register sketch:", maxWindow, scrapeInterval, int64(float64(maxWindow)/float64(scrapeInterval))*3)
+		err := vmsketch.RegisterMetricNameFuncName(mnSrc, rc.FuncName, maxWindow*2, int64(float64(maxWindow)/float64(scrapeInterval))*2)
 
 		if err != nil {
 			fmt.Errorf("Failed to create new VMSketch cache for %s %s", mnSrc, rc.FuncName)
@@ -904,6 +908,7 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 
 		sargs := getRollupArgForSketches(rargs, rfa.idx)
 
+		// fmt.Println("before sketch eval")
 		value := sr.Eval(sr.MetricName, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
 		// fmt.Println("evaled value=", value)
 

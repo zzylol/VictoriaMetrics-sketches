@@ -19,6 +19,7 @@ type vmMemSeries struct {
 	id              TSId
 	mn              *storage.MetricName // TODO: change this to be VM MetricName
 	sketchInstances *SketchInstances    // same as PromSketches
+	oldestTimestamp int64
 }
 
 type vmSketchSeriesHashMap struct {
@@ -183,6 +184,7 @@ func newVMMemSeries(mn *storage.MetricName, id TSId) *vmMemSeries {
 		mn:              &storage.MetricName{},
 		id:              id,
 		sketchInstances: nil,
+		oldestTimestamp: -1,
 	}
 	s.mn.CopyFrom(mn)
 	return s
@@ -220,7 +222,7 @@ func (vs *VMSketches) NewVMSketchCacheInstance(mn *storage.MetricName, funcName 
 	return nil
 }
 
-func (vs *VMSketches) LookupMetricNameFuncName(mn *storage.MetricName, funcName string) bool {
+func (vs *VMSketches) LookupAndUpdateWindowMetricNameFuncName(mn *storage.MetricName, funcName string, window int64) bool {
 	mn.SortTags()
 	hash := MetricNameHash(mn)
 	series := vs.series.getByHash(hash, mn)
@@ -234,14 +236,20 @@ func (vs *VMSketches) LookupMetricNameFuncName(mn *storage.MetricName, funcName 
 		case EHUniv:
 			if series.sketchInstances.ehuniv == nil {
 				return false
+			} else if series.sketchInstances.ehuniv.time_window_size < window {
+				series.sketchInstances.ehuniv.UpdateWindow(window)
 			}
 		case EHKLL:
 			if series.sketchInstances.ehkll == nil {
 				return false
+			} else if series.sketchInstances.ehkll.time_window_size < window {
+				series.sketchInstances.ehkll.UpdateWindow(window)
 			}
 		case USampling:
 			if series.sketchInstances.sampling == nil {
 				return false
+			} else if series.sketchInstances.sampling.Time_window_size < window {
+				series.sketchInstances.sampling.UpdateWindow(window)
 			}
 		default:
 			return false
@@ -317,6 +325,10 @@ func (vs *VMSketches) AddRow(mn *storage.MetricName, t int64, value float64) err
 		return nil // fmt.Errorf("not find timeseries")
 	}
 
+	if s.oldestTimestamp == -1 {
+		s.oldestTimestamp = t
+	}
+
 	if s.sketchInstances.ehkll != nil {
 		s.sketchInstances.ehkll.Update(t, value)
 	}
@@ -350,24 +362,29 @@ func (vs *VMSketches) LookupMetricNameFuncNamesTimeRange(mn *storage.MetricName,
 		stypes = append(stypes, funcSketchMap[funcName]...)
 	}
 
+	startt := mint
+	if series.oldestTimestamp != -1 && mint < series.oldestTimestamp {
+		startt = series.oldestTimestamp
+	}
+
 	for _, stype := range stypes {
 		switch stype {
 		case EHUniv:
 			if series.sketchInstances.ehuniv == nil {
 				return series.sketchInstances, false
-			} else if series.sketchInstances.ehuniv.Cover(mint, maxt) == false {
+			} else if series.sketchInstances.ehuniv.Cover(startt, maxt) == false {
 				return series.sketchInstances, false
 			}
 		case EHKLL:
 			if series.sketchInstances.ehkll == nil {
 				return series.sketchInstances, false
-			} else if series.sketchInstances.ehkll.Cover(mint, maxt) == false {
+			} else if series.sketchInstances.ehkll.Cover(startt, maxt) == false {
 				return series.sketchInstances, false
 			}
 		case USampling:
 			if series.sketchInstances.sampling == nil {
 				return series.sketchInstances, false
-			} else if series.sketchInstances.sampling.Cover(mint, maxt) == false {
+			} else if series.sketchInstances.sampling.Cover(startt, maxt) == false {
 				return series.sketchInstances, false
 			}
 		default:

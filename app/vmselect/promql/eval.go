@@ -284,6 +284,8 @@ func evalExpr(qt *querytracer.Tracer, ec *EvalConfig, e metricsql.Expr) ([]*time
 }
 
 func evalExprInternal(qt *querytracer.Tracer, ec *EvalConfig, e metricsql.Expr) ([]*timeseries, error) {
+	fmt.Println("[evalExprInternal] ec=", ec, "e=", e)
+
 	if me, ok := e.(*metricsql.MetricExpr); ok {
 		re := &metricsql.RollupExpr{
 			Expr: me,
@@ -798,6 +800,9 @@ func getRollupExprArg(arg metricsql.Expr) *metricsql.RollupExpr {
 // - aggrFunc(rollupFunc(m)) if iafc isn't nil
 func evalRollupFunc(qt *querytracer.Tracer, ec *EvalConfig, funcName string, rf rollupFunc, rargs []interface{},
 	expr metricsql.Expr, re *metricsql.RollupExpr, iafc *incrementalAggrFuncContext) ([]*timeseries, error) {
+
+	fmt.Println("[evalRollupFunc] re=", re)
+
 	if re.At == nil {
 		return evalRollupFuncWithoutAt(qt, ec, funcName, rf, rargs, expr, re, iafc)
 	}
@@ -838,6 +843,9 @@ func evalRollupFuncWithoutAt(qt *querytracer.Tracer, ec *EvalConfig, funcName st
 	expr metricsql.Expr, re *metricsql.RollupExpr, iafc *incrementalAggrFuncContext) ([]*timeseries, error) {
 	funcName = strings.ToLower(funcName)
 	ecNew := ec
+
+	fmt.Println("[evalRollupFuncWithoutAt]", re)
+
 	var offset int64
 	if re.Offset != nil {
 		offset = re.Offset.Duration(ec.Step)
@@ -1590,6 +1598,7 @@ var (
 )
 
 func evalRollupFuncWithMetricExpr(qt *querytracer.Tracer, ec *EvalConfig, funcName string, rf rollupFunc, args []interface{},
+
 	expr metricsql.Expr, me *metricsql.MetricExpr, iafc *incrementalAggrFuncContext, windowExpr *metricsql.DurationExpr) ([]*timeseries, error) {
 	window, err := windowExpr.NonNegativeDuration(ec.Step)
 	if err != nil {
@@ -1598,6 +1607,8 @@ func evalRollupFuncWithMetricExpr(qt *querytracer.Tracer, ec *EvalConfig, funcNa
 	if me.IsEmpty() {
 		return evalNumber(ec, nan), nil
 	}
+
+	fmt.Println("[evalRollupFuncWithMetricExpr], window =", window)
 
 	if ec.Start == ec.End {
 		rvs, err := evalInstantRollup(qt, ec, funcName, rf, args, expr, me, iafc, window)
@@ -1685,6 +1696,8 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 		return nil, err
 	}
 
+	fmt.Println("[evalRollupFuncNoCache] rcs=", rcs)
+
 	tfss := searchutils.ToTagFilterss(me.LabelFilterss)
 	tfss = searchutils.JoinTagFilterss(tfss, ec.EnforcedTagFilterss)
 	minTimestamp := ec.Start
@@ -1698,8 +1711,11 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 	}
 
 	// Fetch the result.
+	start := time.Now()
 	sq := storage.NewSearchQuery(minTimestamp, ec.End, tfss, ec.MaxSeries)
 	rss, err := netstorage.ProcessSearchQuery(qt, sq, ec.Deadline)
+	since := time.Since(start)
+
 	if err != nil {
 		return nil, err
 	}
@@ -1715,10 +1731,22 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 	mns := rss.GetMetricNames()
 
 	scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries, ec.Deadline)
+	if isCovered == true {
+		fmt.Println("VM ProcessSearchQuery time:", since.Seconds(), "s")
+		// fmt.Println("cover:", isCovered, minTimestamp, ec.End)
+	} else {
+		if window != 0 {
+			fmt.Println(funcNames, minTimestamp, ec.End)
+		}
+	}
 
 	if err == nil && isCovered {
 		keepMetricNames := getKeepMetricNames(expr)
-		return evalRollupSketchCache(qt, funcName, keepMetricNames, args, scs, rcs, sharedTimestamps)
+		start := time.Now()
+		ts_results, err := evalRollupSketchCache(qt, funcName, keepMetricNames, args, scs, rcs, sharedTimestamps)
+		since := time.Since(start)
+		fmt.Println("sketch evaluation time:", since.Seconds(), "s", "window=", window)
+		return ts_results, err
 	} else {
 
 		// Verify timeseries fit available memory during rollup calculations.

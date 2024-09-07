@@ -28,6 +28,7 @@ type ExpoHistogramKLL struct {
 	k                int64
 	time_window_size int64
 	kll_k            int
+	mutex            sync.Mutex // when updating s_count and buckets, query should wait; when query, update() should wait
 }
 
 type ExpoHistogramDD struct {
@@ -98,7 +99,16 @@ func ExpoInitKLL(k int64, kll_k int, time_window_size int64) (ehkll *ExpoHistogr
 	return ehkll
 }
 
+func (ehkll *ExpoHistogramKLL) UpdateWindow(window int64) {
+	ehkll.mutex.Lock()
+	ehkll.time_window_size = window
+	fmt.Println("cur window=", ehkll.time_window_size)
+	ehkll.mutex.Unlock()
+}
+
 func (ehkll *ExpoHistogramKLL) Update(time int64, value float64) {
+	ehkll.mutex.Lock()
+
 	// remove expired buckets
 	removed := 0
 	for i := 0; i < ehkll.s_count; i++ {
@@ -162,17 +172,24 @@ func (ehkll *ExpoHistogramKLL) Update(time int64, value float64) {
 		ehkll.bucketsize = append(ehkll.bucketsize[:1], ehkll.bucketsize[2:]...)
 		ehkll.s_count -= 1
 	}
+
+	ehkll.mutex.Unlock()
 }
 
 func (ehkll *ExpoHistogramKLL) Cover(mint, maxt int64) bool {
 	// fmt.Println("ehkll s_count =", ehkll.s_count)
+
+	ehkll.mutex.Lock()
 	if ehkll.s_count == 0 {
+		ehkll.mutex.Unlock()
 		return false
 	}
-	// fmt.Println(ehkll.min_time[0], ehkll.max_time[0], ehkll.min_time[ehkll.s_count-1], ehkll.max_time[ehkll.s_count-1])
-	// return (ehkll.min_time[0] <= mint && ehkll.max_time[ehkll.s_count-1] >= maxt)
-	// return (ehkll.min_time[0] <= mint)
-	return ehkll.max_time[ehkll.s_count-1]-ehkll.time_window_size <= mint
+
+	// fmt.Println("cover search:", mint, maxt, ehkll.min_time[0], ehkll.max_time[ehkll.s_count-1])
+	isCovered := ehkll.max_time[ehkll.s_count-1] >= maxt && ehkll.min_time[0] <= mint
+	ehkll.mutex.Unlock()
+	return isCovered
+	// return ehkll.max_time[ehkll.s_count-1]-ehkll.time_window_size <= mint && ehkll.min_time[0] <= maxt
 }
 
 func (ehkll *ExpoHistogramKLL) GetMaxTime() int64 {
@@ -195,9 +212,7 @@ func (ehkll *ExpoHistogramKLL) print_buckets() {
 	fmt.Println("s_count =", ehkll.s_count)
 	fmt.Println("k =", ehkll.k)
 	for i := 0; i < ehkll.s_count; i++ {
-		fmt.Println(i, ehkll.bucketsize[i], ehkll.min_time[i], ehkll.max_time[i])
-		// cdf := ehkll.klls[i].cdf()
-		// fmt.Println(cdf[:15])
+		fmt.Println(i, ehkll.min_time[i], ehkll.max_time[i], ehkll.bucketsize[i])
 	}
 }
 
@@ -206,20 +221,25 @@ func (ehkll *ExpoHistogramKLL) get_memory() (int, []int64) {
 }
 
 func (ehkll *ExpoHistogramKLL) QueryIntervalMergeKLL(t1, t2 int64) *kll.Sketch {
+	var from_bucket, to_bucket int = 0, 0
+	ehkll.mutex.Lock()
+
 	if ehkll.s_count == 0 {
+		ehkll.mutex.Unlock()
 		return nil
 	}
 
-	var from_bucket, to_bucket int = ehkll.s_count, ehkll.s_count
-
 	for i := 0; i < ehkll.s_count; i++ {
-		if t1 <= ehkll.max_time[i] && t1 >= ehkll.min_time[i] {
+		if t1 >= ehkll.min_time[i] && t1 <= ehkll.max_time[i] {
 			from_bucket = i
 		}
-		if t2 <= ehkll.max_time[i] && t2 >= ehkll.min_time[i] {
+		if t2 >= ehkll.min_time[i] && t2 <= ehkll.max_time[i] {
 			to_bucket = i
 		}
 	}
+
+	// fmt.Println("t1, t2=", t1, t2)
+	// fmt.Println("min time, max time=", ehkll.min_time[0], ehkll.GetMaxTime())
 
 	if t2 > ehkll.max_time[ehkll.s_count-1] {
 		to_bucket = ehkll.s_count - 1
@@ -231,15 +251,25 @@ func (ehkll *ExpoHistogramKLL) QueryIntervalMergeKLL(t1, t2 int64) *kll.Sketch {
 		from_bucket += 1
 	}
 
-	// fmt.Println("from_bucket =", from_bucket)
-	// fmt.Println("to_bucket =", to_bucket)
+	/*
+		fmt.Println("s_count =", ehkll.s_count)
+		fmt.Println("from_bucket =", from_bucket)
+		fmt.Println("to_bucket =", to_bucket)
+	*/
+
+	if to_bucket >= ehkll.s_count {
+		to_bucket = ehkll.s_count - 1
+	}
+
 	if from_bucket < to_bucket {
 		merged_kll := kll.New(ehkll.kll_k)
 		for i := from_bucket; i <= to_bucket; i++ {
 			merged_kll.Merge(ehkll.klls[i])
 		}
+		ehkll.mutex.Unlock()
 		return merged_kll
 	} else {
+		ehkll.mutex.Unlock()
 		return ehkll.klls[from_bucket]
 	}
 }

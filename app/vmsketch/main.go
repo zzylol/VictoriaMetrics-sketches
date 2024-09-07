@@ -80,9 +80,9 @@ func RegisterMetricNameFuncName(mn *storage.MetricName, funcName string, window 
 }
 
 // SearchMetricNames returns metric names for the given tfss on the given tr.
-func SearchMetricNameFuncName(mn *storage.MetricName, funcName string) bool {
+func SearchAndUpdateWindowMetricNameFuncName(mn *storage.MetricName, funcName string, window int64) bool {
 	WG.Add(1)
-	lookup := SketchCache.LookupMetricNameFuncName(mn, funcName)
+	lookup := SketchCache.LookupAndUpdateWindowMetricNameFuncName(mn, funcName, window)
 	WG.Done()
 	return lookup
 }

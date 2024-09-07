@@ -49,7 +49,6 @@ type ExpoHistogramUnivOptimized struct {
 	ctx    context.Context
 	cancel func()     // Cancellation function for background ehuniv cleaning.
 	mutex  sync.Mutex // when updating s_count and buckets, query should wait; when query, update() should wait
-
 }
 
 /*------------------------------------------------------------------------------
@@ -90,6 +89,13 @@ func ExpoInitUnivOptimized(k int64, time_window_size int64) (ehu *ExpoHistogramU
 	ehu.StartBackgroundClean(ehu.ctx)
 
 	return ehu
+}
+
+func (ehu *ExpoHistogramUnivOptimized) UpdateWindow(window int64) {
+	ehu.mutex.Lock()
+	ehu.time_window_size = window
+	fmt.Println("cur window=", ehu.time_window_size)
+	ehu.mutex.Unlock()
 }
 
 func (ehu *ExpoHistogramUnivOptimized) StartBackgroundClean(ctx context.Context) {
@@ -338,10 +344,18 @@ func (ehu *ExpoHistogramUnivOptimized) Update(time_ int64, fvalue float64) {
 }
 
 func (eh *ExpoHistogramUnivOptimized) Cover(mint, maxt int64) bool {
+	eh.mutex.Lock()
 	if eh.s_count+eh.arr_count == 0 {
+		eh.mutex.Unlock()
 		return false
 	}
-	return (eh.array[eh.arr_count-1].max_time-eh.time_window_size <= mint)
+	maxt_covered := (eh.array[0].min_time <= maxt)
+	if eh.s_count > 0 {
+		maxt_covered = maxt_covered || (eh.univs[0].min_time <= maxt)
+	}
+	isCovered := (eh.array[eh.arr_count-1].max_time-eh.time_window_size <= mint) && maxt_covered
+	eh.mutex.Unlock()
+	return isCovered
 }
 
 func (eh *ExpoHistogramUnivOptimized) GetMaxTime() int64 {
