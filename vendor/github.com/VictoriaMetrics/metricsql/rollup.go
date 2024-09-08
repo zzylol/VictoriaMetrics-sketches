@@ -26,6 +26,7 @@ var rollupFuncs = map[string]bool{
 	"descent_over_time":       true,
 	"distinct_over_time":      true,
 	"duration_over_time":      true,
+	"entropy_over_time":       true,
 	"first_over_time":         true,
 	"geomean_over_time":       true,
 	"histogram_over_time":     true,
