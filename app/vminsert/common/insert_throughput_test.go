@@ -46,6 +46,18 @@ func TestWriteZipfThroughPut(t *testing.T) {
 		}
 		mr := &metricRows[ts_id]
 		mr.MetricNameRaw = mn.MarshalRaw(mr.MetricNameRaw[:0])
+		err := vmsketch.RegisterMetricNameFuncName(&mn, "distinct_over_time", 10000000, 100000)
+		if err != nil {
+			panic(fmt.Errorf("Failed register vmsketch cache EHuniv instance %w", err))
+		}
+		err = vmsketch.RegisterMetricNameFuncName(&mn, "avg_over_time", 10000000, 100000)
+		if err != nil {
+			panic(fmt.Errorf("Failed register vmsketch cache Sampling instance %w", err))
+		}
+		err = vmsketch.RegisterMetricNameFuncName(&mn, "quantile_over_time", 10000000, 100000)
+		if err != nil {
+			panic(fmt.Errorf("Failed register vmsketch cache EHKLL instance %w", err))
+		}
 	}
 
 	tNow := time.Now()
@@ -78,6 +90,7 @@ func ingestZipfScrapes(st *storage.Storage, mrs []storage.MetricRow, scrapeTotCo
 				var RAND *rand.Rand = rand.New(rand.NewSource(time.Now().Unix()))
 				z := rand.NewZipf(RAND, s, v, uint64(100000))
 
+				var wg_sketch sync.WaitGroup
 				for j := 0; j < scrapeBatch; j++ {
 					rowsToInsert := make([]storage.MetricRow, 0, len(batch))
 					ts := int64(j*second) + currTime
@@ -85,13 +98,23 @@ func ingestZipfScrapes(st *storage.Storage, mrs []storage.MetricRow, scrapeTotCo
 						mr.Value = float64(z.Uint64())
 						mr.Timestamp = ts
 						rowsToInsert = append(rowsToInsert, mr)
-						vmsketch.AddRow(mr.MetricNameRaw, mr.Timestamp, mr.Value)
+
 					}
+
+					wg_sketch.Add(1)
+					go func(rowsToInsert []storage.MetricRow) {
+						defer wg_sketch.Done()
+						for j := 0; j < scrapeBatch; j++ {
+							mr := rowsToInsert[j]
+							vmsketch.AddRow(mr.MetricNameRaw, mr.Timestamp, mr.Value)
+						}
+					}(rowsToInsert)
 
 					if err := st.AddRows(rowsToInsert, defaultPrecisionBits); err != nil {
 						panic(fmt.Errorf("cannot add rows to storage: %w", err))
 					}
 				}
+				wg_sketch.Wait()
 			}(currTime)
 		}
 	}

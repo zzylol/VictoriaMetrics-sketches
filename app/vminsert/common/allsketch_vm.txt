@@ -1,0 +1,7 @@
+=== RUN   TestWriteZipfThroughPut
+2024-09-08T20:36:01.059Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
+2024-09-08T20:36:01.300Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1936	deleting "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F35F2FCB11A864" because it isn't listed in "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/parts.json"; this is the expected case after unclean shutdown
+ingestion completed
+    insert_throughput_test.go:68: 1000 4.841767238 8.922361996452503e+06
+--- PASS: TestWriteZipfThroughPut (13.87s)
+=== RUN   TestWriteZipfThroughPut
