@@ -1,7 +1,6 @@
 package promsketch
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"sort"
@@ -34,7 +33,7 @@ func (s *UniformSampling) UpdateWindow(window int64) {
 	s.mutex.Lock()
 	s.Max_size = int(float64(s.Max_size) * float64(s.Time_window_size) / float64(window))
 	s.Time_window_size = window
-	fmt.Println("cur window=", s.Time_window_size, s.Max_size)
+	// fmt.Println("cur window=", s.Time_window_size, s.Max_size)
 	s.mutex.Unlock()
 }
 

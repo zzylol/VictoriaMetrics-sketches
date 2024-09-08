@@ -36,7 +36,7 @@ const INTERVAL int = 1000 // ms
 const MILLION int = 1000000
 const BILLION int = 1000000000
 
-const UnivPoolCAP uint32 = 10
+const UnivPoolCAP uint32 = 1
 
 const maxPointsSliceSize = 5000
 

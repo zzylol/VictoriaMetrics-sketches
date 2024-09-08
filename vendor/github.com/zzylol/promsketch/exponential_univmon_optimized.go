@@ -47,8 +47,8 @@ type ExpoHistogramUnivOptimized struct {
 	putch            chan int64
 
 	ctx    context.Context
-	cancel func()     // Cancellation function for background ehuniv cleaning.
-	mutex  sync.Mutex // when updating s_count and buckets, query should wait; when query, update() should wait
+	cancel func()       // Cancellation function for background ehuniv cleaning.
+	mutex  sync.RWMutex // when updating s_count and buckets, query should wait; when query, update() should wait; but multiple queries can read simultaneously
 }
 
 /*------------------------------------------------------------------------------
@@ -60,7 +60,7 @@ func ExpoInitUnivOptimized(k int64, time_window_size int64) (ehu *ExpoHistogramU
 		k:                k,
 		s_count:          0,
 		arr_count:        0,
-		max_array_size:   32768,
+		max_array_size:   16384,
 		min_array_size:   1,
 		time_window_size: time_window_size,
 		univs:            make([]*UnivSketch, 0),
@@ -94,7 +94,6 @@ func ExpoInitUnivOptimized(k int64, time_window_size int64) (ehu *ExpoHistogramU
 func (ehu *ExpoHistogramUnivOptimized) UpdateWindow(window int64) {
 	ehu.mutex.Lock()
 	ehu.time_window_size = window
-	fmt.Println("cur window=", ehu.time_window_size)
 	ehu.mutex.Unlock()
 }
 
@@ -344,17 +343,21 @@ func (ehu *ExpoHistogramUnivOptimized) Update(time_ int64, fvalue float64) {
 }
 
 func (eh *ExpoHistogramUnivOptimized) Cover(mint, maxt int64) bool {
-	eh.mutex.Lock()
+	eh.mutex.RLock()
 	if eh.s_count+eh.arr_count == 0 {
-		eh.mutex.Unlock()
+		eh.mutex.RUnlock()
 		return false
 	}
-	maxt_covered := (eh.array[0].min_time <= maxt)
+
+	mint_time := eh.array[0].min_time
 	if eh.s_count > 0 {
-		maxt_covered = maxt_covered || (eh.univs[0].min_time <= maxt)
+		mint_time = eh.univs[0].min_time
 	}
-	isCovered := (eh.array[eh.arr_count-1].max_time-eh.time_window_size <= mint) && maxt_covered
-	eh.mutex.Unlock()
+	// fmt.Println("EHoptimized Cover:", mint, maxt, mint_time, eh.array[eh.arr_count-1].max_time)
+	maxt_covered := (eh.array[eh.arr_count-1].max_time >= maxt)
+	mint_covered := (mint_time <= mint)
+	isCovered := mint_covered && maxt_covered
+	eh.mutex.RUnlock()
 	return isCovered
 }
 
@@ -390,17 +393,24 @@ func (eh *ExpoHistogramUnivOptimized) GetMemoryKB() float64 {
 
 func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_t int64) (univ *UnivSketch, arr *[]float64, err error) {
 	var from_bucket, to_bucket int = 0, 0
-	ehu.mutex.Lock()
+	ehu.mutex.RLock()
 
 	// ehu.print_buckets()
 	// fmt.Println(" ")
 
-	for i := 0; i < ehu.s_count; i++ {
+	for i := ehu.s_count - 1; i >= 0; i-- {
 		if t1 >= ehu.univs[i].min_time && t1 <= ehu.univs[i].max_time {
 			from_bucket = i
+		} else {
+			break
 		}
+	}
+
+	for i := ehu.s_count - 1; i >= 0; i-- {
 		if t2 >= ehu.univs[i].min_time && t2 <= ehu.univs[i].max_time {
 			to_bucket = i
+		} else {
+			break
 		}
 	}
 
@@ -442,10 +452,10 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 				merged_univ.MergeWith(ehu.univs[i])
 				merged_univ.bucket_size += ehu.univs[i].bucket_size
 			}
-			ehu.mutex.Unlock()
+			ehu.mutex.RUnlock()
 			return merged_univ, nil, nil
 		} else {
-			ehu.mutex.Unlock()
+			ehu.mutex.RUnlock()
 			return ehu.univs[from_bucket], nil, nil
 		}
 	} else if from_bucket >= ehu.s_count {
@@ -454,7 +464,7 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 		for i := from_bucket - ehu.s_count; i <= to_bucket-ehu.s_count; i++ {
 			samples = append(samples, ehu.array[i].samples...)
 		}
-		ehu.mutex.Unlock()
+		ehu.mutex.RUnlock()
 		return nil, &samples, nil
 	} else {
 		// merge univ and array
@@ -480,9 +490,9 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 			hash := xxhash.ChecksumString64S(value, uint64(merged_univ.seed))
 			bottom_layer_num := findBottomLayerNum(hash, CS_LVLS)
 			pos, sign := ehu.univs[0].cs_layers[0].position_and_sign([]byte(value))
-			merged_univ.univmon_processing_optimized(value, v, bottom_layer_num, &pos, &sign) // TODO: change to a map and group by key to univmon_update
+			merged_univ.univmon_processing_optimized(value, v, bottom_layer_num, &pos, &sign)
 		}
-		ehu.mutex.Unlock()
+		ehu.mutex.RUnlock()
 		return merged_univ, nil, nil
 	}
 }

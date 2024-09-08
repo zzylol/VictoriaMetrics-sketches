@@ -1731,6 +1731,7 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 	mns := rss.GetMetricNames()
 
 	scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries, ec.Deadline)
+	fmt.Println("isCovered=", isCovered)
 	if isCovered == true {
 		fmt.Println("VM ProcessSearchQuery time:", since.Seconds(), "s")
 		// fmt.Println("cover:", isCovered, minTimestamp, ec.End)

@@ -28,7 +28,7 @@ type ExpoHistogramKLL struct {
 	k                int64
 	time_window_size int64
 	kll_k            int
-	mutex            sync.Mutex // when updating s_count and buckets, query should wait; when query, update() should wait
+	mutex            sync.RWMutex // when updating s_count and buckets, query should wait; when query, update() should wait
 }
 
 type ExpoHistogramDD struct {
@@ -102,7 +102,7 @@ func ExpoInitKLL(k int64, kll_k int, time_window_size int64) (ehkll *ExpoHistogr
 func (ehkll *ExpoHistogramKLL) UpdateWindow(window int64) {
 	ehkll.mutex.Lock()
 	ehkll.time_window_size = window
-	fmt.Println("cur window=", ehkll.time_window_size)
+	// fmt.Println("cur window=", ehkll.time_window_size)
 	ehkll.mutex.Unlock()
 }
 
@@ -179,15 +179,15 @@ func (ehkll *ExpoHistogramKLL) Update(time int64, value float64) {
 func (ehkll *ExpoHistogramKLL) Cover(mint, maxt int64) bool {
 	// fmt.Println("ehkll s_count =", ehkll.s_count)
 
-	ehkll.mutex.Lock()
+	ehkll.mutex.RLock()
 	if ehkll.s_count == 0 {
-		ehkll.mutex.Unlock()
+		ehkll.mutex.RUnlock()
 		return false
 	}
 
 	// fmt.Println("cover search:", mint, maxt, ehkll.min_time[0], ehkll.max_time[ehkll.s_count-1])
 	isCovered := ehkll.max_time[ehkll.s_count-1] >= maxt && ehkll.min_time[0] <= mint
-	ehkll.mutex.Unlock()
+	ehkll.mutex.RUnlock()
 	return isCovered
 	// return ehkll.max_time[ehkll.s_count-1]-ehkll.time_window_size <= mint && ehkll.min_time[0] <= maxt
 }
@@ -222,19 +222,26 @@ func (ehkll *ExpoHistogramKLL) get_memory() (int, []int64) {
 
 func (ehkll *ExpoHistogramKLL) QueryIntervalMergeKLL(t1, t2 int64) *kll.Sketch {
 	var from_bucket, to_bucket int = 0, 0
-	ehkll.mutex.Lock()
+	ehkll.mutex.RLock()
 
 	if ehkll.s_count == 0 {
-		ehkll.mutex.Unlock()
+		ehkll.mutex.RUnlock()
 		return nil
 	}
 
 	for i := 0; i < ehkll.s_count; i++ {
 		if t1 >= ehkll.min_time[i] && t1 <= ehkll.max_time[i] {
 			from_bucket = i
+		} else {
+			break
 		}
+	}
+
+	for i := 0; i < ehkll.s_count; i++ {
 		if t2 >= ehkll.min_time[i] && t2 <= ehkll.max_time[i] {
 			to_bucket = i
+		} else {
+			break
 		}
 	}
 
@@ -266,10 +273,10 @@ func (ehkll *ExpoHistogramKLL) QueryIntervalMergeKLL(t1, t2 int64) *kll.Sketch {
 		for i := from_bucket; i <= to_bucket; i++ {
 			merged_kll.Merge(ehkll.klls[i])
 		}
-		ehkll.mutex.Unlock()
+		ehkll.mutex.RUnlock()
 		return merged_kll
 	} else {
-		ehkll.mutex.Unlock()
+		ehkll.mutex.RUnlock()
 		return ehkll.klls[from_bucket]
 	}
 }
