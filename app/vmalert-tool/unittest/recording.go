@@ -10,7 +10,7 @@ import (
 
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmalert/datasource"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/promutils"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 // metricsqlTestCase holds metricsql_expr_test cases defined in test file

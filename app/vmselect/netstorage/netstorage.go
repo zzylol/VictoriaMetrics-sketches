@@ -12,7 +12,7 @@ import (
 	"unsafe"
 
 	"github.com/VictoriaMetrics/metrics"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmstorage"

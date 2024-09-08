@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 // NewDuration returns new `duration` flag with the given name, defaultValue and description.

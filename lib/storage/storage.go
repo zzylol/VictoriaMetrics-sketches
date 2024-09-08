@@ -16,7 +16,6 @@ import (
 	"unsafe"
 
 	"github.com/VictoriaMetrics/fastcache"
-	"github.com/VictoriaMetrics/metricsql"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/backup/backupnames"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bloomfilter"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
@@ -31,6 +30,7 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/timeutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/uint64set"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/workingsetcache"
+	"github.com/zzylol/metricsql"
 )
 
 const (

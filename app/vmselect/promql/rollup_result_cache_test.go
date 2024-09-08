@@ -6,7 +6,7 @@ import (
 
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/fs"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 func TestRollupResultCacheInitStop(t *testing.T) {

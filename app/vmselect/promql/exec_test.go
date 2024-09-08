@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"

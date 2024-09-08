@@ -133,10 +133,6 @@ github.com/VictoriaMetrics/fastcache
 # github.com/VictoriaMetrics/metrics v1.35.1
 ## explicit; go 1.17
 github.com/VictoriaMetrics/metrics
-# github.com/VictoriaMetrics/metricsql v0.77.0
-## explicit; go 1.13
-github.com/VictoriaMetrics/metricsql
-github.com/VictoriaMetrics/metricsql/binaryop
 # github.com/VividCortex/ewma v1.2.0
 ## explicit; go 1.12
 github.com/VividCortex/ewma
@@ -616,6 +612,10 @@ github.com/xrash/smetrics
 # github.com/zzylol/go-kll v0.0.0-20240604180517-e15a688e6ebe
 ## explicit; go 1.22.3
 github.com/zzylol/go-kll
+# github.com/zzylol/metricsql v0.1.1
+## explicit; go 1.13
+github.com/zzylol/metricsql
+github.com/zzylol/metricsql/binaryop
 # github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240903204742-c589c9446e48
 ## explicit; go 1.22.3
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/exemplar

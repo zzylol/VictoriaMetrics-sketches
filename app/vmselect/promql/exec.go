@@ -10,14 +10,14 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/VictoriaMetrics/metrics"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/querystats"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/querytracer"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
-	"github.com/VictoriaMetrics/metrics"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 var (

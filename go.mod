@@ -9,7 +9,6 @@ require (
 	github.com/VictoriaMetrics/easyproto v0.1.4
 	github.com/VictoriaMetrics/fastcache v1.12.2
 	github.com/VictoriaMetrics/metrics v1.35.1
-	github.com/VictoriaMetrics/metricsql v0.77.0
 	github.com/aws/aws-sdk-go-v2 v1.30.1
 	github.com/aws/aws-sdk-go-v2/config v1.27.23
 	github.com/aws/aws-sdk-go-v2/feature/s3/manager v1.17.4
@@ -30,6 +29,7 @@ require (
 	github.com/valyala/gozstd v1.21.1
 	github.com/valyala/histogram v1.2.0
 	github.com/valyala/quicktemplate v1.8.0
+	github.com/zzylol/metricsql v0.1.1
 	github.com/zzylol/promsketch v0.2.95
 	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sys v0.25.0

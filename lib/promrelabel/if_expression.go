@@ -8,7 +8,7 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/prompbmarshal"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/regexutil"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 // IfExpression represents PromQL-like label filters such as `metric_name{filters...}`.

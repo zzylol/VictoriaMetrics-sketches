@@ -9,6 +9,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/VictoriaMetrics/fastcache"
+	"github.com/VictoriaMetrics/metrics"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/encoding"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
@@ -20,9 +22,7 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/stringsutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/workingsetcache"
-	"github.com/VictoriaMetrics/fastcache"
-	"github.com/VictoriaMetrics/metrics"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 var (

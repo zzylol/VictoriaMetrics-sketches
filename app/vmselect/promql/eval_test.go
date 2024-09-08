@@ -6,7 +6,7 @@ import (
 
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/protoparser/prometheus"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 func TestGetCommonLabelFilters(t *testing.T) {

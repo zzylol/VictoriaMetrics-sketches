@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 func TestIncrementalAggr(t *testing.T) {

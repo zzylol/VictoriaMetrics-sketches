@@ -5,7 +5,7 @@ import (
 	"strings"
 
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/graphiteql"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 // Type represents data source type

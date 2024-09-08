@@ -3,7 +3,7 @@ package prometheus
 import (
 	"flag"
 	"fmt"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 	"math"
 	"net/http"
 	"runtime"
@@ -13,6 +13,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/VictoriaMetrics/metrics"
+	"github.com/valyala/fastjson/fastfloat"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/promql"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/querystats"
@@ -26,8 +28,6 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/querytracer"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
-	"github.com/VictoriaMetrics/metrics"
-	"github.com/valyala/fastjson/fastfloat"
 )
 
 var (

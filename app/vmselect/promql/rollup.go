@@ -9,8 +9,8 @@ import (
 	"sync"
 
 	"github.com/VictoriaMetrics/metrics"
-	"github.com/VictoriaMetrics/metricsql"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmsketch"
+	"github.com/zzylol/metricsql"
 
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
@@ -62,6 +62,8 @@ var rollupFuncs = map[string]newRollupFunc{
 	"lag":                     newRollupFuncOneArg(rollupLag),
 	"last_over_time":          newRollupFuncOneArg(rollupLast),
 	"lifetime":                newRollupFuncOneArg(rollupLifetime),
+	"l1_over_time":            newRollupFuncOneArg(rollupL1),
+	"l2_over_time":            newRollupFuncOneArg(rollupL2),
 	"mad_over_time":           newRollupFuncOneArg(rollupMAD),
 	"max_over_time":           newRollupFuncOneArg(rollupMax),
 	"median_over_time":        newRollupFuncOneArg(rollupMedian),
@@ -172,6 +174,8 @@ var rollupAggrFuncs = map[string]rollupFunc{
 	"lag":                     rollupLag,
 	"last_over_time":          rollupLast,
 	"lifetime":                rollupLifetime,
+	"l1_over_time":            rollupL1,
+	"l2_over_time":            rollupL2,
 	"mad_over_time":           rollupMAD,
 	"max_over_time":           rollupMax,
 	"median_over_time":        rollupMedian,
@@ -2514,6 +2518,52 @@ func rollupEntropy(rfa *rollupFuncArg) float64 {
 	}
 	entropy = math.Log2(n) - entropy/n
 	return entropy
+}
+
+func rollupL1(rfa *rollupFuncArg) float64 {
+	// There is no need in handling NaNs here, since they must be cleaned up
+	// before calling rollup funcs.
+	values := rfa.values
+	if len(values) == 0 {
+		return nan
+	}
+	m := make(map[float64]float64)
+	for _, v := range values {
+		if _, ok := m[v]; !ok {
+			m[v] = 1
+		} else {
+			m[v] += 1
+		}
+	}
+	var l1 float64 = 0
+	for _, v := range m {
+		l1 += float64(v)
+	}
+
+	return l1
+}
+
+func rollupL2(rfa *rollupFuncArg) float64 {
+	// There is no need in handling NaNs here, since they must be cleaned up
+	// before calling rollup funcs.
+	values := rfa.values
+	if len(values) == 0 {
+		return nan
+	}
+	m := make(map[float64]float64)
+	for _, v := range values {
+		if _, ok := m[v]; !ok {
+			m[v] = 1
+		} else {
+			m[v] += 1
+		}
+	}
+	var l2 float64 = 0
+	for _, v := range m {
+		l2 += float64(v) * float64(v)
+	}
+
+	return l2
 }
 
 func rollupIntegrate(rfa *rollupFuncArg) float64 {

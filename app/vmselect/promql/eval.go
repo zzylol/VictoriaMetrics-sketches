@@ -13,7 +13,6 @@ import (
 	"unsafe"
 
 	"github.com/VictoriaMetrics/metrics"
-	"github.com/VictoriaMetrics/metricsql"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/netstorage"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmselect/searchutils"
 	"github.com/zzylol/VictoriaMetrics-sketches/app/vmsketch"
@@ -27,6 +26,7 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/querytracer"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/stringsutil"
+	"github.com/zzylol/metricsql"
 )
 
 var (

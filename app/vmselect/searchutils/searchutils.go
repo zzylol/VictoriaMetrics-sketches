@@ -10,7 +10,7 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/httputils"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/storage"
-	"github.com/VictoriaMetrics/metricsql"
+	"github.com/zzylol/metricsql"
 )
 
 var (
