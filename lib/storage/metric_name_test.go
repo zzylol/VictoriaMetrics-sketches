@@ -138,7 +138,7 @@ func TestMetricNameMarshalUnmarshalRaw(t *testing.T) {
 				value := fmt.Sprintf("\x02\x00\x01value_%d_%d", i, j)
 				mn.AddTag(key, value)
 			}
-			data := mn.marshalRaw(nil)
+			data := mn.MarshalRaw(nil)
 			var mn1 MetricName
 			if err := mn1.UnmarshalRaw(data); err != nil {
 				t.Fatalf("cannot unmarshal mn %s: %s", &mn, err)
