@@ -147,3 +147,50 @@ ingestion completed
 === RUN   TestWriteZipfThroughPut
 2024-09-09T20:18:25.765Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
 2024-09-09T20:18:25.819Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-09T20:19:28.762Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (12 parts, 183500100 rows, 124659 blocks, 675941824 bytes) into (1 part, 183500100 rows, 34124 blocks, 552828001 bytes) in 34.681 seconds at 5291137 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3ACD3518EFBB8"
+2024-09-09T20:19:41.039Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (11 parts, 180290913 rows, 110000 blocks, 637005024 bytes) into (1 part, 180290913 rows, 29000 blocks, 540137142 bytes) in 36.077 seconds at 4997414 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3ACD3518EFBB9"
+ingestion completed
+    insert_throughput_test.go:68: 10000 380.235147472 1.1361390520370342e+06
+--- PASS: TestWriteZipfThroughPut (384.64s)
+=== RUN   TestWriteZipfThroughPut
+2024-09-09T20:24:49.979Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-09T20:24:50.016Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-09T20:26:06.898Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 150041362 rows, 90000 blocks, 542067328 bytes) into (1 part, 150041362 rows, 20000 blocks, 449977593 bytes) in 37.914 seconds at 3957391 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AD2CC578FCB6"
+2024-09-09T20:26:06.949Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (15 parts, 197999833 rows, 151528 blocks, 729723104 bytes) into (1 part, 197999833 rows, 31246 blocks, 595828190 bytes) in 47.908 seconds at 4132956 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AD2CC578FCB5"
+ingestion completed
+    insert_throughput_test.go:68: 10000 379.721801246 1.1376749993875963e+06
+--- PASS: TestWriteZipfThroughPut (383.81s)
+=== RUN   TestWriteZipfThroughPut
+2024-09-09T20:31:12.778Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-09T20:31:12.818Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-09T20:32:21.558Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (8 parts, 154769220 rows, 86009 blocks, 555182464 bytes) into (1 part, 154769220 rows, 25208 blocks, 464157487 bytes) in 38.141 seconds at 4057863 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AD85E645AF60"
+2024-09-09T20:32:21.660Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (13 parts, 183500100 rows, 143766 blocks, 663932736 bytes) into (1 part, 183500100 rows, 40773 blocks, 553676532 bytes) in 39.534 seconds at 4641569 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AD85E645AF5F"
+ingestion completed
+    insert_throughput_test.go:68: 10000 379.708972855 1.1377134355078e+06
+--- PASS: TestWriteZipfThroughPut (382.78s)
+PASS
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	1925.403s
+=== RUN   TestWriteZipfThroughPut
+2024-09-09T20:37:38.374Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
+2024-09-09T20:38:23.084Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-09T20:38:23.121Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-09T20:39:14.390Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 193564 blocks, 107524928 bytes) into (1 part, 23592870 rows, 51755 blocks, 85263488 bytes) in 36.175 seconds at 652183 rows/sec to ""
+2024-09-09T20:39:42.631Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (8 parts, 20971440 rows, 123424 blocks, 99355936 bytes) into (1 part, 20971440 rows, 32329 blocks, 73605824 bytes) in 32.620 seconds at 642893 rows/sec to ""
+2024-09-09T20:39:45.239Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 45000 blocks, 89343680 bytes) into (1 part, 23592870 rows, 5000 blocks, 82886832 bytes) in 34.439 seconds at 685055 rows/sec to ""
+2024-09-09T20:39:45.556Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 75787 blocks, 103410016 bytes) into (1 part, 23592870 rows, 17793 blocks, 87015872 bytes) in 42.851 seconds at 550581 rows/sec to ""
+2024-09-09T20:39:58.833Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 109935 blocks, 102706208 bytes) into (1 part, 23592870 rows, 32874 blocks, 91775680 bytes) in 48.277 seconds at 488696 rows/sec to ""
+2024-09-09T20:40:05.634Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (10 parts, 26214300 rows, 644174 blocks, 152403584 bytes) into (1 part, 26214300 rows, 89509 blocks, 116467712 bytes) in 30.044 seconds at 872527 rows/sec to ""
+2024-09-09T20:40:08.857Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (8 parts, 20971440 rows, 605610 blocks, 116013056 bytes) into (1 part, 20971440 rows, 77372 blocks, 93169408 bytes) in 32.967 seconds at 636132 rows/sec to ""
+2024-09-09T20:40:11.030Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 663875 blocks, 136223360 bytes) into (1 part, 23592870 rows, 101037 blocks, 103852288 bytes) in 32.806 seconds at 719163 rows/sec to ""
+2024-09-09T20:40:11.585Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 626845 blocks, 130644384 bytes) into (1 part, 23592870 rows, 77594 blocks, 103261952 bytes) in 35.531 seconds at 664000 rows/sec to ""
+2024-09-09T20:40:11.927Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 698746 blocks, 133341696 bytes) into (1 part, 23592870 rows, 97552 blocks, 103852032 bytes) in 36.128 seconds at 653033 rows/sec to ""
+2024-09-09T20:40:12.252Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 701713 blocks, 138993408 bytes) into (1 part, 23592870 rows, 81397 blocks, 103851776 bytes) in 35.634 seconds at 662096 rows/sec to ""
+2024-09-09T20:40:34.438Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 597978 blocks, 142130048 bytes) into (1 part, 23592870 rows, 103626 blocks, 104360192 bytes) in 54.332 seconds at 434235 rows/sec to ""
+2024-09-09T20:40:34.907Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (8 parts, 20971440 rows, 88582 blocks, 96283088 bytes) into (1 part, 20971440 rows, 13524 blocks, 78487904 bytes) in 31.262 seconds at 670828 rows/sec to ""
+2024-09-09T20:41:09.208Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (11 parts, 28835730 rows, 340910 blocks, 139870336 bytes) into (1 part, 28835730 rows, 99411 blocks, 116492288 bytes) in 66.823 seconds at 431526 rows/sec to ""
+2024-09-09T20:41:10.715Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (6 parts, 115491979 rows, 292205 blocks, 429767168 bytes) into (1 part, 115491979 rows, 101825 blocks, 351397191 bytes) in 96.921 seconds at 1191605 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3ADEA164C611B"
+2024-09-09T20:41:50.962Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (10 parts, 26214300 rows, 401339 blocks, 137129824 bytes) into (1 part, 26214300 rows, 103886 blocks, 116492288 bytes) in 119.416 seconds at 219519 rows/sec to ""
+2024-09-09T20:41:52.523Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 86622 blocks, 100600144 bytes) into (1 part, 23592870 rows, 33623 blocks, 91775680 bytes) in 110.324 seconds at 213850 rows/sec to ""
+signal: killed
+FAIL	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	332.987s
+FAIL
