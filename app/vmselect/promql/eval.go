@@ -284,7 +284,7 @@ func evalExpr(qt *querytracer.Tracer, ec *EvalConfig, e metricsql.Expr) ([]*time
 }
 
 func evalExprInternal(qt *querytracer.Tracer, ec *EvalConfig, e metricsql.Expr) ([]*timeseries, error) {
-	fmt.Println("[evalExprInternal] ec=", ec, "e=", e)
+	// fmt.Println("[evalExprInternal] ec=", ec, "e=", e)
 
 	if me, ok := e.(*metricsql.MetricExpr); ok {
 		re := &metricsql.RollupExpr{
@@ -801,7 +801,7 @@ func getRollupExprArg(arg metricsql.Expr) *metricsql.RollupExpr {
 func evalRollupFunc(qt *querytracer.Tracer, ec *EvalConfig, funcName string, rf rollupFunc, rargs []interface{},
 	expr metricsql.Expr, re *metricsql.RollupExpr, iafc *incrementalAggrFuncContext) ([]*timeseries, error) {
 
-	fmt.Println("[evalRollupFunc] re=", re)
+	// fmt.Println("[evalRollupFunc] re=", re)
 
 	if re.At == nil {
 		return evalRollupFuncWithoutAt(qt, ec, funcName, rf, rargs, expr, re, iafc)
@@ -844,7 +844,7 @@ func evalRollupFuncWithoutAt(qt *querytracer.Tracer, ec *EvalConfig, funcName st
 	funcName = strings.ToLower(funcName)
 	ecNew := ec
 
-	fmt.Println("[evalRollupFuncWithoutAt]", re)
+	// fmt.Println("[evalRollupFuncWithoutAt]", re)
 
 	var offset int64
 	if re.Offset != nil {
@@ -1608,7 +1608,7 @@ func evalRollupFuncWithMetricExpr(qt *querytracer.Tracer, ec *EvalConfig, funcNa
 		return evalNumber(ec, nan), nil
 	}
 
-	fmt.Println("[evalRollupFuncWithMetricExpr], window =", window)
+	// fmt.Println("[evalRollupFuncWithMetricExpr], window =", window)
 
 	if ec.Start == ec.End {
 		rvs, err := evalInstantRollup(qt, ec, funcName, rf, args, expr, me, iafc, window)
@@ -1696,7 +1696,7 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 		return nil, err
 	}
 
-	fmt.Println("[evalRollupFuncNoCache] rcs=", rcs)
+	// fmt.Println("[evalRollupFuncNoCache] rcs=", rcs)
 
 	tfss := searchutils.ToTagFilterss(me.LabelFilterss)
 	tfss = searchutils.JoinTagFilterss(tfss, ec.EnforcedTagFilterss)
