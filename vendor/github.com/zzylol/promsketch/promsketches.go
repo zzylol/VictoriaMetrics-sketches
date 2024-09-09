@@ -145,6 +145,7 @@ type memSeries struct {
 	lset            labels.Labels
 	sketchInstances *SketchInstances
 	memoryPart      goconcurrentqueue.Queue
+	oldestTimestamp int64
 }
 
 type sketchSeriesHashMap struct {
@@ -360,6 +361,7 @@ func newMemSeries(lset labels.Labels, id TSId) *memSeries {
 		id:              id,
 		sketchInstances: nil,
 		memoryPart:      goconcurrentqueue.NewFixedFIFO(500),
+		oldestTimestamp: -1,
 	}
 	return s
 }
@@ -440,6 +442,92 @@ func (ps *PromSketches) LookUp(lset labels.Labels, funcName string, mint, maxt i
 			if series.sketchInstances.sampling == nil {
 				return false
 			} else if series.sketchInstances.sampling.Cover(mint, maxt) == false {
+				return false
+			}
+		/*
+			case EffSum:
+				if series.sketchInstances.EffSum == nil {
+					// fmt.Println("[lookup] effsum no sketch instance")
+					return false
+				} else if series.sketchInstances.EffSum.Cover(mint, maxt) == false {
+					// fmt.Println("[lookup] effsum not covered")
+					return false
+				}
+			case EffSum2:
+				if series.sketchInstances.EffSum2 == nil {
+					// fmt.Println("[lookup] no sketch instance")
+					return false
+				} else if series.sketchInstances.EffSum2.Cover(mint, maxt) == false {
+					// fmt.Println("[lookup] not covered")
+					return false
+				}
+			case EHDD:
+				if series.sketchInstances.ehdd == nil {
+					// fmt.Println("[lookup] no sketch instance")
+					return false
+				} else if series.sketchInstances.ehdd.Cover(mint, maxt) == false {
+					// fmt.Println("[lookup] not covered")
+					return false
+				}
+		*/
+		default:
+			return false
+		}
+	}
+	return true
+}
+
+func (ps *PromSketches) LookUpAndUpdateWindow(lset labels.Labels, funcName string, mint, maxt int64) bool {
+	series := ps.series.getByHash(lset.Hash(), lset)
+	if series == nil {
+		// fmt.Println("[lookup] no timeseries")
+		return false
+	}
+	stypes := funcSketchMap[funcName]
+
+	startt := mint
+	if series.oldestTimestamp != -1 && mint < series.oldestTimestamp {
+		startt = series.oldestTimestamp
+	}
+
+	for _, stype := range stypes {
+		switch stype {
+		/*
+			case EHCount:
+				if series.sketchInstances.ehc == nil {
+					// fmt.Println("[lookup] ehc no sketch instance")
+					return false
+				} else if series.sketchInstances.ehc.Cover(mint, maxt) == false {
+					// fmt.Println("[lookup] ehc not covered")
+					return false
+				}
+		*/
+		case EHUniv:
+			if series.sketchInstances.ehuniv == nil {
+				// fmt.Println("[lookup] no sketch instance")
+				return false
+			} else if series.sketchInstances.ehuniv.Cover(startt, maxt) == false {
+				if series.sketchInstances.ehuniv.time_window_size < maxt-mint {
+					series.sketchInstances.ehuniv.UpdateWindow(maxt - mint)
+				}
+				return false
+			}
+		case EHKLL:
+			if series.sketchInstances.ehkll == nil {
+				return false
+			} else if series.sketchInstances.ehkll.Cover(startt, maxt) == false {
+				if series.sketchInstances.ehkll.time_window_size < maxt-mint {
+					series.sketchInstances.ehkll.UpdateWindow(maxt - mint)
+				}
+				return false
+			}
+		case USampling:
+			if series.sketchInstances.sampling == nil {
+				return false
+			} else if series.sketchInstances.sampling.Cover(startt, maxt) == false {
+				if series.sketchInstances.sampling.Time_window_size < maxt-mint {
+					series.sketchInstances.sampling.UpdateWindow(maxt - mint)
+				}
 				return false
 			}
 		/*
@@ -650,9 +738,14 @@ func (ps *PromSketches) SketchInsertDefinedRules(lset labels.Labels, t int64, va
 // t.(int64) is millisecond level timestamp, based on Prometheus timestamp
 func (ps *PromSketches) SketchInsert(lset labels.Labels, t int64, val float64) error {
 	s := ps.series.getByHash(lset.Hash(), lset)
-	if s == nil {
+	if s == nil || s.sketchInstances == nil {
 		return nil
 	}
+
+	if s.oldestTimestamp == -1 {
+		s.oldestTimestamp = t
+	}
+
 	var wg sync.WaitGroup
 	if s.sketchInstances.ehkll != nil {
 		s.sketchInstances.ehkll.Update(t, val)
@@ -664,26 +757,12 @@ func (ps *PromSketches) SketchInsert(lset labels.Labels, t int64, val float64) e
 
 	if s.sketchInstances.ehuniv != nil {
 		wg.Add(1)
-		// s.MemPartAppend(t, val)
+
 		go func() {
 			defer wg.Done()
 			s.sketchInstances.ehuniv.Update(t, val)
 		}()
 
-		/*
-			go func() {
-				for s.memoryPart.GetLen() >= 500 { // s.memoryPart should be a FIFO queue and concurrency safe; TODO: find a efficient impl
-					for i := 0; i < 500; i++ {
-						item, err := s.memoryPart.Dequeue()
-						if err != nil {
-							fmt.Println("memory queue dequeue error")
-							break
-						}
-						s.sketchInstances.shuniv.Update(item.(Sample).T, strconv.FormatFloat(item.(Sample).F, 'f', -1, 64))
-					}
-				}
-			}()
-		*/
 	}
 
 	wg.Wait()
