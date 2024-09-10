@@ -1,196 +1,171 @@
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:28.159Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
+2024-09-10T03:22:32.556Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+2024-09-10T03:22:33.297Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:33.329Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1 0.334925952 128983.7342912143
---- PASS: TestWriteZipfThroughPut (1.27s)
+    insert_throughput_test.go:68: 1 0.531408119 81293.451220304
+--- PASS: TestWriteZipfThroughPut (2.10s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:30.139Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:30.171Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:22:35.121Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:35.149Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1 0.406958072 106153.44177274361
---- PASS: TestWriteZipfThroughPut (1.67s)
+    insert_throughput_test.go:68: 1 0.886801478 48714.39783504736
+--- PASS: TestWriteZipfThroughPut (2.17s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:32.390Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:32.417Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:22:37.266Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:37.295Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1 0.244875689 176416.0426721658
---- PASS: TestWriteZipfThroughPut (2.15s)
+    insert_throughput_test.go:68: 1 0.859210361 50278.72330324471
+--- PASS: TestWriteZipfThroughPut (2.13s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:33.852Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:33.888Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:22:39.403Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:39.431Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1 0.275245855 156950.59240764953
---- PASS: TestWriteZipfThroughPut (1.54s)
+    insert_throughput_test.go:68: 1 0.679114045 63612.29062785765
+--- PASS: TestWriteZipfThroughPut (1.98s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:35.397Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:35.426Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:22:41.333Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:41.361Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1 0.261349696 165295.77290956557
---- PASS: TestWriteZipfThroughPut (1.50s)
+    insert_throughput_test.go:68: 1 0.650524548 66407.94745227661
+--- PASS: TestWriteZipfThroughPut (1.93s)
 PASS
-ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	8.220s
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	10.359s
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:37.320Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
-2024-09-09T20:01:38.121Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:38.151Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:22:43.656Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+2024-09-10T03:22:44.432Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:44.463Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10 0.737552343 585721.1411502492
---- PASS: TestWriteZipfThroughPut (2.34s)
+    insert_throughput_test.go:68: 10 1.939292557 222761.64493112115
+--- PASS: TestWriteZipfThroughPut (3.44s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:40.163Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:40.209Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:22:47.655Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:47.691Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10 0.751131359 575132.4250063696
---- PASS: TestWriteZipfThroughPut (2.11s)
+    insert_throughput_test.go:68: 10 2.183849955 197815.78812725714
+--- PASS: TestWriteZipfThroughPut (3.45s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:42.332Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:42.366Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:22:51.335Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:51.369Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10 0.717166799 602370.3280776108
---- PASS: TestWriteZipfThroughPut (2.18s)
+    insert_throughput_test.go:68: 10 1.836281152 235258.09189376247
+--- PASS: TestWriteZipfThroughPut (3.30s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:44.446Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:44.483Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:22:54.424Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:54.455Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10 0.813785178 530852.6275468733
---- PASS: TestWriteZipfThroughPut (2.11s)
+    insert_throughput_test.go:68: 10 1.9475348000000001 221818.88611181683
+--- PASS: TestWriteZipfThroughPut (3.22s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:46.516Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:46.570Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:22:57.642Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:22:57.674Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10 0.66004862 654497.2399154474
---- PASS: TestWriteZipfThroughPut (1.94s)
+    insert_throughput_test.go:68: 10 2.280340613 189445.3826490701
+--- PASS: TestWriteZipfThroughPut (3.50s)
 PASS
-ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	10.786s
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	16.996s
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:48.952Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
-2024-09-09T20:01:49.847Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:49.875Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:23:01.643Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+2024-09-10T03:23:02.467Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:23:02.499Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 100 3.958833864 1.091230435124923e+06
---- PASS: TestWriteZipfThroughPut (7.07s)
+    insert_throughput_test.go:68: 100 14.378391986 300450.8434744519
+--- PASS: TestWriteZipfThroughPut (15.86s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:01:56.755Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:01:56.786Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:23:18.056Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:23:18.089Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 100 4.17602015 1.0344777670672877e+06
---- PASS: TestWriteZipfThroughPut (6.87s)
+    insert_throughput_test.go:68: 100 15.263862223 283021.422552577
+--- PASS: TestWriteZipfThroughPut (16.45s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:02:03.553Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:02:03.594Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:23:34.567Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:23:34.597Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 100 4.220635658 1.023542506402243e+06
---- PASS: TestWriteZipfThroughPut (6.89s)
+    insert_throughput_test.go:68: 100 15.314840703 282079.3297023169
+--- PASS: TestWriteZipfThroughPut (16.55s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:02:10.386Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:02:10.425Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:23:51.084Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:23:51.114Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 100 3.9850103629999998 1.0840624255611252e+06
---- PASS: TestWriteZipfThroughPut (6.54s)
+    insert_throughput_test.go:68: 100 15.000370323 287992.88997393375
+--- PASS: TestWriteZipfThroughPut (16.20s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:02:16.903Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:02:16.938Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:24:07.259Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:24:07.287Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 100 3.806217147 1.134985165889696e+06
---- PASS: TestWriteZipfThroughPut (6.33s)
+    insert_throughput_test.go:68: 100 14.777418789 292337.9286791085
+--- PASS: TestWriteZipfThroughPut (15.99s)
 PASS
-ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	33.871s
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	81.163s
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:02:23.671Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
-2024-09-09T20:02:24.971Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:02:25.027Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:24:23.658Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+2024-09-10T03:24:24.900Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:24:24.956Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1000 36.827693703 1.173030283905096e+06
---- PASS: TestWriteZipfThroughPut (38.21s)
+    insert_throughput_test.go:68: 1000 35.374686964 1.2212122200251168e+06
+--- PASS: TestWriteZipfThroughPut (39.94s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:03:02.833Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:03:02.869Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:25:04.586Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:25:04.617Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1000 36.41416991 1.186351360109859e+06
---- PASS: TestWriteZipfThroughPut (37.47s)
+    insert_throughput_test.go:68: 1000 35.673104577 1.210996365812605e+06
+--- PASS: TestWriteZipfThroughPut (39.45s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:03:40.317Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:03:40.352Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:25:44.016Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:25:44.047Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1000 36.272817945 1.1909744664862708e+06
---- PASS: TestWriteZipfThroughPut (37.33s)
+    insert_throughput_test.go:68: 1000 35.404741359 1.2201755567695573e+06
+--- PASS: TestWriteZipfThroughPut (38.93s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:04:17.565Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:04:17.601Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:26:22.910Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:26:22.951Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1000 35.854923375 1.2048554545265432e+06
---- PASS: TestWriteZipfThroughPut (36.86s)
+    insert_throughput_test.go:68: 1000 35.155715954 1.2288186665441734e+06
+--- PASS: TestWriteZipfThroughPut (39.52s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:04:54.342Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:04:54.418Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T03:27:02.330Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:27:02.363Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 1000 36.228109152 1.1924442376704914e+06
---- PASS: TestWriteZipfThroughPut (37.14s)
+    insert_throughput_test.go:68: 1000 35.469317934 1.2179540661138443e+06
+--- PASS: TestWriteZipfThroughPut (39.53s)
 PASS
-ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	187.586s
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	197.787s
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:05:32.133Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
-2024-09-09T20:05:37.346Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:05:37.458Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
-2024-09-09T20:06:54.461Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (15 parts, 173213488 rows, 157023 blocks, 704106912 bytes) into (1 part, 173213488 rows, 33426 blocks, 520627234 bytes) in 44.075 seconds at 3929975 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AC206A0A6A06"
-2024-09-09T20:06:54.512Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (10 parts, 174538458 rows, 100121 blocks, 631917376 bytes) into (1 part, 174538458 rows, 28121 blocks, 523169367 bytes) in 41.400 seconds at 4215920 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AC206A0A6A07"
+2024-09-10T03:27:42.321Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+2024-09-10T03:27:46.921Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:27:46.959Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10000 381.827506362 1.1314009410061538e+06
---- PASS: TestWriteZipfThroughPut (387.02s)
+    insert_throughput_test.go:68: 10000 395.461906458 1.0923934592569424e+06
+--- PASS: TestWriteZipfThroughPut (405.15s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:12:02.684Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:12:02.730Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
-2024-09-09T20:13:02.400Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (13 parts, 162528660 rows, 136684 blocks, 593751808 bytes) into (1 part, 162528660 rows, 31694 blocks, 488272917 bytes) in 30.841 seconds at 5269906 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AC7A1FAA045A"
+2024-09-10T03:34:31.098Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:34:31.136Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10000 378.462010722 1.1414619902691538e+06
---- PASS: TestWriteZipfThroughPut (382.27s)
+    insert_throughput_test.go:68: 10000 392.809745412 1.0997690486189318e+06
+--- PASS: TestWriteZipfThroughPut (398.94s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:18:25.765Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:18:25.819Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
-2024-09-09T20:19:28.762Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (12 parts, 183500100 rows, 124659 blocks, 675941824 bytes) into (1 part, 183500100 rows, 34124 blocks, 552828001 bytes) in 34.681 seconds at 5291137 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3ACD3518EFBB8"
-2024-09-09T20:19:41.039Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (11 parts, 180290913 rows, 110000 blocks, 637005024 bytes) into (1 part, 180290913 rows, 29000 blocks, 540137142 bytes) in 36.077 seconds at 4997414 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3ACD3518EFBB9"
+2024-09-10T03:41:09.923Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:41:09.963Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10000 380.235147472 1.1361390520370342e+06
---- PASS: TestWriteZipfThroughPut (384.64s)
+    insert_throughput_test.go:68: 10000 391.82006524 1.1025469043689447e+06
+--- PASS: TestWriteZipfThroughPut (398.00s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:24:49.979Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:24:50.016Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
-2024-09-09T20:26:06.898Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 150041362 rows, 90000 blocks, 542067328 bytes) into (1 part, 150041362 rows, 20000 blocks, 449977593 bytes) in 37.914 seconds at 3957391 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AD2CC578FCB6"
-2024-09-09T20:26:06.949Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (15 parts, 197999833 rows, 151528 blocks, 729723104 bytes) into (1 part, 197999833 rows, 31246 blocks, 595828190 bytes) in 47.908 seconds at 4132956 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AD2CC578FCB5"
+2024-09-10T03:47:47.160Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:47:47.193Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10000 379.721801246 1.1376749993875963e+06
---- PASS: TestWriteZipfThroughPut (383.81s)
+    insert_throughput_test.go:68: 10000 391.31891104 1.1039589138482541e+06
+--- PASS: TestWriteZipfThroughPut (396.56s)
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:31:12.778Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:31:12.818Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
-2024-09-09T20:32:21.558Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (8 parts, 154769220 rows, 86009 blocks, 555182464 bytes) into (1 part, 154769220 rows, 25208 blocks, 464157487 bytes) in 38.141 seconds at 4057863 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AD85E645AF60"
-2024-09-09T20:32:21.660Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (13 parts, 183500100 rows, 143766 blocks, 663932736 bytes) into (1 part, 183500100 rows, 40773 blocks, 553676532 bytes) in 39.534 seconds at 4641569 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3AD85E645AF5F"
+2024-09-10T03:54:24.002Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T03:54:24.038Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
 ingestion completed
-    insert_throughput_test.go:68: 10000 379.708972855 1.1377134355078e+06
---- PASS: TestWriteZipfThroughPut (382.78s)
+    insert_throughput_test.go:68: 10000 393.281733299 1.0984491864806842e+06
+--- PASS: TestWriteZipfThroughPut (399.99s)
 PASS
-ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	1925.403s
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	2001.656s
 === RUN   TestWriteZipfThroughPut
-2024-09-09T20:37:38.374Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
-2024-09-09T20:38:23.084Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
-2024-09-09T20:38:23.121Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
-2024-09-09T20:39:14.390Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 193564 blocks, 107524928 bytes) into (1 part, 23592870 rows, 51755 blocks, 85263488 bytes) in 36.175 seconds at 652183 rows/sec to ""
-2024-09-09T20:39:42.631Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (8 parts, 20971440 rows, 123424 blocks, 99355936 bytes) into (1 part, 20971440 rows, 32329 blocks, 73605824 bytes) in 32.620 seconds at 642893 rows/sec to ""
-2024-09-09T20:39:45.239Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 45000 blocks, 89343680 bytes) into (1 part, 23592870 rows, 5000 blocks, 82886832 bytes) in 34.439 seconds at 685055 rows/sec to ""
-2024-09-09T20:39:45.556Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 75787 blocks, 103410016 bytes) into (1 part, 23592870 rows, 17793 blocks, 87015872 bytes) in 42.851 seconds at 550581 rows/sec to ""
-2024-09-09T20:39:58.833Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 109935 blocks, 102706208 bytes) into (1 part, 23592870 rows, 32874 blocks, 91775680 bytes) in 48.277 seconds at 488696 rows/sec to ""
-2024-09-09T20:40:05.634Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (10 parts, 26214300 rows, 644174 blocks, 152403584 bytes) into (1 part, 26214300 rows, 89509 blocks, 116467712 bytes) in 30.044 seconds at 872527 rows/sec to ""
-2024-09-09T20:40:08.857Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (8 parts, 20971440 rows, 605610 blocks, 116013056 bytes) into (1 part, 20971440 rows, 77372 blocks, 93169408 bytes) in 32.967 seconds at 636132 rows/sec to ""
-2024-09-09T20:40:11.030Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 663875 blocks, 136223360 bytes) into (1 part, 23592870 rows, 101037 blocks, 103852288 bytes) in 32.806 seconds at 719163 rows/sec to ""
-2024-09-09T20:40:11.585Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 626845 blocks, 130644384 bytes) into (1 part, 23592870 rows, 77594 blocks, 103261952 bytes) in 35.531 seconds at 664000 rows/sec to ""
-2024-09-09T20:40:11.927Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 698746 blocks, 133341696 bytes) into (1 part, 23592870 rows, 97552 blocks, 103852032 bytes) in 36.128 seconds at 653033 rows/sec to ""
-2024-09-09T20:40:12.252Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 701713 blocks, 138993408 bytes) into (1 part, 23592870 rows, 81397 blocks, 103851776 bytes) in 35.634 seconds at 662096 rows/sec to ""
-2024-09-09T20:40:34.438Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 597978 blocks, 142130048 bytes) into (1 part, 23592870 rows, 103626 blocks, 104360192 bytes) in 54.332 seconds at 434235 rows/sec to ""
-2024-09-09T20:40:34.907Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (8 parts, 20971440 rows, 88582 blocks, 96283088 bytes) into (1 part, 20971440 rows, 13524 blocks, 78487904 bytes) in 31.262 seconds at 670828 rows/sec to ""
-2024-09-09T20:41:09.208Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (11 parts, 28835730 rows, 340910 blocks, 139870336 bytes) into (1 part, 28835730 rows, 99411 blocks, 116492288 bytes) in 66.823 seconds at 431526 rows/sec to ""
-2024-09-09T20:41:10.715Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (6 parts, 115491979 rows, 292205 blocks, 429767168 bytes) into (1 part, 115491979 rows, 101825 blocks, 351397191 bytes) in 96.921 seconds at 1191605 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3ADEA164C611B"
-2024-09-09T20:41:50.962Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (10 parts, 26214300 rows, 401339 blocks, 137129824 bytes) into (1 part, 26214300 rows, 103886 blocks, 116492288 bytes) in 119.416 seconds at 219519 rows/sec to ""
-2024-09-09T20:41:52.523Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (9 parts, 23592870 rows, 86622 blocks, 100600144 bytes) into (1 part, 23592870 rows, 33623 blocks, 91775680 bytes) in 110.324 seconds at 213850 rows/sec to ""
-signal: killed
-FAIL	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	332.987s
-FAIL
+2024-09-10T04:01:04.850Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+2024-09-10T04:01:48.266Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2024-09-10T04:01:48.306Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+2024-09-10T04:10:27.928Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (14 parts, 478871100 rows, 1400000 blocks, 1336849584 bytes) into (1 part, 478871100 rows, 100000 blocks, 1089320216 bytes) in 63.885 seconds at 7495874 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3C61C96EB6530"
+2024-09-10T04:18:34.794Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:1462	merged (14 parts, 511042200 rows, 1400000 blocks, 1377518214 bytes) into (1 part, 511042200 rows, 100000 blocks, 1128310962 bytes) in 69.090 seconds at 7396725 rows/sec to "/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01/17F3C61C96EB6596"
