@@ -56,7 +56,7 @@ func TestWriteZipfThroughPut(t *testing.T) {
 				panic(fmt.Errorf("Failed register vmsketch cache Sampling instance %w", err))
 			}
 		*/
-		err := vmsketch.RegisterMetricNameFuncName(&mn, "quantile_over_time", 10000000, 100000)
+		err := vmsketch.RegisterMetricNameFuncName(&mn, "quantile_over_time", 1000000, 10000)
 		if err != nil {
 			panic(fmt.Errorf("Failed register vmsketch cache EHKLL instance %w", err))
 		}
