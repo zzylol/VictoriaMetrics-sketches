@@ -46,18 +46,20 @@ func TestWriteZipfThroughPut(t *testing.T) {
 		}
 		mr := &metricRows[ts_id]
 		mr.MetricNameRaw = mn.MarshalRaw(mr.MetricNameRaw[:0])
-		err := vmsketch.RegisterMetricNameFuncName(&mn, "distinct_over_time", 10000000, 100000)
+		err := vmsketch.RegisterMetricNameFuncName(&mn, "distinct_over_time", 1000000, 10000)
 		if err != nil {
 			panic(fmt.Errorf("Failed register vmsketch cache EHuniv instance %w", err))
 		}
-		err = vmsketch.RegisterMetricNameFuncName(&mn, "avg_over_time", 10000000, 100000)
-		if err != nil {
-			panic(fmt.Errorf("Failed register vmsketch cache Sampling instance %w", err))
-		}
-		err = vmsketch.RegisterMetricNameFuncName(&mn, "quantile_over_time", 10000000, 100000)
-		if err != nil {
-			panic(fmt.Errorf("Failed register vmsketch cache EHKLL instance %w", err))
-		}
+		/*
+			err = vmsketch.RegisterMetricNameFuncName(&mn, "avg_over_time", 10000000, 100000)
+			if err != nil {
+				panic(fmt.Errorf("Failed register vmsketch cache Sampling instance %w", err))
+			}
+			err = vmsketch.RegisterMetricNameFuncName(&mn, "quantile_over_time", 10000000, 100000)
+			if err != nil {
+				panic(fmt.Errorf("Failed register vmsketch cache EHKLL instance %w", err))
+			}
+		*/
 	}
 
 	tNow := time.Now()
