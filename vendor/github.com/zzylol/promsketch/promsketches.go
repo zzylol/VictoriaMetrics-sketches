@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"sync"
 	"sync/atomic"
 	"time"
 
@@ -746,7 +745,6 @@ func (ps *PromSketches) SketchInsert(lset labels.Labels, t int64, val float64) e
 		s.oldestTimestamp = t
 	}
 
-	var wg sync.WaitGroup
 	if s.sketchInstances.ehkll != nil {
 		s.sketchInstances.ehkll.Update(t, val)
 	}
@@ -756,16 +754,9 @@ func (ps *PromSketches) SketchInsert(lset labels.Labels, t int64, val float64) e
 	}
 
 	if s.sketchInstances.ehuniv != nil {
-		wg.Add(1)
-
-		go func() {
-			defer wg.Done()
-			s.sketchInstances.ehuniv.Update(t, val)
-		}()
-
+		s.sketchInstances.ehuniv.Update(t, val)
 	}
 
-	wg.Wait()
 	return nil
 }
 
@@ -779,27 +770,4 @@ func (ps *PromSketches) StopBackground() {
 			series.sketchInstances.ehuniv.StopBackgroundClean()
 		}
 	}
-}
-
-func (ps *PromSketches) BackgroundSketchInsert() {
-	var wg sync.WaitGroup
-	for id := 0; id < int(ps.series.id); id++ {
-		series := ps.series.getByID(TSId(id))
-		if series == nil {
-			continue
-		}
-		wg.Add(1)
-		go func() {
-			for series.memoryPart.GetLen() > 0 { // s.memoryPart should be a FIFO queue and concurrency safe; TODO: find a efficient impl
-				item, err := series.memoryPart.Dequeue()
-				if err != nil {
-					fmt.Println("memory queue dequeue error")
-					break
-				}
-				series.sketchInstances.ehuniv.Update(item.(Sample).T, item.(Sample).F)
-			}
-			wg.Done()
-		}()
-	}
-	wg.Wait()
 }
