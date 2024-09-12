@@ -232,7 +232,6 @@ func (ehkll *ExpoHistogramKLL) QueryIntervalMergeKLL(t1, t2 int64) *kll.Sketch {
 	for i := 0; i < ehkll.s_count; i++ {
 		if t1 >= ehkll.min_time[i] && t1 <= ehkll.max_time[i] {
 			from_bucket = i
-		} else {
 			break
 		}
 	}
@@ -240,7 +239,6 @@ func (ehkll *ExpoHistogramKLL) QueryIntervalMergeKLL(t1, t2 int64) *kll.Sketch {
 	for i := 0; i < ehkll.s_count; i++ {
 		if t2 >= ehkll.min_time[i] && t2 <= ehkll.max_time[i] {
 			to_bucket = i
-		} else {
 			break
 		}
 	}

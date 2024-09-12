@@ -43,10 +43,12 @@ func (s *UniformSampling) GetMemory() float64 {
 
 func (s *UniformSampling) Insert(t int64, x float64) {
 	s.mutex.Lock()
+
 	s.Cur_time = t
 	shift := 0
 	// fmt.Println(s.Arr)
 	for i := range s.Arr {
+
 		if s.Arr[i].T < s.Cur_time-s.Time_window_size {
 			shift = i
 		} else {
@@ -54,6 +56,7 @@ func (s *UniformSampling) Insert(t int64, x float64) {
 			break
 		}
 	}
+
 	s.Arr = s.Arr[shift:]
 	r := rand.Float64()
 	if r <= s.Sampling_rate {
@@ -165,14 +168,16 @@ func quantiles(qs []float64, values []float64) (quantiles []float64) {
 
 func (s *UniformSampling) QueryQuantile(phis []float64, t1, t2 int64) []float64 {
 	values := make([]float64, 0)
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		values = append(values, v.F)
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return []float64{math.NaN()}
+	}
+
+	for i := idx_1; i <= idx_2; i++ {
+		values = append(values, s.Arr[i].F)
 	}
 	return quantiles(phis, values)
 }
@@ -225,14 +230,17 @@ func (s *UniformSampling) QueryAvg(t1, t2 int64) float64 {
 	s.mutex.RLock()
 	var sum float64 = 0
 	var n float64 = 0
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		sum += v.F
+
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
+	}
+
+	for i := idx_1; i <= idx_2; i++ {
+		sum += s.Arr[i].F
 		n += 1
 	}
 	s.mutex.RUnlock()
@@ -242,14 +250,17 @@ func (s *UniformSampling) QueryAvg(t1, t2 int64) float64 {
 func (s *UniformSampling) QuerySum(t1, t2 int64) float64 {
 	s.mutex.RLock()
 	var sum float64 = 0
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		sum += v.F
+
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
+	}
+
+	for i := idx_1; i <= idx_2; i++ {
+		sum += s.Arr[i].F
 	}
 	s.mutex.RUnlock()
 	return sum / float64(s.Sampling_rate)
@@ -258,15 +269,17 @@ func (s *UniformSampling) QuerySum(t1, t2 int64) float64 {
 func (s *UniformSampling) QueryMax(t1, t2 int64) float64 {
 	s.mutex.RLock()
 	var max float64 = 0
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		if v.F > max {
-			max = v.F
+
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
+	}
+	for i := idx_1; i <= idx_2; i++ {
+		if s.Arr[i].F > max {
+			max = s.Arr[i].F
 		}
 	}
 	s.mutex.RUnlock()
@@ -275,16 +288,20 @@ func (s *UniformSampling) QueryMax(t1, t2 int64) float64 {
 
 func (s *UniformSampling) QueryMin(t1, t2 int64) float64 {
 	s.mutex.RLock()
-	var min float64 = s.Arr[0].F
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		if v.F < min {
-			min = v.F
+
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
+	}
+
+	var min float64 = s.Arr[idx_1].F
+
+	for i := idx_1; i <= idx_2; i++ {
+		if s.Arr[i].F < min {
+			min = s.Arr[i].F
 		}
 	}
 	s.mutex.RUnlock()
@@ -294,14 +311,16 @@ func (s *UniformSampling) QueryMin(t1, t2 int64) float64 {
 func (s *UniformSampling) QuerySum2(t1, t2 int64) float64 {
 	s.mutex.RLock()
 	var sum2 float64 = 0
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		sum2 += v.F * v.F
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
+	}
+
+	for i := idx_1; i <= idx_2; i++ {
+		sum2 += s.Arr[i].F * s.Arr[i].F
 	}
 	s.mutex.RUnlock()
 	return sum2 / float64(s.Sampling_rate)
@@ -310,15 +329,15 @@ func (s *UniformSampling) QuerySum2(t1, t2 int64) float64 {
 func (s *UniformSampling) QueryCount(t1, t2 int64) float64 {
 	s.mutex.RLock()
 	var count float64 = 0
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		count += 1
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
 	}
+	count = float64(idx_2 - idx_1 + 1)
+
 	s.mutex.RUnlock()
 	return float64(count) / float64(s.Sampling_rate)
 }
@@ -326,17 +345,19 @@ func (s *UniformSampling) QueryCount(t1, t2 int64) float64 {
 func (s *UniformSampling) QueryL1(t1, t2 int64) float64 {
 	s.mutex.RLock()
 	m := make(map[float64]int)
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		if _, ok := m[v.F]; !ok {
-			m[v.F] = 1
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
+	}
+
+	for i := idx_1; i <= idx_2; i++ {
+		if _, ok := m[s.Arr[i].F]; !ok {
+			m[s.Arr[i].F] = 1
 		} else {
-			m[v.F] += 1
+			m[s.Arr[i].F] += 1
 		}
 	}
 	var l1 float64 = 0
@@ -351,18 +372,20 @@ func (s *UniformSampling) QueryGSum(t1, t2 int64) (float64, float64, float64, fl
 	s.mutex.RLock()
 	m := make(map[float64]int)
 	n := float64(0)
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN(), math.NaN(), math.NaN(), math.NaN()
+	}
+
+	for i := idx_1; i <= idx_2; i++ {
 		n += 1
-		if _, ok := m[v.F]; !ok {
-			m[v.F] = 1
+		if _, ok := m[s.Arr[i].F]; !ok {
+			m[s.Arr[i].F] = 1
 		} else {
-			m[v.F] += 1
+			m[s.Arr[i].F] += 1
 		}
 	}
 	var l1, l2, entropy float64 = 0, 0, 0
@@ -379,17 +402,19 @@ func (s *UniformSampling) QueryGSum(t1, t2 int64) (float64, float64, float64, fl
 func (s *UniformSampling) QueryL2(t1, t2 int64) float64 {
 	s.mutex.RLock()
 	m := make(map[float64]int)
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		if _, ok := m[v.F]; !ok {
-			m[v.F] = 1
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
+	}
+
+	for i := idx_1; i <= idx_2; i++ {
+		if _, ok := m[s.Arr[i].F]; !ok {
+			m[s.Arr[i].F] = 1
 		} else {
-			m[v.F] += 1
+			m[s.Arr[i].F] += 1
 		}
 	}
 	var l2 float64 = 0
@@ -404,18 +429,20 @@ func (s *UniformSampling) QueryEntropy(t1, t2 int64) float64 {
 	s.mutex.RLock()
 	m := make(map[float64]int)
 	n := float64(0)
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
+	}
+
+	for i := idx_1; i <= idx_2; i++ {
 		n += 1
-		if _, ok := m[v.F]; !ok {
-			m[v.F] = 1
+		if _, ok := m[s.Arr[i].F]; !ok {
+			m[s.Arr[i].F] = 1
 		} else {
-			m[v.F] += 1
+			m[s.Arr[i].F] += 1
 		}
 	}
 	var entropy float64 = 0
@@ -429,14 +456,16 @@ func (s *UniformSampling) QueryEntropy(t1, t2 int64) float64 {
 func (s *UniformSampling) QueryDistinct(t1, t2 int64) float64 {
 	s.mutex.RLock()
 	m := make(map[float64]int)
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
-		m[v.F] = 1
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	if idx_1 >= len(s.Arr) {
+		s.mutex.RUnlock()
+		return math.NaN()
+	}
+
+	for i := idx_1; i <= idx_2; i++ {
+		m[s.Arr[i].F] = 1
 	}
 	s.mutex.RUnlock()
 	return float64(len(m)) / float64(s.Sampling_rate)

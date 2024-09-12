@@ -398,18 +398,16 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 	// ehu.print_buckets()
 	// fmt.Println(" ")
 
-	for i := ehu.s_count - 1; i >= 0; i-- {
+	for i := 0; i <= ehu.s_count-1; i++ {
 		if t1 >= ehu.univs[i].min_time && t1 <= ehu.univs[i].max_time {
 			from_bucket = i
-		} else {
 			break
 		}
 	}
 
-	for i := ehu.s_count - 1; i >= 0; i-- {
+	for i := 0; i <= ehu.s_count-1; i++ {
 		if t2 >= ehu.univs[i].min_time && t2 <= ehu.univs[i].max_time {
 			to_bucket = i
-		} else {
 			break
 		}
 	}
@@ -417,9 +415,14 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 	for i := 0; i < ehu.arr_count; i++ {
 		if t1 >= ehu.array[i].min_time && t1 <= ehu.array[i].max_time {
 			from_bucket = i + ehu.s_count
+			break
 		}
+	}
+
+	for i := 0; i < ehu.arr_count; i++ {
 		if t2 >= ehu.array[i].min_time && t2 <= ehu.array[i].max_time {
 			to_bucket = i + ehu.s_count
+			break
 		}
 	}
 
@@ -475,7 +478,7 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 		}
 
 		tmp := make(map[float64]int64)
-		for i := 0; i < to_bucket-ehu.s_count; i++ {
+		for i := 0; i <= to_bucket-ehu.s_count; i++ {
 			for j := 0; j < len(ehu.array[i].samples); j++ {
 				if _, ok := tmp[ehu.array[i].samples[j]]; !ok {
 					tmp[ehu.array[i].samples[j]] = 1
