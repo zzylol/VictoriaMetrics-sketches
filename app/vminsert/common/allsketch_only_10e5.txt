@@ -1,0 +1,128 @@
+=== RUN   TestWriteZipfThroughPut
+2024-09-11T15:15:11.972Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+ingestion completed
+    insert_throughput_test.go:72: 1 0.129938139 332465.8974837249
+--- PASS: TestWriteZipfThroughPut (0.54s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 1 0.128082695 337282.0973200166
+--- PASS: TestWriteZipfThroughPut (0.88s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 1 0.128454243 336306.52433956583
+--- PASS: TestWriteZipfThroughPut (1.17s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 1 0.117637871 367228.67927455093
+--- PASS: TestWriteZipfThroughPut (0.83s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 1 0.112481533 384063.04437547096
+--- PASS: TestWriteZipfThroughPut (0.92s)
+PASS
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	4.370s
+=== RUN   TestWriteZipfThroughPut
+2024-09-11T15:15:17.440Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+ingestion completed
+    insert_throughput_test.go:72: 10 1.206521428 358054.14638686384
+--- PASS: TestWriteZipfThroughPut (2.14s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 10 1.05497065 409490.06496057496
+--- PASS: TestWriteZipfThroughPut (1.88s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 10 1.010317372 427588.41129775206
+--- PASS: TestWriteZipfThroughPut (1.81s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 10 1.003240655 430604.5591822632
+--- PASS: TestWriteZipfThroughPut (1.87s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 10 0.961735782 449187.82069397933
+--- PASS: TestWriteZipfThroughPut (1.75s)
+PASS
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	9.510s
+=== RUN   TestWriteZipfThroughPut
+2024-09-11T15:15:28.011Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+ingestion completed
+    insert_throughput_test.go:72: 100 14.283748747 302441.612248838
+--- PASS: TestWriteZipfThroughPut (15.29s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 100 13.593811737 317791.6601744387
+--- PASS: TestWriteZipfThroughPut (15.17s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 100 13.314695819 324453.52554245986
+--- PASS: TestWriteZipfThroughPut (14.04s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 100 13.150536607 328503.70514161943
+--- PASS: TestWriteZipfThroughPut (13.88s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 100 12.893058413 335064.0213996213
+--- PASS: TestWriteZipfThroughPut (13.66s)
+PASS
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	72.113s
+=== RUN   TestWriteZipfThroughPut
+2024-09-11T15:16:40.879Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+ingestion completed
+    insert_throughput_test.go:72: 1000 36.214026846 1.1929079354722914e+06
+--- PASS: TestWriteZipfThroughPut (37.60s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 1000 35.100054473 1.230767320695491e+06
+--- PASS: TestWriteZipfThroughPut (36.11s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 1000 34.869202551 1.2389156286787833e+06
+--- PASS: TestWriteZipfThroughPut (35.77s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 1000 34.692633136 1.245221134719003e+06
+--- PASS: TestWriteZipfThroughPut (35.57s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 1000 34.816517793 1.240790370158314e+06
+--- PASS: TestWriteZipfThroughPut (35.68s)
+PASS
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	181.088s
+=== RUN   TestWriteZipfThroughPut
+2024-09-11T15:19:42.888Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+ingestion completed
+    insert_throughput_test.go:72: 10000 388.05724393 1.1132378193097888e+06
+--- PASS: TestWriteZipfThroughPut (392.88s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 10000 386.241615014 1.1184708824924042e+06
+--- PASS: TestWriteZipfThroughPut (389.57s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 10000 386.691470736 1.117169714598988e+06
+--- PASS: TestWriteZipfThroughPut (389.50s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 10000 386.533044471 1.1176276030713622e+06
+--- PASS: TestWriteZipfThroughPut (389.33s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 10000 386.870158735 1.1166537150670057e+06
+--- PASS: TestWriteZipfThroughPut (389.71s)
+PASS
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	1953.865s
+=== RUN   TestWriteZipfThroughPut
+2024-09-11T15:52:17.685Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618911948 bytes, leaving 161745941300 bytes to the OS according to -memory.allowedPercent=60
+ingestion completed
+    insert_throughput_test.go:72: 100000 4167.797350439 1.0365187260232238e+06
+--- PASS: TestWriteZipfThroughPut (4208.36s)
+=== RUN   TestWriteZipfThroughPut
+ingestion completed
+    insert_throughput_test.go:72: 100000 4136.313138165 1.0444083549043121e+06
+--- PASS: TestWriteZipfThroughPut (4170.00s)
+=== RUN   TestWriteZipfThroughPut
+signal: killed
+FAIL	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	12646.883s
+FAIL
