@@ -616,7 +616,7 @@ github.com/zzylol/go-kll
 ## explicit; go 1.13
 github.com/zzylol/metricsql
 github.com/zzylol/metricsql/binaryop
-# github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240912005827-035463cbfe82
+# github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240912022804-d8c2dc0b6309
 ## explicit; go 1.22.5
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/exemplar
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/histogram
@@ -631,7 +631,7 @@ github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/tsdb/errors
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/tsdb/fileutil
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/util/annotations
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/util/zeropool
-# github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240912005827-035463cbfe82
+# github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240912022804-d8c2dc0b6309
 ## explicit; go 1.22.3
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus/model/labels
 # github.com/zzylol/promsketch v0.3.0
