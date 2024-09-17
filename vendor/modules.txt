@@ -120,7 +120,7 @@ github.com/DataDog/sketches-go/ddsketch/store
 # github.com/OneOfOne/xxhash v1.2.8
 ## explicit; go 1.11
 github.com/OneOfOne/xxhash
-# github.com/RoaringBitmap/roaring/v2 v2.3.4
+# github.com/RoaringBitmap/roaring/v2 v2.3.5
 ## explicit; go 1.14
 github.com/RoaringBitmap/roaring/v2
 github.com/RoaringBitmap/roaring/v2/internal
@@ -345,7 +345,6 @@ github.com/davecgh/go-spew/spew
 github.com/dennwc/varint
 # github.com/enriquebris/goconcurrentqueue v0.7.0
 ## explicit; go 1.17
-github.com/enriquebris/goconcurrentqueue
 # github.com/fatih/color v1.17.0
 ## explicit; go 1.17
 github.com/fatih/color
@@ -502,7 +501,7 @@ github.com/pkg/browser
 # github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2
 ## explicit
 github.com/pmezard/go-difflib/difflib
-# github.com/prometheus/client_golang v1.20.3
+# github.com/prometheus/client_golang v1.20.4
 ## explicit; go 1.20
 github.com/prometheus/client_golang/prometheus
 github.com/prometheus/client_golang/prometheus/internal
@@ -616,7 +615,7 @@ github.com/zzylol/go-kll
 ## explicit; go 1.13
 github.com/zzylol/metricsql
 github.com/zzylol/metricsql/binaryop
-# github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240912022804-d8c2dc0b6309
+# github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240917000454-539f86437da7
 ## explicit; go 1.22.5
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/exemplar
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/histogram
@@ -631,10 +630,10 @@ github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/tsdb/errors
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/tsdb/fileutil
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/util/annotations
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/util/zeropool
-# github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240912022804-d8c2dc0b6309
+# github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240917000454-539f86437da7
 ## explicit; go 1.22.3
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus/model/labels
-# github.com/zzylol/promsketch v0.3.0
+# github.com/zzylol/promsketch v0.3.9
 ## explicit; go 1.22.5
 github.com/zzylol/promsketch
 # go.opencensus.io v0.24.0

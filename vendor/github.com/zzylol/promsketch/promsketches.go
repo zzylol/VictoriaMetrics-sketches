@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"sync/atomic"
 	"time"
+	"unsafe"
 
 	"github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/labels"
 	"github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/util/annotations"
-
-	"github.com/enriquebris/goconcurrentqueue"
 )
 
 type SketchType int
@@ -143,7 +142,6 @@ type memSeries struct {
 	id              TSId
 	lset            labels.Labels
 	sketchInstances *SketchInstances
-	memoryPart      goconcurrentqueue.Queue
 	oldestTimestamp int64
 }
 
@@ -359,7 +357,6 @@ func newMemSeries(lset labels.Labels, id TSId) *memSeries {
 		lset:            lset,
 		id:              id,
 		sketchInstances: nil,
-		memoryPart:      goconcurrentqueue.NewFixedFIFO(500),
 		oldestTimestamp: -1,
 	}
 	return s
@@ -476,6 +473,12 @@ func (ps *PromSketches) LookUp(lset labels.Labels, funcName string, mint, maxt i
 	return true
 }
 
+func (ps *PromSketches) PrintSampling(lset labels.Labels) {
+	series := ps.series.getByHash(lset.Hash(), lset)
+	fmt.Println(lset, len(series.sketchInstances.sampling.Arr))
+	fmt.Println(series.sketchInstances.sampling.GetMemory(), "KB", unsafe.Sizeof(*series.sketchInstances.sampling))
+}
+
 func (ps *PromSketches) LookUpAndUpdateWindow(lset labels.Labels, funcName string, mint, maxt int64) bool {
 	series := ps.series.getByHash(lset.Hash(), lset)
 	if series == nil {
@@ -566,24 +569,7 @@ func (ps *PromSketches) Eval(funcName string, lset labels.Labels, otherArgs floa
 	sfunc := FunctionCalls[funcName]
 	series := ps.series.getByHash(lset.Hash(), lset)
 
-	// Clean memory array and transfer insertion time to evaluation time for SHUniv
-	for series.memoryPart.GetLen() > 0 {
-		item, err := series.memoryPart.Dequeue()
-		if err != nil {
-			fmt.Println("memory queue dequeue error")
-			break
-		}
-		series.sketchInstances.ehuniv.Update(item.(Sample).T, item.(Sample).F)
-		if item.(Sample).T >= maxt {
-			break
-		}
-	}
-
 	return sfunc(context.TODO(), series, otherArgs, mint, maxt, cur_time), nil
-}
-
-func (s *memSeries) MemPartAppend(t int64, val float64) {
-	s.memoryPart.Enqueue(Sample{T: t, F: val})
 }
 
 func (ps *PromSketches) getOrCreate(hash uint64, lset labels.Labels) (*memSeries, bool, error) {
@@ -666,7 +652,7 @@ func (ps *PromSketches) SketchInsertInsertionThroughputTest(lset labels.Labels, 
 
 	t_4 := time.Now()
 	if s.sketchInstances.ehuniv != nil {
-		s.MemPartAppend(t, val)
+		// s.MemPartAppend(t, val)
 	}
 	since_4 := time.Since(t_4)
 	fmt.Println("ehuniv=", (s.sketchInstances.ehuniv == nil), since_4)
@@ -717,7 +703,7 @@ func (ps *PromSketches) SketchInsertDefinedRules(lset labels.Labels, t int64, va
 
 	//	t_4 := time.Now()
 	if s.sketchInstances.ehuniv != nil {
-		s.MemPartAppend(t, val)
+		// s.MemPartAppend(t, val)
 		// s.sketchInstances.shuniv.Update(t, strconv.FormatFloat(val, 'f', -1, 64))
 	}
 	//	since_4 := time.Since(t_4)

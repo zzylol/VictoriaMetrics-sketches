@@ -88,25 +88,22 @@ func (p FPoint) MarshalJSON() ([]byte, error) {
 type Sample struct {
 	T int64
 	F float64
-
-	Metric labels.Labels
 }
 
 func (s Sample) String() string {
 	var str string
 	p := FPoint{T: s.T, F: s.F}
 	str = p.String()
-	return fmt.Sprintf("%s => %s", s.Metric, str)
+	return fmt.Sprintf("%s", str)
 }
 
 // MarshalJSON is mirrored in web/api/v1/api.go with jsoniter because FPoint and
 // HPoint wouldn't be marshaled with jsoniter otherwise.
 func (s Sample) MarshalJSON() ([]byte, error) {
 	f := struct {
-		M labels.Labels `json:"metric"`
-		F FPoint        `json:"value"`
+		F FPoint `json:"value"`
 	}{
-		M: s.Metric,
+
 		F: FPoint{T: s.T, F: s.F},
 	}
 	return json.Marshal(f)
@@ -136,28 +133,6 @@ func (vec Vector) String() string {
 // See HPoint.size for details.
 func (vec Vector) TotalSamples() int {
 	return len(vec)
-}
-
-// ContainsSameLabelset checks if a vector has samples with the same labelset
-// Such a behavior is semantically undefined
-// https://github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/issues/4562
-func (vec Vector) ContainsSameLabelset() bool {
-	switch len(vec) {
-	case 0, 1:
-		return false
-	case 2:
-		return vec[0].Metric.Hash() == vec[1].Metric.Hash()
-	default:
-		l := make(map[uint64]struct{}, len(vec))
-		for _, ss := range vec {
-			hash := ss.Metric.Hash()
-			if _, ok := l[hash]; ok {
-				return true
-			}
-			l[hash] = struct{}{}
-		}
-		return false
-	}
 }
 
 // Matrix is a slice of Series that implements sort.Interface and

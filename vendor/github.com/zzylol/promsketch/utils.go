@@ -55,15 +55,6 @@ func init() {
 	}
 }
 
-type CountBucket struct {
-	count      int64
-	sum        float64
-	sum2       float64
-	bucketsize int
-	min_time   int64
-	max_time   int64
-}
-
 var (
 	farr2Pool = zeropool.New(func() [][]float64 {
 		tmp := make([][]float64, CS_ROW_NO_Univ_ELEPHANT)

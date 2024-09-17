@@ -60,7 +60,7 @@ func ExpoInitUnivOptimized(k int64, time_window_size int64) (ehu *ExpoHistogramU
 		k:                k,
 		s_count:          0,
 		arr_count:        0,
-		max_array_size:   16384,
+		max_array_size:   30720,
 		min_array_size:   1,
 		time_window_size: time_window_size,
 		univs:            make([]*UnivSketch, 0),
