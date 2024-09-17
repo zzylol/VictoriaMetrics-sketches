@@ -84,7 +84,7 @@ func ingestZipfScrapes(st *storage.Storage, mrs []storage.MetricRow, scrapeTotCo
 		currTime := int64(i * second)
 		lbls := mrs
 		for len(lbls) > 0 {
-			b := 10
+			b := 100
 			if len(lbls) < b {
 				b = len(lbls)
 			}
