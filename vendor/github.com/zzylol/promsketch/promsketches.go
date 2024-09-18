@@ -12,6 +12,11 @@ import (
 	"github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/util/annotations"
 )
 
+const (
+	// DefaultStripeSize is the default number of entries to allocate in the stripeSeries hash map.
+	DefaultStripeSize = 1 << 14
+)
+
 type SketchType int
 
 const (
@@ -479,6 +484,12 @@ func (ps *PromSketches) PrintSampling(lset labels.Labels) {
 	fmt.Println(series.sketchInstances.sampling.GetMemory(), "KB", unsafe.Sizeof(*series.sketchInstances.sampling))
 }
 
+func (ps *PromSketches) PrintEHUniv(lset labels.Labels) {
+	series := ps.series.getByHash(lset.Hash(), lset)
+	fmt.Println(series.sketchInstances.ehuniv.GetTotalBucketSizes(), "total samples")
+	fmt.Println(series.sketchInstances.ehuniv.GetMemoryKB(), "KB", series.sketchInstances.ehuniv.arr_count, series.sketchInstances.ehuniv.s_count)
+}
+
 func (ps *PromSketches) LookUpAndUpdateWindow(lset labels.Labels, funcName string, mint, maxt int64) bool {
 	series := ps.series.getByHash(lset.Hash(), lset)
 	if series == nil {
@@ -722,7 +733,10 @@ func (ps *PromSketches) SketchInsertDefinedRules(lset labels.Labels, t int64, va
 // SketchInsert will be called in Prometheus scrape module, for SketchCache version
 // t.(int64) is millisecond level timestamp, based on Prometheus timestamp
 func (ps *PromSketches) SketchInsert(lset labels.Labels, t int64, val float64) error {
+	// start := time.Now()
 	s := ps.series.getByHash(lset.Hash(), lset)
+	// elapsed := time.Since(start)
+	// fmt.Println("getByHash time:", elapsed)
 	if s == nil || s.sketchInstances == nil {
 		return nil
 	}

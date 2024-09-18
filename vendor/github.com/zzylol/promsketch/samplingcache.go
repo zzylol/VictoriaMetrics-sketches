@@ -9,11 +9,6 @@ import (
 	"github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus/model/labels"
 )
 
-const (
-	// DefaultStripeSize is the default number of entries to allocate in the stripeSeries hash map.
-	DefaultStripeSize = (1 << 14)
-)
-
 type SamplingCacheEntry struct {
 	id   int
 	lset labels.Labels
