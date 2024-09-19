@@ -550,6 +550,8 @@ github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-202409120228
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240912022804-d8c2dc0b6309/go.mod h1:Zy0t031FyLHeobtW6x8L/W5Q0RZHrwY2H53X/aQgMF4=
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240917000454-539f86437da7 h1:CSsi1m4w2SheqrlQRHvEQZtEPGQcwoMj8o1X1e2a94Y=
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240917000454-539f86437da7/go.mod h1:a69r5bFaLP8vPuZbnn2EEoG5S7KTzalE/9TRShIv42c=
+github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240919174826-dd8f2673f28e h1:h8K4axuVUg82vN7ObeeR0MAneXzaqN35TcngxA2Xsis=
+github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240919174826-dd8f2673f28e/go.mod h1:1Jaqva0UpJTtwx0/8zJQmlPpHZORAr0GTYJK8PI1qtw=
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240903204742-c589c9446e48 h1:cPQzeOPmNJES2RBKqBDjLJKo+0sXUrVr7cZaUVBjh2Q=
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240903204742-c589c9446e48/go.mod h1:QiIlqAeVdnAETgD3FJsYsQzcDZu3tKSfs6TW5SyzAcw=
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240909194920-5bf8a8293aae h1:CAdxe2hNJau9r7HZs5WVQZ2Ttdh4r+SSkLnFu5G4L3o=
@@ -562,6 +564,8 @@ github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240912022804-d8c2dc0b6309/go.mod h1:QiIlqAeVdnAETgD3FJsYsQzcDZu3tKSfs6TW5SyzAcw=
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240917000454-539f86437da7 h1:dHn9UKvs7G/lQDCa2uNYI2id60dAmu9bSYSMB54mAz8=
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240917000454-539f86437da7/go.mod h1:QiIlqAeVdnAETgD3FJsYsQzcDZu3tKSfs6TW5SyzAcw=
+github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240919174826-dd8f2673f28e h1:3YpYVetcPGhA1NCn0V4sMjxkfLkiEq6HUa+kn1wbcz8=
+github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240919174826-dd8f2673f28e/go.mod h1:QiIlqAeVdnAETgD3FJsYsQzcDZu3tKSfs6TW5SyzAcw=
 github.com/zzylol/promsketch v0.2.95 h1:PCBJHJD12MWfrAmCXWa1IG6eSEs+SaMonG0k5N+drUE=
 github.com/zzylol/promsketch v0.2.95/go.mod h1:QSfGBeMmMIgOU8ugbLheMJs43QX0qrJ6eqqaSr4lErw=
 github.com/zzylol/promsketch v0.2.97 h1:g26Heu/9sE6mwaa6q1SMkaNDbI81KfPHMaJOb7dxBz0=
@@ -572,6 +576,8 @@ github.com/zzylol/promsketch v0.3.0 h1:hIA2H84DZ2YOF30CbFQsOfqG+cv46ztQaU95Mu+bT
 github.com/zzylol/promsketch v0.3.0/go.mod h1:7eCiEgPE9tTq5f1k/UuOizQq3GZ8/u03+BRpRWNk+ZI=
 github.com/zzylol/promsketch v0.3.9 h1:1E078U0osQV8oFbC1xpCYnDDOVOn/TDlmxRa765zP5o=
 github.com/zzylol/promsketch v0.3.9/go.mod h1:7eCiEgPE9tTq5f1k/UuOizQq3GZ8/u03+BRpRWNk+ZI=
+github.com/zzylol/promsketch v0.3.20 h1:gTQsAM6wlkHPN/GOr2vh7Vp0b/Rewb+UzsTcWWHhpAI=
+github.com/zzylol/promsketch v0.3.20/go.mod h1:h+3BbqRTI9pbgDVnNbifF9yWLBFVslh5WnUnmS3OZkY=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=

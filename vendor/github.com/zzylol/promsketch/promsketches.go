@@ -12,6 +12,11 @@ import (
 	"github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/util/annotations"
 )
 
+const (
+	// DefaultStripeSize is the default number of entries to allocate in the stripeSeries hash map.
+	DefaultStripeSize = 1 << 14
+)
+
 type SketchType int
 
 const (
@@ -334,6 +339,7 @@ func NewPromSketches() *PromSketches {
 	return ps
 }
 
+/*
 func NewPromSketchesWithConfig(sketchRuleTests []SketchRuleTest, sc *SketchConfig) *PromSketches {
 	ss := NewSketchSeries(DefaultStripeSize)
 	ps := &PromSketches{
@@ -351,6 +357,8 @@ func NewPromSketchesWithConfig(sketchRuleTests []SketchRuleTest, sc *SketchConfi
 	}
 	return ps
 }
+
+*/
 
 func newMemSeries(lset labels.Labels, id TSId) *memSeries {
 	s := &memSeries{
@@ -378,7 +386,7 @@ func (ps *PromSketches) NewSketchCacheInstance(lset labels.Labels, funcName stri
 		case USampling:
 			sc.Sampling_config = SamplingConfig{Sampling_rate: 0.1, Time_window_size: time_window_size, Max_size: int(float64(item_window_size) * 0.1)}
 		case EHKLL:
-			sc.EH_kll_config = EHKLLConfig{K: 100, Time_window_size: time_window_size, Kll_k: 256}
+			sc.EH_kll_config = EHKLLConfig{K: 50, Time_window_size: time_window_size, Kll_k: 256}
 			/*
 				case EHCount:
 					sc.EH_count_config = EHCountConfig{K: 100, Time_window_size: time_window_size}
@@ -477,6 +485,12 @@ func (ps *PromSketches) PrintSampling(lset labels.Labels) {
 	series := ps.series.getByHash(lset.Hash(), lset)
 	fmt.Println(lset, len(series.sketchInstances.sampling.Arr))
 	fmt.Println(series.sketchInstances.sampling.GetMemory(), "KB", unsafe.Sizeof(*series.sketchInstances.sampling))
+}
+
+func (ps *PromSketches) PrintEHUniv(lset labels.Labels) {
+	series := ps.series.getByHash(lset.Hash(), lset)
+	fmt.Println(series.sketchInstances.ehuniv.GetTotalBucketSizes(), "total samples")
+	fmt.Println(series.sketchInstances.ehuniv.GetMemoryKB(), "KB", series.sketchInstances.ehuniv.arr_count, series.sketchInstances.ehuniv.s_count)
 }
 
 func (ps *PromSketches) LookUpAndUpdateWindow(lset labels.Labels, funcName string, mint, maxt int64) bool {
@@ -619,7 +633,7 @@ func (ps *PromSketches) SketchInsertInsertionThroughputTest(lset labels.Labels, 
 			// Univ_config:     UnivConfig{TopK_size: 5, Row_no: 3, Col_no: 4096, Layer: 16},
 			// SH_univ_config:  SHUnivConfig{Beta: 0.1, Time_window_size: 1000000},
 			EH_univ_config:  EHUnivConfig{K: 20, Time_window_size: 1000000},
-			EH_kll_config:   EHKLLConfig{K: 100, Kll_k: 256, Time_window_size: 1000000},
+			EH_kll_config:   EHKLLConfig{K: 50, Kll_k: 256, Time_window_size: 1000000},
 			Sampling_config: SamplingConfig{Sampling_rate: 0.05, Time_window_size: 1000000, Max_size: int(50000)},
 			// EH_count_config: EHCountConfig{K: 100, Time_window_size: 100000},
 			// EffSum_config:   EffSumConfig{Time_window_size: 100000, Item_window_size: 100000, Epsilon: 0.01, R: 10000},
@@ -722,7 +736,10 @@ func (ps *PromSketches) SketchInsertDefinedRules(lset labels.Labels, t int64, va
 // SketchInsert will be called in Prometheus scrape module, for SketchCache version
 // t.(int64) is millisecond level timestamp, based on Prometheus timestamp
 func (ps *PromSketches) SketchInsert(lset labels.Labels, t int64, val float64) error {
+	// start := time.Now()
 	s := ps.series.getByHash(lset.Hash(), lset)
+	// elapsed := time.Since(start)
+	// fmt.Println("getByHash time:", elapsed)
 	if s == nil || s.sketchInstances == nil {
 		return nil
 	}

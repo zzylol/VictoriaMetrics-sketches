@@ -15,7 +15,8 @@ import (
 )
 
 type EHArray struct {
-	samples     []float64
+	min_idx     int
+	max_idx     int
 	max_time    int64
 	min_time    int64
 	bucket_size int
@@ -23,12 +24,12 @@ type EHArray struct {
 
 func NewArray() *EHArray {
 	return &EHArray{
-		samples: make([]float64, 0),
+		min_idx:     0,
+		max_idx:     0,
+		max_time:    0,
+		min_time:    0,
+		bucket_size: 0,
 	}
-}
-
-func (arr *EHArray) MergeWith(other *EHArray) {
-	arr.samples = append(arr.samples, other.samples...)
 }
 
 type ExpoHistogramUnivOptimized struct {
@@ -38,7 +39,8 @@ type ExpoHistogramUnivOptimized struct {
 	s_count          int           // sketch count
 	arr_count        int           // array count
 	univs            []*UnivSketch // larger bucket is a univsketch
-	array            []*EHArray    // smaller bucket is exact, storing all samples
+	array_buckets    []*EHArray    // smaller bucket is exact, storing all samples
+	array            []float64     // array part, use one array
 	max_array_size   int
 	min_array_size   int
 	k                int64
@@ -64,7 +66,8 @@ func ExpoInitUnivOptimized(k int64, time_window_size int64) (ehu *ExpoHistogramU
 		min_array_size:   1,
 		time_window_size: time_window_size,
 		univs:            make([]*UnivSketch, 0),
-		array:            make([]*EHArray, 0),
+		array:            make([]float64, 0),
+		array_buckets:    make([]*EHArray, 0),
 	}
 
 	ehu.putch = make(chan int64, 100)
@@ -80,13 +83,12 @@ func ExpoInitUnivOptimized(k int64, time_window_size int64) (ehu *ExpoHistogramU
 
 	ehu.univPool = UnivSketchPool{pool: make([]*UnivSketch, UnivPoolCAP), size: 0, max_size: UnivPoolCAP}
 	for i := uint32(0); i < UnivPoolCAP; i++ {
-		ehu.univPool.pool[i], _ = NewUnivSketchPyramid(TOPK_SIZE, CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, CS_LVLS, ehu.cs_seed1, ehu.cs_seed2, ehu.seed3, int64(i))
+		ehu.univPool.pool[i], _ = NewUnivSketchPyramid(TOPK_SIZE, CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, CS_LVLS, ehu.cs_seed1, ehu.cs_seed2, ehu.seed3, -1) // int64(i))
 	}
 	ehu.univPool.bm = roaring.New()
 
 	ehu.ctx, ehu.cancel = context.WithCancel(context.Background())
-	ehu.StartBackgroundClean(ehu.ctx)
-	ehu.StartBackgroundClean(ehu.ctx)
+	// ehu.StartBackgroundClean(ehu.ctx)
 
 	return ehu
 }
@@ -221,7 +223,7 @@ func (ehu *ExpoHistogramUnivOptimized) Update(time_ int64, fvalue float64) {
 
 	removed = 0
 	for i := 0; i < ehu.arr_count; i++ {
-		if ehu.array[i].max_time < time_-ehu.time_window_size {
+		if ehu.array_buckets[i].max_time < time_-ehu.time_window_size {
 			removed++
 		} else {
 			break
@@ -229,69 +231,84 @@ func (ehu *ExpoHistogramUnivOptimized) Update(time_ int64, fvalue float64) {
 	}
 
 	if removed > 0 {
+
+		for l := removed; l < ehu.arr_count; l++ {
+			ehu.array_buckets[l].min_idx -= ehu.array_buckets[removed-1].max_idx - 1
+			ehu.array_buckets[l].max_idx -= ehu.array_buckets[removed-1].max_idx - 1
+		}
+
+		ehu.array = ehu.array[ehu.array_buckets[removed-1].max_idx+1:]
 		ehu.arr_count = ehu.arr_count - removed
-		ehu.array = ehu.array[removed:]
+		ehu.array_buckets = ehu.array_buckets[removed:]
 	}
 
 	// add value to new EH bucket (array)
-	if ehu.arr_count > 0 && ehu.array[ehu.arr_count-1].bucket_size < ehu.min_array_size {
-		ehu.array[ehu.arr_count-1].samples = append(ehu.array[ehu.arr_count-1].samples, fvalue)
-		ehu.array[ehu.arr_count-1].max_time = time_
-		ehu.array[ehu.arr_count-1].bucket_size += 1
+	if ehu.arr_count > 0 && ehu.array_buckets[ehu.arr_count-1].bucket_size < ehu.min_array_size {
+		ehu.array = append(ehu.array, fvalue)
+		ehu.array_buckets[ehu.arr_count-1].max_time = time_
+		ehu.array_buckets[ehu.arr_count-1].bucket_size += 1
+		ehu.array_buckets[ehu.arr_count-1].max_idx = len(ehu.array) - 1
 	} else {
+		ehu.array = append(ehu.array, fvalue)
 		tmp_arr := NewArray()
-		tmp_arr.samples = append(tmp_arr.samples, fvalue)
 		tmp_arr.max_time, tmp_arr.min_time = time_, time_
+		tmp_arr.min_idx, tmp_arr.max_idx = len(ehu.array)-1, len(ehu.array)-1
 		tmp_arr.bucket_size = 1
-		ehu.array = append(ehu.array, tmp_arr)
+		ehu.array_buckets = append(ehu.array_buckets, tmp_arr)
 		ehu.arr_count++
 	}
+	// fmt.Println(ehu.array_buckets[0].bucket_size, ehu.array_buckets[0].min_idx, ehu.array_buckets[0].max_idx)
 
 	// Merge EH buckets (array)
 	same_size_bucket := 1
 	for i := ehu.arr_count - 2; i >= 0; i-- {
-		if ehu.array[i].bucket_size == ehu.array[i+1].bucket_size {
+		if ehu.array_buckets[i].bucket_size == ehu.array_buckets[i+1].bucket_size {
 			same_size_bucket += 1
 		} else {
 			if float64(same_size_bucket) >= float64(ehu.k)/2.0+2 {
-				ehu.array[i+1].MergeWith(ehu.array[i+2])
-				ehu.array[i+1].bucket_size += ehu.array[i+2].bucket_size
-				ehu.array[i+1].max_time = MaxInt64(ehu.array[i+1].max_time, ehu.array[i+2].max_time)
-				ehu.array[i+1].min_time = MinInt64(ehu.array[i+1].min_time, ehu.array[i+2].min_time)
-				ehu.array = append(ehu.array[:i+2], ehu.array[i+3:]...)
+				ehu.array_buckets[i+1].bucket_size += ehu.array_buckets[i+2].bucket_size
+				ehu.array_buckets[i+1].max_time = MaxInt64(ehu.array_buckets[i+1].max_time, ehu.array_buckets[i+2].max_time)
+				ehu.array_buckets[i+1].min_time = MinInt64(ehu.array_buckets[i+1].min_time, ehu.array_buckets[i+2].min_time)
+				ehu.array_buckets[i+1].max_idx = ehu.array_buckets[i+2].max_idx
+				ehu.array_buckets[i+2] = nil
+				ehu.array_buckets = append(ehu.array_buckets[:i+2], ehu.array_buckets[i+3:]...)
 				ehu.arr_count -= 1
 			}
 			same_size_bucket = 1
-			if ehu.array[i+1].bucket_size == ehu.array[i].bucket_size {
+			if ehu.array_buckets[i+1].bucket_size == ehu.array_buckets[i].bucket_size {
 				same_size_bucket += 1
 			}
 		}
 	}
 
 	if float64(same_size_bucket) >= float64(ehu.k)/2.0+2 {
-		ehu.array[0].MergeWith(ehu.array[1])
-		ehu.array[0].bucket_size += ehu.array[1].bucket_size
-		ehu.array[0].max_time = MaxInt64(ehu.array[0].max_time, ehu.array[1].max_time)
-		ehu.array[0].min_time = MinInt64(ehu.array[0].min_time, ehu.array[1].min_time)
-		ehu.array = append(ehu.array[:1], ehu.array[2:]...)
+		ehu.array_buckets[0].bucket_size += ehu.array_buckets[1].bucket_size
+		ehu.array_buckets[0].max_time = MaxInt64(ehu.array_buckets[0].max_time, ehu.array_buckets[1].max_time)
+		ehu.array_buckets[0].min_time = MinInt64(ehu.array_buckets[0].min_time, ehu.array_buckets[1].min_time)
+		ehu.array_buckets[0].max_idx = ehu.array_buckets[1].max_idx
+		ehu.array_buckets[1] = nil
+		ehu.array_buckets = append(ehu.array_buckets[:1], ehu.array_buckets[2:]...)
 		ehu.arr_count -= 1
 	}
 
-	if ehu.array[0].bucket_size >= ehu.max_array_size {
+	if ehu.array_buckets[0].bucket_size >= ehu.max_array_size {
 		// only under this, we may need to merge univmons
 
 		// change oldest array into univmon
-		tmp, err := ehu.GetUnivSketch()
+
+		// tmp, err := ehu.GetUnivSketch()
+
+		tmp, err := NewUnivSketchPyramid(TOPK_SIZE, CS_ROW_NO_Univ_ELEPHANT, CS_COL_NO_Univ_ELEPHANT, CS_LVLS, ehu.cs_seed1, ehu.cs_seed2, ehu.seed3, -1)
 		if err != nil {
 			fmt.Println("[Expo Univ] memory full, cannot allocate UnivSketch")
 			return
 		}
 
-		tmp.max_time, tmp.min_time = ehu.array[0].max_time, ehu.array[0].min_time
+		tmp.max_time, tmp.min_time = ehu.array_buckets[0].max_time, ehu.array_buckets[0].min_time
 		ehu.univs = append(ehu.univs, tmp)
 
-		for i := 0; i < len(ehu.array[0].samples); i++ {
-			value := strconv.FormatFloat(ehu.array[0].samples[i], 'f', -1, 64)
+		for i := ehu.array_buckets[0].min_idx; i <= ehu.array_buckets[0].max_idx; i++ {
+			value := strconv.FormatFloat(ehu.array[i], 'f', -1, 64)
 			hash := xxhash.ChecksumString64S(value, uint64(tmp.seed))
 			bottom_layer_num := findBottomLayerNum(hash, CS_LVLS)
 			pos, sign := ehu.univs[0].cs_layers[0].position_and_sign([]byte(value))
@@ -299,7 +316,12 @@ func (ehu *ExpoHistogramUnivOptimized) Update(time_ int64, fvalue float64) {
 		}
 		ehu.s_count++
 
-		ehu.array = ehu.array[1:]
+		ehu.array = ehu.array[ehu.array_buckets[0].max_idx+1:]
+		for l := 1; l < ehu.arr_count; l++ {
+			ehu.array_buckets[l].min_idx -= ehu.array_buckets[0].max_idx - 1
+			ehu.array_buckets[l].max_idx -= ehu.array_buckets[0].max_idx - 1
+		}
+		ehu.array_buckets = ehu.array_buckets[1:]
 		ehu.arr_count -= 1
 
 		// Merge EH buckets (univmon)
@@ -316,6 +338,7 @@ func (ehu *ExpoHistogramUnivOptimized) Update(time_ int64, fvalue float64) {
 					ehu.univs[i+1].max_time = MaxInt64(ehu.univs[i+1].max_time, ehu.univs[i+2].max_time)
 					ehu.univs[i+1].min_time = MinInt64(ehu.univs[i+1].min_time, ehu.univs[i+2].min_time)
 					ehu.PutUnivSketch(ehu.univs[i+2])
+					ehu.univs[i+2] = nil
 					ehu.univs = append(ehu.univs[:i+2], ehu.univs[i+3:]...)
 					ehu.s_count -= 1
 
@@ -333,6 +356,7 @@ func (ehu *ExpoHistogramUnivOptimized) Update(time_ int64, fvalue float64) {
 			ehu.univs[0].max_time = MaxInt64(ehu.univs[0].max_time, ehu.univs[1].max_time)
 			ehu.univs[0].min_time = MinInt64(ehu.univs[0].min_time, ehu.univs[1].min_time)
 			ehu.PutUnivSketch(ehu.univs[1])
+			ehu.univs[1] = nil
 			ehu.univs = append(ehu.univs[:1], ehu.univs[2:]...)
 			ehu.s_count -= 1
 		}
@@ -349,12 +373,12 @@ func (eh *ExpoHistogramUnivOptimized) Cover(mint, maxt int64) bool {
 		return false
 	}
 
-	mint_time := eh.array[0].min_time
+	mint_time := eh.array_buckets[0].min_time
 	if eh.s_count > 0 {
 		mint_time = eh.univs[0].min_time
 	}
 	// fmt.Println("EHoptimized Cover:", mint, maxt, mint_time, eh.array[eh.arr_count-1].max_time)
-	maxt_covered := (eh.array[eh.arr_count-1].max_time >= maxt)
+	maxt_covered := (eh.array_buckets[eh.arr_count-1].max_time >= maxt)
 	mint_covered := (mint_time <= mint)
 	isCovered := mint_covered && maxt_covered
 	eh.mutex.RUnlock()
@@ -365,7 +389,7 @@ func (eh *ExpoHistogramUnivOptimized) GetMaxTime() int64 {
 	if eh.s_count+eh.arr_count == 0 {
 		return -1
 	}
-	return eh.array[eh.arr_count-1].max_time
+	return eh.array_buckets[eh.arr_count-1].max_time
 }
 
 func (ehu *ExpoHistogramUnivOptimized) print_buckets() {
@@ -376,7 +400,7 @@ func (ehu *ExpoHistogramUnivOptimized) print_buckets() {
 	}
 	fmt.Println("arr_count =", ehu.arr_count)
 	for i := 0; i < ehu.arr_count; i++ {
-		fmt.Println(i, ehu.array[i].min_time, ehu.array[i].max_time, ehu.array[i].bucket_size)
+		fmt.Println(i, ehu.array_buckets[i].min_time, ehu.array_buckets[i].max_time, ehu.array_buckets[i].bucket_size)
 	}
 }
 
@@ -385,10 +409,21 @@ func (eh *ExpoHistogramUnivOptimized) GetMemoryKB() float64 {
 	for i := 0; i < eh.s_count; i++ {
 		total_mem += eh.univs[i].GetMemoryKBPyramid()
 	}
-	for i := 0; i < eh.arr_count; i++ {
-		total_mem += float64(len(eh.array[i].samples)*8) / 1024
-	}
+
+	total_mem += float64(len(eh.array)*8) / 1024
+
 	return total_mem
+}
+
+func (eh *ExpoHistogramUnivOptimized) GetTotalBucketSizes() int64 {
+	var total_bucket_size int64 = 0
+	for i := 0; i < eh.s_count; i++ {
+		total_bucket_size += eh.univs[i].bucket_size
+	}
+	for i := 0; i < eh.arr_count; i++ {
+		total_bucket_size += int64((eh.array_buckets[i].bucket_size))
+	}
+	return total_bucket_size
 }
 
 func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_t int64) (univ *UnivSketch, arr *[]float64, err error) {
@@ -413,20 +448,20 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 	}
 
 	for i := 0; i < ehu.arr_count; i++ {
-		if t1 >= ehu.array[i].min_time && t1 <= ehu.array[i].max_time {
+		if t1 >= ehu.array_buckets[i].min_time && t1 <= ehu.array_buckets[i].max_time {
 			from_bucket = i + ehu.s_count
 			break
 		}
 	}
 
 	for i := 0; i < ehu.arr_count; i++ {
-		if t2 >= ehu.array[i].min_time && t2 <= ehu.array[i].max_time {
+		if t2 >= ehu.array_buckets[i].min_time && t2 <= ehu.array_buckets[i].max_time {
 			to_bucket = i + ehu.s_count
 			break
 		}
 	}
 
-	if t2 > ehu.array[ehu.arr_count-1].max_time {
+	if t2 > ehu.array_buckets[ehu.arr_count-1].max_time {
 		to_bucket = ehu.arr_count - 1 + ehu.s_count
 	}
 	if ehu.s_count > 0 && t1 < ehu.univs[0].min_time {
@@ -438,7 +473,7 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 			from_bucket += 1
 		}
 	} else {
-		if AbsInt64(t1-ehu.array[from_bucket-ehu.s_count].min_time) > AbsInt64(t1-ehu.array[from_bucket-ehu.s_count].max_time) {
+		if AbsInt64(t1-ehu.array_buckets[from_bucket-ehu.s_count].min_time) > AbsInt64(t1-ehu.array_buckets[from_bucket-ehu.s_count].max_time) {
 			from_bucket += 1
 		}
 	}
@@ -464,8 +499,8 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 	} else if from_bucket >= ehu.s_count {
 		// only in array part
 		samples := make([]float64, 0)
-		for i := from_bucket - ehu.s_count; i <= to_bucket-ehu.s_count; i++ {
-			samples = append(samples, ehu.array[i].samples...)
+		for i := ehu.array_buckets[from_bucket-ehu.s_count].min_idx; i <= ehu.array_buckets[to_bucket-ehu.s_count].max_idx; i++ {
+			samples = append(samples, ehu.array[i])
 		}
 		ehu.mutex.RUnlock()
 		return nil, &samples, nil
@@ -478,13 +513,11 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 		}
 
 		tmp := make(map[float64]int64)
-		for i := 0; i <= to_bucket-ehu.s_count; i++ {
-			for j := 0; j < len(ehu.array[i].samples); j++ {
-				if _, ok := tmp[ehu.array[i].samples[j]]; !ok {
-					tmp[ehu.array[i].samples[j]] = 1
-				} else {
-					tmp[ehu.array[i].samples[j]] += 1
-				}
+		for i := ehu.array_buckets[0].min_idx; i <= ehu.array_buckets[to_bucket-ehu.s_count].max_idx; i++ {
+			if _, ok := tmp[ehu.array[i]]; !ok {
+				tmp[ehu.array[i]] = 1
+			} else {
+				tmp[ehu.array[i]] += 1
 			}
 		}
 

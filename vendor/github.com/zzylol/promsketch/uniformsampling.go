@@ -193,8 +193,18 @@ func (s *UniformSampling) Cover(t1, t2 int64) bool {
 		s.mutex.RUnlock()
 		return false
 	}
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
 
-	isCovered := s.Cur_time-s.Time_window_size <= t1 && s.Cur_time >= t2
+	var isCovered bool = false
+	if idx_1 >= len(s.Arr) {
+		isCovered = false
+	} else {
+		if idx_1 <= idx_2 {
+			isCovered = true
+		}
+	}
+
 	s.mutex.RUnlock()
 	return isCovered
 }
