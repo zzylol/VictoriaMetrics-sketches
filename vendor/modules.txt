@@ -615,25 +615,16 @@ github.com/zzylol/go-kll
 ## explicit; go 1.13
 github.com/zzylol/metricsql
 github.com/zzylol/metricsql/binaryop
-# github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240918022417-89c220258c01
+# github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240919003324-691bc349f1ba
 ## explicit; go 1.22.5
-github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/exemplar
-github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/histogram
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/labels
-github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/metadata
-github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/model/value
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/promql/parser/posrange
-github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/storage
-github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/tsdb/chunkenc
-github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/tsdb/chunks
-github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/tsdb/errors
-github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/tsdb/fileutil
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/util/annotations
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches/util/zeropool
-# github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240918022417-89c220258c01
+# github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240919003324-691bc349f1ba
 ## explicit; go 1.22.3
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus/model/labels
-# github.com/zzylol/promsketch v0.3.16
+# github.com/zzylol/promsketch v0.3.19
 ## explicit; go 1.22.5
 github.com/zzylol/promsketch
 # go.opencensus.io v0.24.0

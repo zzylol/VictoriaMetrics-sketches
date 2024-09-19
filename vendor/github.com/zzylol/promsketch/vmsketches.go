@@ -209,7 +209,7 @@ func (vs *VMSketches) NewVMSketchCacheInstance(mn *storage.MetricName, funcName 
 			sc.Sampling_config = SamplingConfig{Sampling_rate: 0.1, Time_window_size: time_window_size, Max_size: int(float64(item_window_size) * 0.1)}
 			// fmt.Println("max_size:", sc.Sampling_config.Max_size)
 		case EHKLL:
-			sc.EH_kll_config = EHKLLConfig{K: 100, Time_window_size: time_window_size, Kll_k: 256}
+			sc.EH_kll_config = EHKLLConfig{K: 50, Time_window_size: time_window_size, Kll_k: 256}
 		default:
 			fmt.Println("[NewSketchCacheInstance] not supported sketch type")
 		}
