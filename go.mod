@@ -30,7 +30,7 @@ require (
 	github.com/valyala/histogram v1.2.0
 	github.com/valyala/quicktemplate v1.8.0
 	github.com/zzylol/metricsql v0.1.1
-	github.com/zzylol/promsketch v0.3.0
+	github.com/zzylol/promsketch v0.3.20
 	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sys v0.25.0
 	google.golang.org/api v0.187.0
@@ -48,7 +48,7 @@ require (
 	github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 // indirect
 	github.com/DataDog/sketches-go v1.4.6 // indirect
 	github.com/OneOfOne/xxhash v1.2.8 // indirect
-	github.com/RoaringBitmap/roaring/v2 v2.3.4 // indirect
+	github.com/RoaringBitmap/roaring/v2 v2.3.5 // indirect
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/alecthomas/units v0.0.0-20240626203959-61d1e3462e30 // indirect
 	github.com/aws/aws-sdk-go v1.54.13 // indirect
@@ -104,7 +104,7 @@ require (
 	github.com/oklog/ulid v1.3.1 // indirect
 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
-	github.com/prometheus/client_golang v1.20.3 // indirect
+	github.com/prometheus/client_golang v1.20.4 // indirect
 	github.com/prometheus/client_model v0.6.1 // indirect
 	github.com/prometheus/common v0.59.1 // indirect
 	github.com/prometheus/common/sigv4 v0.1.0 // indirect
@@ -116,8 +116,8 @@ require (
 	github.com/valyala/bytebufferpool v1.0.0 // indirect
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1 // indirect
 	github.com/zzylol/go-kll v0.0.0-20240604180517-e15a688e6ebe // indirect
-	github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240912022804-d8c2dc0b6309 // indirect
-	github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240912022804-d8c2dc0b6309 // indirect
+	github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240919174826-dd8f2673f28e // indirect
+	github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240919174826-dd8f2673f28e // indirect
 	go.opencensus.io v0.24.0 // indirect
 	go.opentelemetry.io/collector/pdata v1.11.0 // indirect
 	go.opentelemetry.io/collector/semconv v0.104.0 // indirect

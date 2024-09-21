@@ -19,7 +19,6 @@ import (
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/bytesutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/cgroup"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/decimal"
-	"github.com/zzylol/VictoriaMetrics-sketches/lib/fasttime"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/flagutil"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/logger"
 	"github.com/zzylol/VictoriaMetrics-sketches/lib/memory"
@@ -1086,104 +1085,127 @@ func evalInstantRollup(qt *querytracer.Tracer, ec *EvalConfig, funcName string, 
 		pointsPerSeries := int64(1)
 		return evalRollupFuncNoCache(qt, ecCopy, funcName, rf, args, expr, me, iafc, window, pointsPerSeries)
 	}
-	tooBigOffset := func(offset int64) bool {
-		maxOffset := window / 2
-		if maxOffset > 1800*1000 {
-			maxOffset = 1800 * 1000
+	return evalAt(qt, timestamp, window)
+	/*
+		tooBigOffset := func(offset int64) bool {
+			maxOffset := window / 2
+			if maxOffset > 1800*1000 {
+				maxOffset = 1800 * 1000
+			}
+			return offset >= maxOffset
 		}
-		return offset >= maxOffset
-	}
-	deleteCachedSeries := func(qt *querytracer.Tracer) {
-		rollupResultCacheV.DeleteInstantValues(qt, expr, window, ec.Step, ec.EnforcedTagFilterss)
-	}
-	getCachedSeries := func(qt *querytracer.Tracer) ([]*timeseries, int64, error) {
-	again:
-		offset := int64(0)
-		tssCached := rollupResultCacheV.GetInstantValues(qt, expr, window, ec.Step, ec.EnforcedTagFilterss)
-		ec.QueryStats.addSeriesFetched(len(tssCached))
-		if len(tssCached) == 0 {
-			// Cache miss. Re-populate the missing data.
-			start := int64(fasttime.UnixTimestamp()*1000) - cacheTimestampOffset.Milliseconds()
-			offset = timestamp - start
+		deleteCachedSeries := func(qt *querytracer.Tracer) {
+			rollupResultCacheV.DeleteInstantValues(qt, expr, window, ec.Step, ec.EnforcedTagFilterss)
+		}
+		getCachedSeries := func(qt *querytracer.Tracer) ([]*timeseries, int64, error) {
+		again:
+			offset := int64(0)
+			tssCached := rollupResultCacheV.GetInstantValues(qt, expr, window, ec.Step, ec.EnforcedTagFilterss)
+			ec.QueryStats.addSeriesFetched(len(tssCached))
+			if len(tssCached) == 0 {
+				// Cache miss. Re-populate the missing data.
+				start := int64(fasttime.UnixTimestamp()*1000) - cacheTimestampOffset.Milliseconds()
+				offset = timestamp - start
+				if offset < 0 {
+					start = timestamp
+					offset = 0
+				}
+				if tooBigOffset(offset) {
+					qt.Printf("cannot apply instant rollup optimization because the -search.cacheTimestampOffset=%s is too big "+
+						"for the requested time=%s and window=%d", cacheTimestampOffset, storage.TimestampToHumanReadableFormat(timestamp), window)
+					tss, err := evalAt(qt, timestamp, window)
+					return tss, 0, err
+				}
+				qt.Printf("calculating the rollup at time=%s, because it is missing in the cache", storage.TimestampToHumanReadableFormat(start))
+				tss, err := evalAt(qt, start, window)
+				if err != nil {
+					return nil, 0, err
+				}
+				if hasDuplicateSeries(tss) {
+					qt.Printf("cannot apply instant rollup optimization because the result contains duplicate series")
+					tss, err := evalAt(qt, timestamp, window)
+					return tss, 0, err
+				}
+				rollupResultCacheV.PutInstantValues(qt, expr, window, ec.Step, ec.EnforcedTagFilterss, tss)
+				return tss, offset, nil
+			}
+			// Cache hit. Verify whether it is OK to use the cached data.
+			offset = timestamp - tssCached[0].Timestamps[0]
 			if offset < 0 {
-				start = timestamp
-				offset = 0
+				qt.Printf("do not apply instant rollup optimization because the cached values have bigger timestamp=%s than the requested one=%s",
+					storage.TimestampToHumanReadableFormat(tssCached[0].Timestamps[0]), storage.TimestampToHumanReadableFormat(timestamp))
+				// Delete the outdated cached values, so the cache could be re-populated with newer values.
+				deleteCachedSeries(qt)
+				goto again
 			}
 			if tooBigOffset(offset) {
-				qt.Printf("cannot apply instant rollup optimization because the -search.cacheTimestampOffset=%s is too big "+
-					"for the requested time=%s and window=%d", cacheTimestampOffset, storage.TimestampToHumanReadableFormat(timestamp), window)
-				tss, err := evalAt(qt, timestamp, window)
-				return tss, 0, err
+				qt.Printf("do not apply instant rollup optimization because the offset=%d between the requested timestamp "+
+					"and the cached values is too big comparing to window=%d", offset, window)
+				// Delete the outdated cached values, so the cache could be re-populated with newer values.
+				deleteCachedSeries(qt)
+				goto again
 			}
-			qt.Printf("calculating the rollup at time=%s, because it is missing in the cache", storage.TimestampToHumanReadableFormat(start))
-			tss, err := evalAt(qt, start, window)
-			if err != nil {
-				return nil, 0, err
-			}
-			if hasDuplicateSeries(tss) {
-				qt.Printf("cannot apply instant rollup optimization because the result contains duplicate series")
-				tss, err := evalAt(qt, timestamp, window)
-				return tss, 0, err
-			}
-			rollupResultCacheV.PutInstantValues(qt, expr, window, ec.Step, ec.EnforcedTagFilterss, tss)
-			return tss, offset, nil
+			return tssCached, offset, nil
 		}
-		// Cache hit. Verify whether it is OK to use the cached data.
-		offset = timestamp - tssCached[0].Timestamps[0]
-		if offset < 0 {
-			qt.Printf("do not apply instant rollup optimization because the cached values have bigger timestamp=%s than the requested one=%s",
-				storage.TimestampToHumanReadableFormat(tssCached[0].Timestamps[0]), storage.TimestampToHumanReadableFormat(timestamp))
-			// Delete the outdated cached values, so the cache could be re-populated with newer values.
-			deleteCachedSeries(qt)
-			goto again
-		}
-		if tooBigOffset(offset) {
-			qt.Printf("do not apply instant rollup optimization because the offset=%d between the requested timestamp "+
-				"and the cached values is too big comparing to window=%d", offset, window)
-			// Delete the outdated cached values, so the cache could be re-populated with newer values.
-			deleteCachedSeries(qt)
-			goto again
-		}
-		return tssCached, offset, nil
-	}
 
-	if !ec.mayCache() {
-		qt.Printf("do not apply instant rollup optimization because of disabled cache")
-		return evalAt(qt, timestamp, window)
-	}
-	if window < minWindowForInstantRollupOptimization.Milliseconds() {
-		qt.Printf("do not apply instant rollup optimization because of too small window=%d; must be equal or bigger than %d",
-			window, minWindowForInstantRollupOptimization.Milliseconds())
-		return evalAt(qt, timestamp, window)
-	}
-	switch funcName {
-	case "avg_over_time":
-		if iafc != nil {
-			qt.Printf("do not apply instant rollup optimization for incremental aggregate %s()", iafc.ae.Name)
+		if !ec.mayCache() {
+			qt.Printf("do not apply instant rollup optimization because of disabled cache")
 			return evalAt(qt, timestamp, window)
 		}
-		qt.Printf("optimized calculation for instant rollup avg_over_time(m[d]) as (sum_over_time(m[d]) / count_over_time(m[d]))")
-		fe := expr.(*metricsql.FuncExpr)
-		feSum := *fe
-		feSum.Name = "sum_over_time"
-		feCount := *fe
-		feCount.Name = "count_over_time"
-		be := &metricsql.BinaryOpExpr{
-			Op:              "/",
-			KeepMetricNames: fe.KeepMetricNames,
-			Left:            &feSum,
-			Right:           &feCount,
+		if window < minWindowForInstantRollupOptimization.Milliseconds() {
+			qt.Printf("do not apply instant rollup optimization because of too small window=%d; must be equal or bigger than %d",
+				window, minWindowForInstantRollupOptimization.Milliseconds())
+			return evalAt(qt, timestamp, window)
 		}
-		return evalExpr(qt, ec, be)
-	case "rate":
-		if iafc != nil {
-			if !strings.EqualFold(iafc.ae.Name, "sum") {
+		switch funcName {
+		case "avg_over_time":
+			if iafc != nil {
 				qt.Printf("do not apply instant rollup optimization for incremental aggregate %s()", iafc.ae.Name)
 				return evalAt(qt, timestamp, window)
 			}
-			qt.Printf("optimized calculation for sum(rate(m[d])) as (sum(increase(m[d])) / d)")
-			afe := expr.(*metricsql.AggrFuncExpr)
-			fe := afe.Args[0].(*metricsql.FuncExpr)
+			qt.Printf("optimized calculation for instant rollup avg_over_time(m[d]) as (sum_over_time(m[d]) / count_over_time(m[d]))")
+			fe := expr.(*metricsql.FuncExpr)
+			feSum := *fe
+			feSum.Name = "sum_over_time"
+			feCount := *fe
+			feCount.Name = "count_over_time"
+			be := &metricsql.BinaryOpExpr{
+				Op:              "/",
+				KeepMetricNames: fe.KeepMetricNames,
+				Left:            &feSum,
+				Right:           &feCount,
+			}
+			return evalExpr(qt, ec, be)
+		case "rate":
+			if iafc != nil {
+				if !strings.EqualFold(iafc.ae.Name, "sum") {
+					qt.Printf("do not apply instant rollup optimization for incremental aggregate %s()", iafc.ae.Name)
+					return evalAt(qt, timestamp, window)
+				}
+				qt.Printf("optimized calculation for sum(rate(m[d])) as (sum(increase(m[d])) / d)")
+				afe := expr.(*metricsql.AggrFuncExpr)
+				fe := afe.Args[0].(*metricsql.FuncExpr)
+				feIncrease := *fe
+				feIncrease.Name = "increase"
+				re := fe.Args[0].(*metricsql.RollupExpr)
+				d := re.Window.Duration(ec.Step)
+				if d == 0 {
+					d = ec.Step
+				}
+				afeIncrease := *afe
+				afeIncrease.Args = []metricsql.Expr{&feIncrease}
+				be := &metricsql.BinaryOpExpr{
+					Op:              "/",
+					KeepMetricNames: true,
+					Left:            &afeIncrease,
+					Right: &metricsql.NumberExpr{
+						N: float64(d) / 1000,
+					},
+				}
+				return evalExpr(qt, ec, be)
+			}
+			qt.Printf("optimized calculation for instant rollup rate(m[d]) as (increase(m[d]) / d)")
+			fe := expr.(*metricsql.FuncExpr)
 			feIncrease := *fe
 			feIncrease.Name = "increase"
 			re := fe.Args[0].(*metricsql.RollupExpr)
@@ -1191,224 +1213,204 @@ func evalInstantRollup(qt *querytracer.Tracer, ec *EvalConfig, funcName string, 
 			if d == 0 {
 				d = ec.Step
 			}
-			afeIncrease := *afe
-			afeIncrease.Args = []metricsql.Expr{&feIncrease}
 			be := &metricsql.BinaryOpExpr{
 				Op:              "/",
-				KeepMetricNames: true,
-				Left:            &afeIncrease,
+				KeepMetricNames: fe.KeepMetricNames,
+				Left:            &feIncrease,
 				Right: &metricsql.NumberExpr{
 					N: float64(d) / 1000,
 				},
 			}
 			return evalExpr(qt, ec, be)
-		}
-		qt.Printf("optimized calculation for instant rollup rate(m[d]) as (increase(m[d]) / d)")
-		fe := expr.(*metricsql.FuncExpr)
-		feIncrease := *fe
-		feIncrease.Name = "increase"
-		re := fe.Args[0].(*metricsql.RollupExpr)
-		d := re.Window.Duration(ec.Step)
-		if d == 0 {
-			d = ec.Step
-		}
-		be := &metricsql.BinaryOpExpr{
-			Op:              "/",
-			KeepMetricNames: fe.KeepMetricNames,
-			Left:            &feIncrease,
-			Right: &metricsql.NumberExpr{
-				N: float64(d) / 1000,
-			},
-		}
-		return evalExpr(qt, ec, be)
-	case "max_over_time":
-		if iafc != nil {
-			if !strings.EqualFold(iafc.ae.Name, "max") {
-				qt.Printf("do not apply instant rollup optimization for non-max incremental aggregate %s()", iafc.ae.Name)
+		case "max_over_time":
+			if iafc != nil {
+				if !strings.EqualFold(iafc.ae.Name, "max") {
+					qt.Printf("do not apply instant rollup optimization for non-max incremental aggregate %s()", iafc.ae.Name)
+					return evalAt(qt, timestamp, window)
+				}
+			}
+
+			// Calculate
+			//
+			// max_over_time(m[window] @ timestamp)
+			//
+			// as the maximum of
+			//
+			// - max_over_time(m[window] @ (timestamp-offset))
+			// - max_over_time(m[offset] @ timestamp)
+			//
+			// if max_over_time(m[offset] @ (timestamp-window)) < max_over_time(m[window] @ (timestamp-offset))
+			// otherwise do not apply the optimization
+			//
+			// where
+			//
+			// - max_over_time(m[window] @ (timestamp-offset)) is obtained from cache
+			// - max_over_time(m[offset] @ timestamp) and max_over_time(m[offset] @ (timestamp-window)) are calculated from the storage
+			//   These rollups are calculated faster than max_over_time(m[window]) because offset is smaller than window.
+			qtChild := qt.NewChild("optimized calculation for instant rollup %s at time=%s with lookbehind window=%d",
+				expr.AppendString(nil), storage.TimestampToHumanReadableFormat(timestamp), window)
+			defer qtChild.Done()
+
+			tssCached, offset, err := getCachedSeries(qtChild)
+			if err != nil {
+				return nil, err
+			}
+			if offset == 0 {
+				return tssCached, nil
+			}
+			// Calculate max_over_time(m[offset] @ timestamp)
+			tssStart, err := evalAt(qtChild, timestamp, offset)
+			if err != nil {
+				return nil, err
+			}
+			if hasDuplicateSeries(tssStart) {
+				qtChild.Printf("cannot apply instant rollup optimization, since tssStart contains duplicate series")
+				return evalAt(qtChild, timestamp, window)
+			}
+			// Calculate max_over_time(m[offset] @ (timestamp - window))
+			tssEnd, err := evalAt(qtChild, timestamp-window, offset)
+			if err != nil {
+				return nil, err
+			}
+			if hasDuplicateSeries(tssEnd) {
+				qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains duplicate series")
+				return evalAt(qtChild, timestamp, window)
+			}
+			// Calculate the result
+			tss, ok := getMaxInstantValues(qtChild, tssCached, tssStart, tssEnd, timestamp)
+			if !ok {
+				qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains bigger values than tssCached")
+				deleteCachedSeries(qtChild)
 				return evalAt(qt, timestamp, window)
 			}
-		}
+			return tss, nil
+		case "min_over_time":
+			if iafc != nil {
+				if !strings.EqualFold(iafc.ae.Name, "min") {
+					qt.Printf("do not apply instant rollup optimization for non-min incremental aggregate %s()", iafc.ae.Name)
+					return evalAt(qt, timestamp, window)
+				}
+			}
 
-		// Calculate
-		//
-		// max_over_time(m[window] @ timestamp)
-		//
-		// as the maximum of
-		//
-		// - max_over_time(m[window] @ (timestamp-offset))
-		// - max_over_time(m[offset] @ timestamp)
-		//
-		// if max_over_time(m[offset] @ (timestamp-window)) < max_over_time(m[window] @ (timestamp-offset))
-		// otherwise do not apply the optimization
-		//
-		// where
-		//
-		// - max_over_time(m[window] @ (timestamp-offset)) is obtained from cache
-		// - max_over_time(m[offset] @ timestamp) and max_over_time(m[offset] @ (timestamp-window)) are calculated from the storage
-		//   These rollups are calculated faster than max_over_time(m[window]) because offset is smaller than window.
-		qtChild := qt.NewChild("optimized calculation for instant rollup %s at time=%s with lookbehind window=%d",
-			expr.AppendString(nil), storage.TimestampToHumanReadableFormat(timestamp), window)
-		defer qtChild.Done()
+			// Calculate
+			//
+			//   min_over_time(m[window] @ timestamp)
+			//
+			// as the minimum of
+			//
+			//   - min_over_time(m[window] @ (timestamp-offset))
+			//   - min_over_time(m[offset] @ timestamp)
+			//
+			// if min_over_time(m[offset] @ (timestamp-window)) > min_over_time(m[window] @ (timestamp-offset))
+			// otherwise do not apply the optimization
+			//
+			// where
+			//
+			// - min_over_time(m[window] @ (timestamp-offset)) is obtained from cache
+			// - min_over_time(m[offset] @ timestamp) and min_over_time(m[offset] @ (timestamp-window)) are calculated from the storage
+			//   These rollups are calculated faster than min_over_time(m[window]) because offset is smaller than window.
+			qtChild := qt.NewChild("optimized calculation for instant rollup %s at time=%s with lookbehind window=%d",
+				expr.AppendString(nil), storage.TimestampToHumanReadableFormat(timestamp), window)
+			defer qtChild.Done()
 
-		tssCached, offset, err := getCachedSeries(qtChild)
-		if err != nil {
-			return nil, err
-		}
-		if offset == 0 {
-			return tssCached, nil
-		}
-		// Calculate max_over_time(m[offset] @ timestamp)
-		tssStart, err := evalAt(qtChild, timestamp, offset)
-		if err != nil {
-			return nil, err
-		}
-		if hasDuplicateSeries(tssStart) {
-			qtChild.Printf("cannot apply instant rollup optimization, since tssStart contains duplicate series")
-			return evalAt(qtChild, timestamp, window)
-		}
-		// Calculate max_over_time(m[offset] @ (timestamp - window))
-		tssEnd, err := evalAt(qtChild, timestamp-window, offset)
-		if err != nil {
-			return nil, err
-		}
-		if hasDuplicateSeries(tssEnd) {
-			qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains duplicate series")
-			return evalAt(qtChild, timestamp, window)
-		}
-		// Calculate the result
-		tss, ok := getMaxInstantValues(qtChild, tssCached, tssStart, tssEnd, timestamp)
-		if !ok {
-			qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains bigger values than tssCached")
-			deleteCachedSeries(qtChild)
-			return evalAt(qt, timestamp, window)
-		}
-		return tss, nil
-	case "min_over_time":
-		if iafc != nil {
-			if !strings.EqualFold(iafc.ae.Name, "min") {
-				qt.Printf("do not apply instant rollup optimization for non-min incremental aggregate %s()", iafc.ae.Name)
+			tssCached, offset, err := getCachedSeries(qtChild)
+			if err != nil {
+				return nil, err
+			}
+			if offset == 0 {
+				return tssCached, nil
+			}
+			// Calculate min_over_time(m[offset] @ timestamp)
+			tssStart, err := evalAt(qtChild, timestamp, offset)
+			if err != nil {
+				return nil, err
+			}
+			if hasDuplicateSeries(tssStart) {
+				qtChild.Printf("cannot apply instant rollup optimization, since tssStart contains duplicate series")
+				return evalAt(qtChild, timestamp, window)
+			}
+			// Calculate min_over_time(m[offset] @ (timestamp - window))
+			tssEnd, err := evalAt(qtChild, timestamp-window, offset)
+			if err != nil {
+				return nil, err
+			}
+			if hasDuplicateSeries(tssEnd) {
+				qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains duplicate series")
+				return evalAt(qtChild, timestamp, window)
+			}
+			// Calculate the result
+			tss, ok := getMinInstantValues(qtChild, tssCached, tssStart, tssEnd, timestamp)
+			if !ok {
+				qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains smaller values than tssCached")
+				deleteCachedSeries(qtChild)
 				return evalAt(qt, timestamp, window)
 			}
-		}
+			return tss, nil
+		case
+			"count_eq_over_time",
+			"count_gt_over_time",
+			"count_le_over_time",
+			"count_ne_over_time",
+			"count_over_time",
+			"increase",
+			"increase_pure",
+			"sum_over_time":
+			if iafc != nil && !strings.EqualFold(iafc.ae.Name, "sum") {
+				qt.Printf("do not apply instant rollup optimization for non-sum incremental aggregate %s()", iafc.ae.Name)
+				return evalAt(qt, timestamp, window)
+			}
 
-		// Calculate
-		//
-		//   min_over_time(m[window] @ timestamp)
-		//
-		// as the minimum of
-		//
-		//   - min_over_time(m[window] @ (timestamp-offset))
-		//   - min_over_time(m[offset] @ timestamp)
-		//
-		// if min_over_time(m[offset] @ (timestamp-window)) > min_over_time(m[window] @ (timestamp-offset))
-		// otherwise do not apply the optimization
-		//
-		// where
-		//
-		// - min_over_time(m[window] @ (timestamp-offset)) is obtained from cache
-		// - min_over_time(m[offset] @ timestamp) and min_over_time(m[offset] @ (timestamp-window)) are calculated from the storage
-		//   These rollups are calculated faster than min_over_time(m[window]) because offset is smaller than window.
-		qtChild := qt.NewChild("optimized calculation for instant rollup %s at time=%s with lookbehind window=%d",
-			expr.AppendString(nil), storage.TimestampToHumanReadableFormat(timestamp), window)
-		defer qtChild.Done()
+			// Calculate
+			//
+			//   rf(m[window] @ timestamp)
+			//
+			// as
+			//
+			//   rf(m[window] @ (timestamp-offset)) + rf(m[offset] @ timestamp) - rf(m[offset] @ (timestamp-window))
+			//
+			// where
+			//
+			// - rf is count_over_time, sum_over_time or increase
+			// - rf(m[window] @ (timestamp-offset)) is obtained from cache
+			// - rf(m[offset] @ timestamp) and rf(m[offset] @ (timestamp-window)) are calculated from the storage
+			//   These rollups are calculated faster than rf(m[window]) because offset is smaller than window.
+			qtChild := qt.NewChild("optimized calculation for instant rollup %s at time=%s with lookbehind window=%d",
+				expr.AppendString(nil), storage.TimestampToHumanReadableFormat(timestamp), window)
+			defer qtChild.Done()
 
-		tssCached, offset, err := getCachedSeries(qtChild)
-		if err != nil {
-			return nil, err
-		}
-		if offset == 0 {
-			return tssCached, nil
-		}
-		// Calculate min_over_time(m[offset] @ timestamp)
-		tssStart, err := evalAt(qtChild, timestamp, offset)
-		if err != nil {
-			return nil, err
-		}
-		if hasDuplicateSeries(tssStart) {
-			qtChild.Printf("cannot apply instant rollup optimization, since tssStart contains duplicate series")
-			return evalAt(qtChild, timestamp, window)
-		}
-		// Calculate min_over_time(m[offset] @ (timestamp - window))
-		tssEnd, err := evalAt(qtChild, timestamp-window, offset)
-		if err != nil {
-			return nil, err
-		}
-		if hasDuplicateSeries(tssEnd) {
-			qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains duplicate series")
-			return evalAt(qtChild, timestamp, window)
-		}
-		// Calculate the result
-		tss, ok := getMinInstantValues(qtChild, tssCached, tssStart, tssEnd, timestamp)
-		if !ok {
-			qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains smaller values than tssCached")
-			deleteCachedSeries(qtChild)
+			tssCached, offset, err := getCachedSeries(qtChild)
+			if err != nil {
+				return nil, err
+			}
+			if offset == 0 {
+				return tssCached, nil
+			}
+			// Calculate rf(m[offset] @ timestamp)
+			tssStart, err := evalAt(qtChild, timestamp, offset)
+			if err != nil {
+				return nil, err
+			}
+			if hasDuplicateSeries(tssStart) {
+				qtChild.Printf("cannot apply instant rollup optimization, since tssStart contains duplicate series")
+				return evalAt(qtChild, timestamp, window)
+			}
+			// Calculate rf(m[offset] @ (timestamp - window))
+			tssEnd, err := evalAt(qtChild, timestamp-window, offset)
+			if err != nil {
+				return nil, err
+			}
+			if hasDuplicateSeries(tssEnd) {
+				qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains duplicate series")
+				return evalAt(qtChild, timestamp, window)
+			}
+			// Calculate the result
+			tss := getSumInstantValues(qtChild, tssCached, tssStart, tssEnd, timestamp)
+			return tss, nil
+		default:
+			qt.Printf("instant rollup optimization isn't implemented for %s()", funcName)
 			return evalAt(qt, timestamp, window)
 		}
-		return tss, nil
-	case
-		"count_eq_over_time",
-		"count_gt_over_time",
-		"count_le_over_time",
-		"count_ne_over_time",
-		"count_over_time",
-		"increase",
-		"increase_pure",
-		"sum_over_time":
-		if iafc != nil && !strings.EqualFold(iafc.ae.Name, "sum") {
-			qt.Printf("do not apply instant rollup optimization for non-sum incremental aggregate %s()", iafc.ae.Name)
-			return evalAt(qt, timestamp, window)
-		}
-
-		// Calculate
-		//
-		//   rf(m[window] @ timestamp)
-		//
-		// as
-		//
-		//   rf(m[window] @ (timestamp-offset)) + rf(m[offset] @ timestamp) - rf(m[offset] @ (timestamp-window))
-		//
-		// where
-		//
-		// - rf is count_over_time, sum_over_time or increase
-		// - rf(m[window] @ (timestamp-offset)) is obtained from cache
-		// - rf(m[offset] @ timestamp) and rf(m[offset] @ (timestamp-window)) are calculated from the storage
-		//   These rollups are calculated faster than rf(m[window]) because offset is smaller than window.
-		qtChild := qt.NewChild("optimized calculation for instant rollup %s at time=%s with lookbehind window=%d",
-			expr.AppendString(nil), storage.TimestampToHumanReadableFormat(timestamp), window)
-		defer qtChild.Done()
-
-		tssCached, offset, err := getCachedSeries(qtChild)
-		if err != nil {
-			return nil, err
-		}
-		if offset == 0 {
-			return tssCached, nil
-		}
-		// Calculate rf(m[offset] @ timestamp)
-		tssStart, err := evalAt(qtChild, timestamp, offset)
-		if err != nil {
-			return nil, err
-		}
-		if hasDuplicateSeries(tssStart) {
-			qtChild.Printf("cannot apply instant rollup optimization, since tssStart contains duplicate series")
-			return evalAt(qtChild, timestamp, window)
-		}
-		// Calculate rf(m[offset] @ (timestamp - window))
-		tssEnd, err := evalAt(qtChild, timestamp-window, offset)
-		if err != nil {
-			return nil, err
-		}
-		if hasDuplicateSeries(tssEnd) {
-			qtChild.Printf("cannot apply instant rollup optimization, since tssEnd contains duplicate series")
-			return evalAt(qtChild, timestamp, window)
-		}
-		// Calculate the result
-		tss := getSumInstantValues(qtChild, tssCached, tssStart, tssEnd, timestamp)
-		return tss, nil
-	default:
-		qt.Printf("instant rollup optimization isn't implemented for %s()", funcName)
-		return evalAt(qt, timestamp, window)
-	}
+	*/
 }
 
 func hasDuplicateSeries(tss []*timeseries) bool {

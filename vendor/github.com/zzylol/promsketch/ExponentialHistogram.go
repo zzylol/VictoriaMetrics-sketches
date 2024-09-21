@@ -75,14 +75,6 @@ type ExpoHistogramCS struct {
 	time_window_size int64
 }
 
-type ExpoHistogramCM struct {
-	seed1            []uint32
-	s_count          int // sketch count
-	cm_instances     []CountMinSketch
-	k                int64
-	time_window_size int64
-}
-
 /*------------------------------------------------------------------------------
 			Exponential Histogram for KLL
 --------------------------------------------------------------------------------*/
@@ -147,6 +139,7 @@ func (ehkll *ExpoHistogramKLL) Update(time int64, value float64) {
 				ehkll.bucketsize[i+1] += ehkll.bucketsize[i+2]
 				ehkll.max_time[i+1] = MaxInt64(ehkll.max_time[i+1], ehkll.max_time[i+2])
 				ehkll.min_time[i+1] = MinInt64(ehkll.min_time[i+1], ehkll.min_time[i+2])
+				ehkll.klls[i+2] = nil
 				ehkll.klls = append(ehkll.klls[:i+2], ehkll.klls[i+3:]...)
 				ehkll.max_time = append(ehkll.max_time[:i+2], ehkll.max_time[i+3:]...)
 				ehkll.min_time = append(ehkll.min_time[:i+2], ehkll.min_time[i+3:]...)
@@ -165,7 +158,7 @@ func (ehkll *ExpoHistogramKLL) Update(time int64, value float64) {
 		ehkll.bucketsize[0] += ehkll.bucketsize[1]
 		ehkll.max_time[0] = MaxInt64(ehkll.max_time[0], ehkll.max_time[1])
 		ehkll.min_time[0] = MinInt64(ehkll.min_time[0], ehkll.min_time[1])
-
+		ehkll.klls[1] = nil
 		ehkll.klls = append(ehkll.klls[:1], ehkll.klls[2:]...)
 		ehkll.max_time = append(ehkll.max_time[:1], ehkll.max_time[2:]...)
 		ehkll.min_time = append(ehkll.min_time[:1], ehkll.min_time[2:]...)

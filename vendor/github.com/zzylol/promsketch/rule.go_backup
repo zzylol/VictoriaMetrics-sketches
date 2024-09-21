@@ -176,17 +176,14 @@ func (rule *SketchRule) Eval(ctx context.Context, ts time.Time) (Vector, error) 
 func (rule *SketchRule) AppendToStorage(ctx context.Context, vector Vector) {
 	lb := labels.NewBuilder(labels.EmptyLabels())
 
-	for i := range vector {
-		sample := &vector[i]
+	for _ = range vector {
 
-		lb.Reset(sample.Metric)
 		lb.Set(labels.MetricName, rule.name)
 
 		rule.labels.Range(func(l labels.Label) {
 			lb.Set(l.Name, l.Value)
 		})
 
-		sample.Metric = lb.Labels()
 	}
 
 	app := rule.Opts.Appendable.Appender(ctx)
@@ -200,7 +197,7 @@ func (rule *SketchRule) AppendToStorage(ctx context.Context, vector Vector) {
 	}()
 
 	for _, s := range vector {
-		_, err := app.Append(0, s.Metric, s.T, s.F)
+		_, err := app.Append(0, nil, s.T, s.F)
 
 		if err != nil {
 			rule.SetHealth(HealthBad)

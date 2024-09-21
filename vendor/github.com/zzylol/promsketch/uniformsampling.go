@@ -56,6 +56,9 @@ func (s *UniformSampling) Insert(t int64, x float64) {
 			break
 		}
 	}
+	if len(s.Arr) > s.Max_size {
+		shift = len(s.Arr) - s.Max_size
+	}
 
 	s.Arr = s.Arr[shift:]
 	r := rand.Float64()
@@ -168,6 +171,7 @@ func quantiles(qs []float64, values []float64) (quantiles []float64) {
 
 func (s *UniformSampling) QueryQuantile(phis []float64, t1, t2 int64) []float64 {
 	values := make([]float64, 0)
+	s.mutex.RLock()
 	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
 	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
 
@@ -179,23 +183,30 @@ func (s *UniformSampling) QueryQuantile(phis []float64, t1, t2 int64) []float64 
 	for i := idx_1; i <= idx_2; i++ {
 		values = append(values, s.Arr[i].F)
 	}
+	s.mutex.RUnlock()
 	return quantiles(phis, values)
 }
 
 func (s *UniformSampling) Cover(t1, t2 int64) bool {
 	s.mutex.RLock()
-	for _, v := range s.Arr {
-		if v.T < t1 {
-			continue
-		}
-		if v.T > t2 {
-			break
-		}
+	if len(s.Arr) == 0 {
 		s.mutex.RUnlock()
-		return true
+		return false
 	}
+	idx_1 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T >= t1 })
+	idx_2 := sort.Search(len(s.Arr), func(i int) bool { return s.Arr[i].T > t2 }) - 1
+
+	var isCovered bool = false
+	if idx_1 >= len(s.Arr) {
+		isCovered = false
+	} else {
+		if idx_1 <= idx_2 {
+			isCovered = true
+		}
+	}
+
 	s.mutex.RUnlock()
-	return false
+	return isCovered
 }
 
 func (s *UniformSampling) GetMinTime() int64 {
@@ -468,5 +479,5 @@ func (s *UniformSampling) QueryDistinct(t1, t2 int64) float64 {
 		m[s.Arr[i].F] = 1
 	}
 	s.mutex.RUnlock()
-	return float64(len(m)) / float64(s.Sampling_rate)
+	return float64(len(m))
 }
