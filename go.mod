@@ -30,7 +30,7 @@ require (
 	github.com/valyala/histogram v1.2.0
 	github.com/valyala/quicktemplate v1.8.0
 	github.com/zzylol/metricsql v0.1.1
-	github.com/zzylol/promsketch v0.3.20
+	github.com/zzylol/promsketch v0.3.21
 	golang.org/x/oauth2 v0.22.0
 	golang.org/x/sys v0.25.0
 	google.golang.org/api v0.187.0
@@ -74,7 +74,6 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/dennwc/varint v1.0.0 // indirect
-	github.com/enriquebris/goconcurrentqueue v0.7.0 // indirect
 	github.com/fatih/color v1.17.0 // indirect
 	github.com/felixge/httpsnoop v1.0.4 // indirect
 	github.com/go-kit/log v0.2.1 // indirect

@@ -24,9 +24,9 @@ const ELEPHANT_LAYER = 8
 const MICE_LAYER = 8
 const CS_LVLS int = 16 // total layers
 const CS_ROW_NO_Univ_ELEPHANT int = 3
-const CS_COL_NO_Univ_ELEPHANT int = 1024
+const CS_COL_NO_Univ_ELEPHANT int = 2048
 const CS_ROW_NO_Univ_MICE int = 3
-const CS_COL_NO_Univ_MICE int = 256
+const CS_COL_NO_Univ_MICE int = 512
 
 const TOPK_SIZE int = 100
 const TOPK_SIZE_MICE int = 100
