@@ -763,7 +763,7 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSr
 		maxWindow = rc.Step
 	}
 
-	lookup := vmsketch.SearchAndUpdateWindowMetricNameFuncName(mnSrc, rc.FuncName, 4*maxWindow)
+	lookup := vmsketch.SearchAndUpdateWindowMetricNameFuncName(mnSrc, rc.FuncName, 2*maxWindow)
 	if !lookup && !isDefault {
 		// Initiate a VMSketch cache
 		// It will be the best to check if it's a query from rules.
@@ -771,7 +771,7 @@ func (rc *rollupConfig) doInternal(dstValues []float64, tsm *timeseriesMap, mnSr
 		// we should allocate a sketch cache for the rule.
 
 		// fmt.Println("before register sketch:", maxWindow, scrapeInterval, int64(float64(maxWindow)/float64(scrapeInterval))*3)
-		err := vmsketch.RegisterMetricNameFuncName(mnSrc, rc.FuncName, maxWindow*4, int64(float64(maxWindow)/float64(scrapeInterval))*4)
+		err := vmsketch.RegisterMetricNameFuncName(mnSrc, rc.FuncName, maxWindow*2, int64(float64(maxWindow)/float64(scrapeInterval))*2)
 
 		if err != nil {
 			fmt.Printf("Failed to create new VMSketch cache for %s %s", mnSrc, rc.FuncName)

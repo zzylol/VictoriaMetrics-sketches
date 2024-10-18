@@ -361,10 +361,7 @@ func (eh *ExpoHistogramUnivOptimized) Cover(mint, maxt int64) bool {
 		return false
 	}
 
-	mint_time := eh.map_buckets[0].min_time
-	if eh.s_count > 0 {
-		mint_time = eh.univs[0].min_time
-	}
+	mint_time := eh.map_buckets[eh.map_count-1].max_time - eh.time_window_size
 	// fmt.Println("EHoptimized Cover:", mint, maxt, mint_time, eh.array[eh.map_count-1].max_time)
 	maxt_covered := (eh.map_buckets[eh.map_count-1].max_time >= maxt)
 	mint_covered := (mint_time <= mint)

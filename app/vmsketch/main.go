@@ -336,7 +336,7 @@ func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string
 			return nil, false, fmt.Errorf("sketchIns doesn't allocated")
 		}
 		if !lookup {
-			// fmt.Println(sketchIns.PrintMinMaxTimeRange(mn, funcNames[0]))
+			fmt.Println(sketchIns.PrintMinMaxTimeRange(mn, funcNames[0]))
 			return nil, false, fmt.Errorf("sketch cache doesn't cover metricName %q", mnstr)
 		}
 		srs.sketchInss = append(srs.sketchInss, SketchResult{sketchIns: sketchIns, MetricName: mn})
