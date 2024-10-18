@@ -332,6 +332,9 @@ func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string
 		}
 
 		sketchIns, lookup := SketchCache.LookupMetricNameFuncNamesTimeRange(mn, funcNames, start, end)
+		if sketchIns == nil {
+			return nil, false, fmt.Errorf("sketchIns doesn't allocated")
+		}
 		if !lookup {
 			return nil, false, fmt.Errorf("sketch cache doesn't cover metricName %q", mnstr)
 		}

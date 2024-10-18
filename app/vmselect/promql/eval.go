@@ -1739,7 +1739,7 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 		// fmt.Println("cover:", isCovered, minTimestamp, ec.End)
 	} else {
 		if window != 0 {
-			fmt.Println(funcNames, minTimestamp, ec.End)
+			fmt.Println(funcNames, minTimestamp, ec.End, err)
 		}
 	}
 
