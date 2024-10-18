@@ -193,6 +193,14 @@ func (ehkll *ExpoHistogramKLL) GetMaxTime() int64 {
 	return ehkll.max_time[ehkll.s_count-1]
 }
 
+func (ehkll *ExpoHistogramKLL) GetMinTime() int64 {
+	if ehkll.s_count == 0 {
+		return -1
+	}
+
+	return ehkll.min_time[0]
+}
+
 func (ehkll *ExpoHistogramKLL) GetMemory() float64 {
 	var total_mem float64 = 0
 	for i := 0; i < ehkll.s_count; i++ {

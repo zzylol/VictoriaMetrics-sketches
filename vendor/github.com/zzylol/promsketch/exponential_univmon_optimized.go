@@ -373,6 +373,17 @@ func (eh *ExpoHistogramUnivOptimized) Cover(mint, maxt int64) bool {
 	return isCovered
 }
 
+func (eh *ExpoHistogramUnivOptimized) GetMinTime() int64 {
+	if eh.s_count+eh.map_count == 0 {
+		return -1
+	}
+	if eh.s_count > 0 {
+		return eh.univs[0].min_time
+	} else {
+		return eh.map_buckets[0].min_time
+	}
+}
+
 func (eh *ExpoHistogramUnivOptimized) GetMaxTime() int64 {
 	if eh.s_count+eh.map_count == 0 {
 		return -1
