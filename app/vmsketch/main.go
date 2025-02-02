@@ -331,14 +331,14 @@ func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string
 			return nil, false, fmt.Errorf("timeout exceeded before starting the query processing: %s", deadline.String())
 		}
 
-		sketchIns, lookup := SketchCache.LookupMetricNameFuncNamesTimeRange(mn, funcNames, start, end)
+		sketchIns, _ := SketchCache.LookupMetricNameFuncNamesTimeRange(mn, funcNames, start, end)
 		if sketchIns == nil {
 			return nil, false, fmt.Errorf("sketchIns doesn't allocated")
 		}
-		if !lookup {
-			fmt.Println(sketchIns.PrintMinMaxTimeRange(mn, funcNames[0]))
-			return nil, false, fmt.Errorf("sketch cache doesn't cover metricName %q", mnstr)
-		}
+		// if !lookup {
+		// 	fmt.Println(sketchIns.PrintMinMaxTimeRange(mn, funcNames[0]))
+		// 	return nil, false, fmt.Errorf("sketch cache doesn't cover metricName %q", mnstr)
+		// }
 		srs.sketchInss = append(srs.sketchInss, SketchResult{sketchIns: sketchIns, MetricName: mn})
 	}
 	return srs, true, nil
