@@ -186,6 +186,7 @@ func ingestVMZipfScrapes(st *storage.Storage, mrs []storage.MetricRow, scrapeTot
 					if err := st.AddRows(rowsToInsert, defaultPrecisionBits); err != nil {
 						panic(fmt.Errorf("cannot add rows to storage: %w", err))
 					}
+					count.Add(int64(len(rowsToInsert)))
 				}
 
 			}(currTime)
@@ -330,6 +331,7 @@ func ingestVMGoogleScrapes(st *storage.Storage, mrs []storage.MetricRow, scrapeT
 					if err := st.AddRows(rowsToInsert, defaultPrecisionBits); err != nil {
 						panic(fmt.Errorf("cannot add rows to storage: %w", err))
 					}
+					count.Add(int64(len(rowsToInsert)))
 				}
 
 			}(currTime)
@@ -531,6 +533,7 @@ func ingestVMDynamicScrapes(st *storage.Storage, mrs []storage.MetricRow, scrape
 					if err := st.AddRows(rowsToInsert, defaultPrecisionBits); err != nil {
 						panic(fmt.Errorf("cannot add rows to storage: %w", err))
 					}
+					count.Add(int64(len(rowsToInsert)))
 				}
 
 			}(currTime)
