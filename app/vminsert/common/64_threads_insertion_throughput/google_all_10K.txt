@@ -1,0 +1,2 @@
+=== RUN   TestVMWriteThroughPut
+2025-02-07T22:55:47.547Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60

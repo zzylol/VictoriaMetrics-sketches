@@ -115,6 +115,19 @@ func TestWriteThroughPut(t *testing.T) {
 			if err != nil {
 				panic(fmt.Errorf("Failed register vmsketch cache EHuniv instance %w", err))
 			}
+		case "all":
+			err := vmsketch.RegisterMetricNameFuncName(&mn, "avg_over_time", flag_sample_window*100, flag_sample_window)
+			if err != nil {
+				panic(fmt.Errorf("Failed register vmsketch cache Sampling instance %w", err))
+			}
+			err = vmsketch.RegisterMetricNameFuncName(&mn, "quantile_over_time", flag_sample_window*100, flag_sample_window)
+			if err != nil {
+				panic(fmt.Errorf("Failed register vmsketch cache EHKLL instance %w", err))
+			}
+			err = vmsketch.RegisterMetricNameFuncName(&mn, "distinct_over_time", flag_sample_window*100, flag_sample_window)
+			if err != nil {
+				panic(fmt.Errorf("Failed register vmsketch cache EHuniv instance %w", err))
+			}
 		default:
 			fmt.Println("not supported algorithm.")
 		}
