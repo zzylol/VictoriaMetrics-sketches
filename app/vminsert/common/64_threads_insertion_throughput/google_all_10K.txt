@@ -1,2 +1,35 @@
 === RUN   TestWriteThroughPut
 2025-02-09T19:35:28.173Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
+Threads: 64 ; Each thread handles 1 timeseries.
+2025-02-09T19:35:44.156Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2025-02-09T19:35:44.214Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+    insert_throughput_test.go:155: 1 29.44047501 73368.38142952233
+--- PASS: TestWriteThroughPut (46.11s)
+=== RUN   TestWriteThroughPut
+Threads: 64 ; Each thread handles 1 timeseries.
+2025-02-09T19:36:28.135Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2025-02-09T19:36:28.175Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+    insert_throughput_test.go:155: 1 28.914604655 74702.7332993981
+--- PASS: TestWriteThroughPut (43.51s)
+PASS
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	89.709s
+=== RUN   TestWriteThroughPut
+2025-02-09T19:36:58.855Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
+Threads: 64 ; Each thread handles 1 timeseries.
+2025-02-09T19:37:15.132Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2025-02-09T19:37:15.169Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+    insert_throughput_test.go:155: 10 38.504003551 560980.6255962446
+--- PASS: TestWriteThroughPut (56.63s)
+=== RUN   TestWriteThroughPut
+Threads: 64 ; Each thread handles 1 timeseries.
+2025-02-09T19:38:08.256Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2025-02-09T19:38:08.294Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
+    insert_throughput_test.go:155: 10 38.214792789 565226.1447356974
+--- PASS: TestWriteThroughPut (52.77s)
+PASS
+ok  	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	109.508s
+=== RUN   TestWriteThroughPut
+2025-02-09T19:38:49.232Z	info	/mydata/VictoriaMetrics-sketches/lib/memory/memory.go:42	limiting caches to 242618914406 bytes, leaving 161745942938 bytes to the OS according to -memory.allowedPercent=60
+Threads: 64 ; Each thread handles 2 timeseries.
+2025-02-09T19:39:05.491Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:199	creating a partition "1970_01" with smallPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/small/1970_01", bigPartsPath="/mydata/VictoriaMetrics-sketches/app/vminsert/common/BenchmarkCtxInsertThoughput/data/big/1970_01"
+2025-02-09T19:39:05.530Z	info	/mydata/VictoriaMetrics-sketches/lib/storage/partition.go:208	partition "1970_01" has been created
