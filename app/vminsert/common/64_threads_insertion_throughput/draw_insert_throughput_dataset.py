@@ -37,15 +37,15 @@ marker_list = {
     "All_1M": "v"}
 
 
-plt.rcParams['font.size'] = 35  # 48
-plt.rcParams['axes.labelsize'] = 35  # 48
+plt.rcParams['font.size'] = 30  # 48
+plt.rcParams['axes.labelsize'] = 30  # 48
 plt.rcParams['legend.fontsize'] = 27  # 55
-plt.rcParams["figure.figsize"] = (14, 6)
+plt.rcParams["figure.figsize"] = (8, 6)
 plt.rcParams['pdf.fonttype'] = 42
 
 num_ts = [1, 10, 100, 1000, 10000]  
-datasets = ["zipf", "dynamic", "google"]
-systems = ["ehkll", "ehuniv", "sampling", "all"]
+datasets = ["dynamic"] # ["zipf", "dynamic", "google"]
+systems = ["ehkll", "ehuniv", "sampling"] # , "all"]
 window_sizes = ["10K", "100K", "1M"]
 
 
@@ -55,6 +55,7 @@ for data in datasets:
     for sys in systems:
         for win in window_sizes:
             baselines.append(sys + "_" + win)
+    baselines.append("vm")
 
     print(baselines)
 
@@ -94,14 +95,15 @@ for data in datasets:
     fig = plt.figure()
     out_num_ts = [x for x in num_ts]
     for sys in baselines:
-        plt.plot(out_num_ts, plot_throughput[sys], label=labels[sys], marker = marker_list[labels[sys]], linewidth=5, markersize=30, fillstyle="none", markeredgewidth=3)
+        plt.plot(out_num_ts, plot_throughput[sys], label=labels[sys], marker = marker_list[labels[sys]], linewidth=3, markersize=25, fillstyle="none", markeredgewidth=3)
+    
     plt.ticklabel_format(axis='y', style='sci', scilimits=(6,6))
     plt.xscale('log')
     plt.yscale("log")
     # plt.ylim([130000, 200000000])
     plt.xlabel("Number of Timeseries")
-    plt.ylabel("Throughput (Samples/s)")
+    plt.ylabel("Throughput(Samples/s)")
     plt.grid()
     # plt.legend(loc='center left', bbox_to_anchor=(1, 0.5))
-    plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.5), ncol=3)
+    # plt.legend(loc="upper center", bbox_to_anchor=(0.5, 1.5), ncol=3)
     plt.savefig("vm_sketch_insert_throughput_" + data + ".pdf", bbox_inches='tight')
