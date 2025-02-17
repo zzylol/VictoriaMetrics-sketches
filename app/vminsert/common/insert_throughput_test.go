@@ -532,9 +532,9 @@ func ingestVMDynamicScrapes(st *storage.Storage, mrs []storage.MetricRow, scrape
 					ts := int64(j*second) + currTime
 					for _, mr := range batch {
 						var value float64 = 0
-						if j%const_3M < const_1M {
+						if (i+j)%const_3M < const_1M {
 							value = float64(z.Uint64())
-						} else if j%const_3M < const_2M {
+						} else if (i+j)%const_3M < const_2M {
 							value = rand.Float64() * 100000
 						} else {
 							value = rand.NormFloat64()*50000 + 10000
