@@ -433,6 +433,7 @@ func ingestDynamicScrapes(st *storage.Storage, mrs []storage.MetricRow, scrapeTo
 	}
 	fmt.Println("Threads:", flagthreads, ";", "Each thread handles", lbl_batch, "timeseries.")
 
+	start := time.Now()
 	for i := 0; i < scrapeTotCount; i += scrapeBatch {
 		var wg sync.WaitGroup
 		currTime := int64(i * second)
@@ -490,6 +491,8 @@ func ingestDynamicScrapes(st *storage.Storage, mrs []storage.MetricRow, scrapeTo
 			}(currTime)
 		}
 		wg.Wait()
+		elapsed := time.Since(start)
+		fmt.Println("throughput:", i, float64(count.Load())/elapsed.Seconds())
 	}
 
 	return count.Load()

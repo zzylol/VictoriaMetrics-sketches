@@ -109,3 +109,4 @@ Threads: 64 ; Each thread handles 157 timeseries.
 signal: killed
 FAIL	github.com/zzylol/VictoriaMetrics-sketches/app/vminsert/common	14665.256s
 FAIL
+insert_throughput_test.go:155: 1000 1843.724593935 1.0644776128921583e+06
