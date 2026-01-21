@@ -434,52 +434,90 @@ func (eh *ExpoHistogramUnivOptimized) GetTotalBucketSizes() int64 {
 func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_t int64) (univ *UnivSketch, m *map[float64]int64, n float64, err error) {
 	var from_bucket, to_bucket int = 0, 0
 	ehu.mutex.RLock()
+	totalBuckets := ehu.s_count + ehu.map_count
+	if totalBuckets == 0 {
+		ehu.mutex.RUnlock()
+		return nil, nil, 0, nil
+	}
 
-	// ehu.print_buckets()
-	// fmt.Println(" ")
+	if ehu.s_count > 0 {
+		for i := 0; i <= ehu.s_count-1; i++ {
+			if t1 >= ehu.univs[i].min_time && t1 <= ehu.univs[i].max_time {
+				from_bucket = i
+				break
+			}
+		}
 
-	for i := 0; i <= ehu.s_count-1; i++ {
-		if t1 >= ehu.univs[i].min_time && t1 <= ehu.univs[i].max_time {
-			from_bucket = i
-			break
+		for i := 0; i <= ehu.s_count-1; i++ {
+			if t2 >= ehu.univs[i].min_time && t2 <= ehu.univs[i].max_time {
+				to_bucket = i
+				break
+			}
 		}
 	}
 
-	for i := 0; i <= ehu.s_count-1; i++ {
-		if t2 >= ehu.univs[i].min_time && t2 <= ehu.univs[i].max_time {
-			to_bucket = i
-			break
+	if ehu.map_count > 0 {
+		for i := 0; i < ehu.map_count; i++ {
+			if t1 >= ehu.map_buckets[i].min_time && t1 <= ehu.map_buckets[i].max_time {
+				from_bucket = i + ehu.s_count
+				break
+			}
+		}
+
+		for i := 0; i < ehu.map_count; i++ {
+			if t2 >= ehu.map_buckets[i].min_time && t2 <= ehu.map_buckets[i].max_time {
+				to_bucket = i + ehu.s_count
+				break
+			}
 		}
 	}
 
-	for i := 0; i < ehu.map_count; i++ {
-		if t1 >= ehu.map_buckets[i].min_time && t1 <= ehu.map_buckets[i].max_time {
-			from_bucket = i + ehu.s_count
-			break
+	if ehu.map_count > 0 {
+		if t2 > ehu.map_buckets[ehu.map_count-1].max_time {
+			to_bucket = totalBuckets - 1
 		}
-	}
-
-	for i := 0; i < ehu.map_count; i++ {
-		if t2 >= ehu.map_buckets[i].min_time && t2 <= ehu.map_buckets[i].max_time {
-			to_bucket = i + ehu.s_count
-			break
+		if t1 > ehu.map_buckets[ehu.map_count-1].max_time {
+			from_bucket = totalBuckets - 1
 		}
-	}
-
-	if t2 > ehu.map_buckets[ehu.map_count-1].max_time {
-		to_bucket = ehu.map_count - 1 + ehu.s_count
+	} else if ehu.s_count > 0 {
+		if t2 > ehu.univs[ehu.s_count-1].max_time {
+			to_bucket = totalBuckets - 1
+		}
+		if t1 > ehu.univs[ehu.s_count-1].max_time {
+			from_bucket = totalBuckets - 1
+		}
 	}
 	if ehu.s_count > 0 && t1 < ehu.univs[0].min_time {
 		from_bucket = 0
+	} else if ehu.s_count == 0 && ehu.map_count > 0 && t1 < ehu.map_buckets[0].min_time {
+		from_bucket = 0
+	}
+
+	if from_bucket < 0 {
+		from_bucket = 0
+	}
+	if to_bucket < 0 {
+		to_bucket = 0
+	}
+	if from_bucket >= totalBuckets {
+		from_bucket = totalBuckets - 1
+	}
+	if to_bucket >= totalBuckets {
+		to_bucket = totalBuckets - 1
 	}
 
 	if from_bucket < ehu.s_count {
 		if AbsInt64(t1-ehu.univs[from_bucket].min_time) > AbsInt64(t1-ehu.univs[from_bucket].max_time) {
-			from_bucket += 1
+			if from_bucket+1 < totalBuckets {
+				from_bucket += 1
+			}
 		}
 	} else {
-		if AbsInt64(t1-ehu.map_buckets[from_bucket-ehu.s_count].min_time) > AbsInt64(t1-ehu.map_buckets[from_bucket-ehu.s_count].max_time) {
-			from_bucket += 1
+		mapIdx := from_bucket - ehu.s_count
+		if mapIdx >= 0 && mapIdx < ehu.map_count && AbsInt64(t1-ehu.map_buckets[mapIdx].min_time) > AbsInt64(t1-ehu.map_buckets[mapIdx].max_time) {
+			if from_bucket+1 < totalBuckets {
+				from_bucket += 1
+			}
 		}
 	}
 
