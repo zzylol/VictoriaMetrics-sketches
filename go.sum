@@ -549,8 +549,8 @@ github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-202409191748
 github.com/zzylol/prometheus-sketch-VLDB/prometheus-sketches v0.0.0-20240919174826-dd8f2673f28e/go.mod h1:1Jaqva0UpJTtwx0/8zJQmlPpHZORAr0GTYJK8PI1qtw=
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240919174826-dd8f2673f28e h1:3YpYVetcPGhA1NCn0V4sMjxkfLkiEq6HUa+kn1wbcz8=
 github.com/zzylol/prometheus-sketch-VLDB/uniform-sampling-caching/prometheus v0.0.0-20240919174826-dd8f2673f28e/go.mod h1:QiIlqAeVdnAETgD3FJsYsQzcDZu3tKSfs6TW5SyzAcw=
-github.com/zzylol/promsketch v0.4.18 h1:rwiSj5zclu9SysvYJiVxSyc/4w+kr3BgnAX85XB7Eyc=
-github.com/zzylol/promsketch v0.4.18/go.mod h1:D7oL4RwUdwtobmQ3tBh8KZyaf4FFZ3HXN/cqmDF7g4s=
+github.com/zzylol/promsketch v0.4.19 h1:g37tFnfhnZcDSnkfZ9eB4KuXTMC2rTyAKRKY9mT+lGo=
+github.com/zzylol/promsketch v0.4.19/go.mod h1:D7oL4RwUdwtobmQ3tBh8KZyaf4FFZ3HXN/cqmDF7g4s=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0/go.mod h1:+kGneAE2xo2IficOXnaByMWTGM9T73dGwxeWcUqIpI8=
 go.opencensus.io v0.22.2/go.mod h1:yxeiOL68Rb0Xd1ddK5vPZ/oVn4vY4Ynel7k9FzqtOIw=
