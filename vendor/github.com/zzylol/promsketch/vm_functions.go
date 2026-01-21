@@ -28,11 +28,17 @@ var VMFunctionCalls = map[string]VMFunctionCall{
 
 // TODO: add last item value in the change data structure
 func funcVMChangeOverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.sampling == nil {
+		return 0
+	}
 	count := sketchIns.sampling.QueryCount(t1, t2)
 	return count
 }
 
 func funcVMAvgOverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.sampling == nil {
+		return 0
+	}
 	// fmt.Println("in VM avg_over_time", sketchIns.sampling.Sampling_rate, len(sketchIns.sampling.Arr), sketchIns.sampling.Max_size)
 	// fmt.Println("in VM avg_over_time", sketchIns.sampling.Time_window_size, sketchIns.sampling.GetMinTime(), sketchIns.sampling.GetMaxTime(), t1, t2)
 	avg := sketchIns.sampling.QueryAvg(t1, t2)
@@ -40,24 +46,36 @@ func funcVMAvgOverTime(ctx context.Context, sketchIns *SketchInstances, c []floa
 }
 
 func funcVMSumOverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.sampling == nil {
+		return 0
+	}
 
 	sum := sketchIns.sampling.QuerySum(t1, t2)
 	return sum
 }
 
 func funcVMSum2OverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.sampling == nil {
+		return 0
+	}
 
 	sum2 := sketchIns.sampling.QuerySum2(t1, t2)
 	return sum2
 }
 
 func funcVMCountOverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.sampling == nil {
+		return 0
+	}
 
 	count := sketchIns.sampling.QueryCount(t1, t2)
 	return count
 }
 
 func funcVMStddevOverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.sampling == nil {
+		return 0
+	}
 
 	// count := sketchIns.sampling.QueryCount(t1, t2)
 	// sum := sketchIns.sampling.QuerySum(t1, t2)
@@ -69,6 +87,9 @@ func funcVMStddevOverTime(ctx context.Context, sketchIns *SketchInstances, c []f
 }
 
 func funcVMStdvarOverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.sampling == nil {
+		return 0
+	}
 
 	// count := sketchIns.sampling.QueryCount(t1, t2)
 	// sum := sketchIns.sampling.QuerySum(t1, t2)
@@ -80,9 +101,12 @@ func funcVMStdvarOverTime(ctx context.Context, sketchIns *SketchInstances, c []f
 }
 
 func funcVMEntropyOverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.ehuniv == nil {
+		return 0
+	}
 
 	merged_univ, m, n, err := sketchIns.ehuniv.QueryIntervalMergeUniv(t1, t2, t)
-	if err != nil {
+	if err != nil || (merged_univ == nil && m == nil) || n <= 0 {
 		return 0
 	}
 
@@ -97,9 +121,12 @@ func funcVMEntropyOverTime(ctx context.Context, sketchIns *SketchInstances, c []
 }
 
 func funcVMCardOverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.ehuniv == nil {
+		return 0
+	}
 
 	merged_univ, m, _, err := sketchIns.ehuniv.QueryIntervalMergeUniv(t1, t2, t)
-	if err != nil {
+	if err != nil || (merged_univ == nil && m == nil) {
 		return 0
 	}
 	var card float64 = 0
@@ -112,9 +139,12 @@ func funcVMCardOverTime(ctx context.Context, sketchIns *SketchInstances, c []flo
 }
 
 func funcVML1OverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.ehuniv == nil {
+		return 0
+	}
 
 	merged_univ, m, _, err := sketchIns.ehuniv.QueryIntervalMergeUniv(t1, t2, t)
-	if err != nil {
+	if err != nil || (merged_univ == nil && m == nil) {
 		return 0
 	}
 	var l1 float64 = 0
@@ -128,9 +158,12 @@ func funcVML1OverTime(ctx context.Context, sketchIns *SketchInstances, c []float
 }
 
 func funcVML2OverTime(ctx context.Context, sketchIns *SketchInstances, c []float64, t1, t2, t int64) float64 {
+	if sketchIns == nil || sketchIns.ehuniv == nil {
+		return 0
+	}
 
 	merged_univ, m, _, err := sketchIns.ehuniv.QueryIntervalMergeUniv(t1, t2, t)
-	if err != nil {
+	if err != nil || (merged_univ == nil && m == nil) {
 		return 0
 	}
 	var l2 float64 = 0

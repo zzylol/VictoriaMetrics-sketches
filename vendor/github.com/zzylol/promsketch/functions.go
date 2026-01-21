@@ -45,6 +45,9 @@ func calc_entropy(values *[]float64) float64 {
 }
 
 func calc_entropy_map(m *map[float64]int64, n float64) float64 {
+	if m == nil || *m == nil || n <= 0 {
+		return 0
+	}
 	var entropy float64 = 0
 	for _, v := range *m {
 		entropy += float64(v) * math.Log2(float64(v))
@@ -73,6 +76,9 @@ func calc_l1(values *[]float64) float64 {
 }
 
 func calc_l1_map(m *map[float64]int64) float64 {
+	if m == nil || *m == nil {
+		return 0
+	}
 	var l1 float64 = 0
 	for _, v := range *m {
 		l1 += float64(v)
@@ -95,6 +101,9 @@ func calc_distinct(values *[]float64) float64 {
 }
 
 func calc_distinct_map(m *map[float64]int64) float64 {
+	if m == nil || *m == nil {
+		return 0
+	}
 	distinct := float64(len(*m))
 	return distinct
 }
@@ -118,6 +127,9 @@ func calc_l2(values *[]float64) float64 {
 }
 
 func calc_l2_map(m *map[float64]int64) float64 {
+	if m == nil || *m == nil {
+		return 0
+	}
 	var l2 float64 = 0
 	for _, v := range *m {
 		l2 += float64(v * v)
