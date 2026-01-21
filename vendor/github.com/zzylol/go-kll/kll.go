@@ -11,7 +11,7 @@ import (
 
 // Sketch is a streaming quantiles sketch
 type Sketch struct {
-	compactors []compactor
+	Compactors []Compactor
 	k          int
 	H          int
 	size       int
@@ -34,8 +34,8 @@ func (s *Sketch) GetSize() int {
 }
 
 func (s *Sketch) grow() {
-	s.compactors = append(s.compactors, compactor{})
-	s.H = len(s.compactors)
+	s.Compactors = append(s.Compactors, Compactor{})
+	s.H = len(s.Compactors)
 
 	s.maxSize = 0
 	for h := 0; h < s.H; h++ {
@@ -49,27 +49,27 @@ func (s *Sketch) capacity(h int) int {
 
 // Update adds x to the stream.
 func (s *Sketch) Update(x float64) {
-	s.compactors[0] = append(s.compactors[0], x)
+	s.Compactors[0] = append(s.Compactors[0], x)
 	s.size++
 	s.compact()
 }
 
 func (s *Sketch) compact() {
 	for s.size >= s.maxSize {
-		for h := 0; h < len(s.compactors); h++ {
-			if len(s.compactors[h]) >= s.capacity(h) {
+		for h := 0; h < len(s.Compactors); h++ {
+			if len(s.Compactors[h]) >= s.capacity(h) {
 				if h+1 >= s.H {
 					s.grow()
 				}
 
-				prev_h := len(s.compactors[h])
-				prev_h1 := len(s.compactors[h+1])
+				prev_h := len(s.Compactors[h])
+				prev_h1 := len(s.Compactors[h+1])
 
-				s.compactors[h+1] = s.compactors[h].compact(
-					&s.co, s.compactors[h+1])
+				s.Compactors[h+1] = s.Compactors[h].compact(
+					&s.co, s.Compactors[h+1])
 
-				s.size += len(s.compactors[h]) - prev_h
-				s.size += len(s.compactors[h+1]) - prev_h1
+				s.size += len(s.Compactors[h]) - prev_h
+				s.size += len(s.Compactors[h+1]) - prev_h1
 
 				if s.size < s.maxSize {
 					break
@@ -81,7 +81,7 @@ func (s *Sketch) compact() {
 
 func (s *Sketch) updateSize() {
 	s.size = 0
-	for _, c := range s.compactors {
+	for _, c := range s.Compactors {
 		s.size += len(c)
 	}
 }
@@ -92,8 +92,8 @@ func (s *Sketch) Merge(t *Sketch) {
 		s.grow()
 	}
 
-	for h, c := range t.compactors {
-		s.compactors[h] = append(s.compactors[h], c...)
+	for h, c := range t.Compactors {
+		s.Compactors[h] = append(s.Compactors[h], c...)
 	}
 
 	s.updateSize()
@@ -103,7 +103,7 @@ func (s *Sketch) Merge(t *Sketch) {
 // Rank estimates the rank of the value x in the stream.
 func (s *Sketch) Rank(x float64) int {
 	var r int
-	for h, c := range s.compactors {
+	for h, c := range s.Compactors {
 		for _, v := range c {
 			if v <= x {
 				r += 1 << uint(h)
@@ -115,7 +115,7 @@ func (s *Sketch) Rank(x float64) int {
 
 func (s *Sketch) Count() int {
 	var n int
-	for h, c := range s.compactors {
+	for h, c := range s.Compactors {
 		n += len(c) * (1 << uint(h))
 	}
 	return n
@@ -124,7 +124,7 @@ func (s *Sketch) Count() int {
 // Quantile estimates the quantile of the value x in the stream.
 func (s *Sketch) Quantile(x float64) float64 {
 	var r, n int
-	for h, c := range s.compactors {
+	for h, c := range s.Compactors {
 		for _, v := range c {
 			w := 1 << uint(h)
 			if v <= x {
@@ -153,7 +153,7 @@ func (s *Sketch) CDF() CDF {
 	q := make(CDF, 0, s.size)
 
 	var totalW float64
-	for h, c := range s.compactors {
+	for h, c := range s.Compactors {
 		weight := float64(int(1 << uint(h)))
 		for _, v := range c {
 			q = append(q, Quantile{Q: weight, V: v})
@@ -220,9 +220,9 @@ func (q CDF) QueryLI(p float64) float64 {
 	return ((aq-p)*b + (p-bq)*a) / (aq - bq)
 }
 
-type compactor []float64
+type Compactor []float64
 
-func (c *compactor) compact(co *coin, dst []float64) []float64 {
+func (c *Compactor) compact(co *coin, dst []float64) []float64 {
 	l := len(*c)
 
 	if l == 0 || l == 1 {
@@ -256,7 +256,7 @@ func (c *compactor) compact(co *coin, dst []float64) []float64 {
 	return dst
 }
 
-func (c compactor) insertionSort() {
+func (c Compactor) insertionSort() {
 	l := len(c)
 	for i := 1; i < l; i++ {
 		v := c[i]

@@ -6,15 +6,15 @@ import (
 	"unsafe"
 )
 
-// we know that compactor is really a []float64, and we want to refer to them
+// we know that Compactor is really a []float64, and we want to refer to them
 // in the state, so we can just unsafely convert them.
 
-func compactorsAsFloats(c []compactor) [][]float64 {
+func CompactorsAsFloats(c []Compactor) [][]float64 {
 	return *(*[][]float64)(unsafe.Pointer(&c))
 }
 
-func floatsAsCompactors(f [][]float64) []compactor {
-	return *(*[]compactor)(unsafe.Pointer(&f))
+func floatsAsCompactors(f [][]float64) []Compactor {
+	return *(*[]Compactor)(unsafe.Pointer(&f))
 }
 
 // State represents the state of the Sketch. It is used for serializing and
@@ -32,7 +32,7 @@ type State struct {
 // other methods of the Sketch are called, and it must not be mutated.
 func (s *Sketch) State() State {
 	return State{
-		Compactors: compactorsAsFloats(s.compactors),
+		Compactors: CompactorsAsFloats(s.Compactors),
 		K:          s.k,
 		H:          s.H,
 		Size:       s.size,
@@ -44,7 +44,7 @@ func (s *Sketch) State() State {
 // shared, so the passed State is invalid to be read from or written to after
 // this call.
 func (s *Sketch) SetState(state State) {
-	s.compactors = floatsAsCompactors(state.Compactors)
+	s.Compactors = floatsAsCompactors(state.Compactors)
 	s.k = state.K
 	s.H = state.H
 	s.size = state.Size
