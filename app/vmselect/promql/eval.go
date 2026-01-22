@@ -47,6 +47,17 @@ var (
 		"to /api/v1/query (aka instant queries), which contain rollup functions with lookbehind window exceeding the given value")
 )
 
+func timeseriesHaveNaN(tss []*timeseries) bool {
+	for _, ts := range tss {
+		for _, v := range ts.Values {
+			if math.IsNaN(v) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
 // The minimum number of points per timeseries for enabling time rounding.
 // This improves cache hit ratio for frequently requested queries over
 // big time ranges.
@@ -1732,29 +1743,44 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 	funcNames := getRollupFuncNames(rcs)
 	mns := rss.GetMetricNames()
 
-	scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries, ec.Deadline)
-	fmt.Println("isCovered=", isCovered)
-	if isCovered == true {
-		fmt.Println("VM ProcessSearchQuery time:", since.Seconds(), "s")
-		// fmt.Println("cover:", isCovered, minTimestamp, ec.End)
+		scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries, ec.Deadline)
+		fmt.Println("isCovered=", isCovered)
+		if isCovered == true {
+			fmt.Println("VM ProcessSearchQuery time:", since.Seconds(), "s")
+			// fmt.Println("cover:", isCovered, minTimestamp, ec.End)
 	} else {
 		if window != 0 {
 			fmt.Println(funcNames, minTimestamp, ec.End, err)
 		}
-	}
+		}
 
-	if err == nil && isCovered {
-		keepMetricNames := getKeepMetricNames(expr)
-		start := time.Now()
-		ts_results, err := evalRollupSketchCache(qt, funcName, keepMetricNames, args, scs, rcs, sharedTimestamps)
-		since := time.Since(start)
-		fmt.Println("sketch evaluation time:", since.Seconds(), "s", "window=", window)
-		return ts_results, err
-	} else {
+		// Treat empty sketch results as not covered, so the code below falls back to exact evaluation.
+		// This may happen if vmsketch cache doesn't have the requested series even if coverage checks passed.
+		if err == nil && isCovered && scs.Len() == 0 {
+			isCovered = false
+		}
 
-		// Verify timeseries fit available memory during rollup calculations.
-		timeseriesLen := rssLen
-		if iafc != nil {
+		if err == nil && isCovered {
+			keepMetricNames := getKeepMetricNames(expr)
+			start := time.Now()
+			tsResults, sketchErr := evalRollupSketchCache(qt, funcName, keepMetricNames, args, scs, rcs, sharedTimestamps)
+			since := time.Since(start)
+			fmt.Println("sketch evaluation time:", since.Seconds(), "s", "window=", window)
+			if sketchErr == nil && len(tsResults) > 0 && !timeseriesHaveNaN(tsResults) {
+				rss.Cancel()
+				return tsResults, nil
+			}
+			// Fall back to exact evaluation if sketch evaluation produced NaN.
+			isCovered = false
+		}
+		if err != nil {
+			isCovered = false
+		}
+		if !isCovered {
+
+			// Verify timeseries fit available memory during rollup calculations.
+			timeseriesLen := rssLen
+			if iafc != nil {
 			// Incremental aggregates require holding only GOMAXPROCS timeseries in memory.
 			timeseriesLen = cgroup.AvailableCPUs()
 			if iafc.ae.Modifier.Op != "" {
@@ -1772,7 +1798,7 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 				timeseriesLen = rssLen
 			}
 		}
-		rollupPoints := mulNoOverflow(pointsPerSeries, int64(timeseriesLen*len(rcs)))
+			rollupPoints := mulNoOverflow(pointsPerSeries, int64(timeseriesLen*len(rcs)))
 		rollupMemorySize := sumNoOverflow(mulNoOverflow(int64(timeseriesLen), 1000), mulNoOverflow(rollupPoints, 16))
 		if maxMemory := int64(logQueryMemoryUsage.N); maxMemory > 0 && rollupMemorySize > maxMemory {
 			memoryIntensiveQueries.Inc()
@@ -1807,12 +1833,14 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 
 		// Evaluate rollup
 		keepMetricNames := getKeepMetricNames(expr)
-		if iafc != nil {
-			return evalRollupWithIncrementalAggregate(qt, funcName, keepMetricNames, iafc, rss, rcs, preFunc, sharedTimestamps)
+			if iafc != nil {
+				return evalRollupWithIncrementalAggregate(qt, funcName, keepMetricNames, iafc, rss, rcs, preFunc, sharedTimestamps)
+			}
+			return evalRollupNoIncrementalAggregate(qt, funcName, keepMetricNames, rss, rcs, preFunc, sharedTimestamps)
 		}
-		return evalRollupNoIncrementalAggregate(qt, funcName, keepMetricNames, rss, rcs, preFunc, sharedTimestamps)
+		rss.Cancel()
+		return nil, nil
 	}
-}
 
 var (
 	rollupMemoryLimiter     memoryLimiter
