@@ -273,6 +273,12 @@ func (ehkll *ExpoHistogramKLL) QueryIntervalMergeKLL(t1, t2 int64) *kll.Sketch {
 		to_bucket = ehkll.s_count - 1
 	}
 
+	mergedBuckets := 1
+	if from_bucket < to_bucket {
+		mergedBuckets = to_bucket - from_bucket + 1
+	}
+	addMergedBucketsTotal(mergedBuckets)
+
 	if from_bucket < to_bucket {
 		merged_kll := kll.New(ehkll.kll_k)
 		for i := from_bucket; i <= to_bucket; i++ {

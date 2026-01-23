@@ -977,6 +977,9 @@ func getStorageSearch() *storage.Search {
 }
 
 func putStorageSearch(sr *storage.Search) {
+	if sr == nil {
+		return
+	}
 	sr.MustClose()
 	ssPool.Put(sr)
 }

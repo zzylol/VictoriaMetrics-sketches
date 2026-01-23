@@ -3,6 +3,9 @@ package promsketch
 import (
 	"context"
 	"fmt"
+	"math"
+	"os"
+	"runtime/debug"
 	"sync/atomic"
 
 	"github.com/cespare/xxhash"
@@ -209,7 +212,7 @@ func (vs *VMSketches) NewVMSketchCacheInstance(mn *storage.MetricName, funcName 
 			sc.Sampling_config = SamplingConfig{Sampling_rate: 0.1, Time_window_size: time_window_size, Max_size: int(float64(item_window_size) * 0.1)}
 			// fmt.Println("max_size:", sc.Sampling_config.Max_size)
 		case EHKLL:
-			sc.EH_kll_config = EHKLLConfig{K: 50, Time_window_size: time_window_size, Kll_k: 256}
+			sc.EH_kll_config = EHKLLConfig{K: 32, Time_window_size: time_window_size, Kll_k: 256}
 		default:
 			fmt.Println("[NewSketchCacheInstance] not supported sketch type")
 		}
@@ -349,13 +352,49 @@ func (vs *VMSketches) AddRow(mn *storage.MetricName, t int64, value float64) err
 	return nil
 }
 
-func (si *SketchInstances) Eval(mn *storage.MetricName, funcName string, args []float64, mint, maxt, cur_time int64) float64 {
-	sfunc := VMFunctionCalls[funcName]
+func (si *SketchInstances) Eval(mn *storage.MetricName, funcName string, args []float64, mint, maxt, cur_time int64) (value float64) {
+	// Default to NaN, so callers may safely fall back to exact evaluation.
+	value = math.NaN()
+
+	debugEnabled := os.Getenv("VMSKETCH_DEBUG_EVAL") != ""
+	debugCalls := os.Getenv("VMSKETCH_DEBUG_CALLS") != ""
+	metric := "<nil>"
+	if mn != nil {
+		metric = mn.String()
+	}
+	if si == nil {
+		if debugEnabled {
+			fmt.Fprintf(os.Stderr, "[vmsketch] nil SketchInstances: metric=%s func=%q args=%v range=[%d,%d] t=%d\n", metric, funcName, args, mint, maxt, cur_time)
+		}
+		return value
+	}
+	sfunc, ok := VMFunctionCalls[funcName]
+	if !ok || sfunc == nil {
+		if debugEnabled {
+			fmt.Fprintf(os.Stderr, "[vmsketch] unknown funcName: metric=%s func=%q args=%v range=[%d,%d] t=%d\n", metric, funcName, args, mint, maxt, cur_time)
+		}
+		return value
+	}
+	if debugCalls {
+		fmt.Fprintf(os.Stderr, "[vmsketch] call: metric=%s func=%q args=%v range=[%d,%d] t=%d\n", metric, funcName, args, mint, maxt, cur_time)
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			if debugEnabled {
+				fmt.Fprintf(os.Stderr, "[vmsketch] panic in Eval: metric=%s func=%q args=%v range=[%d,%d] t=%d panic=%v\n%s\n",
+					metric, funcName, args, mint, maxt, cur_time, r, debug.Stack())
+			}
+			value = math.NaN()
+		}
+	}()
 	return sfunc(context.TODO(), si, args, mint, maxt, cur_time)
 }
 
 func (s *SketchInstances) PrintMinMaxTimeRange(mn *storage.MetricName, funcName string) (mint, maxt int64) {
-	stype := funcSketchMap[funcName]
+	stype, ok := funcSketchMap[funcName]
+	if !ok || len(stype) == 0 {
+		return -1, -1
+	}
 
 	switch stype[0] {
 	case EHUniv:
@@ -379,7 +418,12 @@ func (vs *VMSketches) LookupMetricNameFuncNamesTimeRange(mn *storage.MetricName,
 	}
 	stypes := make([]SketchType, 0)
 	for _, funcName := range funcNames {
-		stypes = append(stypes, funcSketchMap[funcName]...)
+		types, ok := funcSketchMap[funcName]
+		if !ok || len(types) == 0 {
+			// Unknown/unsupported funcName cannot be satisfied by sketches.
+			return series.sketchInstances, false
+		}
+		stypes = append(stypes, types...)
 	}
 
 	startt := mint

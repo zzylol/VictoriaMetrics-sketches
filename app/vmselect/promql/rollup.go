@@ -4,6 +4,8 @@ import (
 	"flag"
 	"fmt"
 	"math"
+	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -696,6 +698,10 @@ func (rc *rollupConfig) DoSketch(dstValues []float64, rargs []interface{}, sr *v
 	return rc.doInternalSketch(dstValues, nil, rargs, sr)
 }
 
+func (rc *rollupConfig) DoSketchWithTail(dstValues []float64, rargs []interface{}, sr *vmsketch.SketchResult, tailTimestamps []int64, tailValues []float64) ([]float64, uint64) {
+	return rc.doInternalSketchWithTail(dstValues, nil, rargs, sr, tailTimestamps, tailValues)
+}
+
 // DoTimeseriesMap calculates rollups for the given timestamps and values and puts them to tsm.
 func (rc *rollupConfig) DoTimeseriesMap(tsm *timeseriesMap, mnSrc *storage.MetricName, values []float64, timestamps []int64) uint64 {
 	ts := getTimeseries()
@@ -909,14 +915,22 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 
 		sargs := getRollupArgForSketches(rargs, rfa.idx)
 
-		// fmt.Println("before sketch eval")
-		value := sr.Eval(sr.MetricName, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
-		// fmt.Println("evaled value=", value)
+			// fmt.Println("before sketch eval")
+			value := sr.Eval(sr.MetricName, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
+			// fmt.Println("evaled value=", value)
+			if math.IsNaN(value) && os.Getenv("VMSKETCH_DEBUG_EVAL") != "" {
+				metric := "<nil>"
+				if sr.MetricName != nil {
+					metric = sr.MetricName.String()
+				}
+				fmt.Fprintf(os.Stderr, "[vmsketch] NaN rollup sample: metric=%s func=%q args=%v range=[%d,%d] t=%d\n",
+					metric, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
+			}
 
-		rfa.idx++
-		if samplesScannedPerCall > 0 {
-			samplesScanned += samplesScannedPerCall
-		} else {
+			rfa.idx++
+			if samplesScannedPerCall > 0 {
+				samplesScanned += samplesScannedPerCall
+			} else {
 			samplesScanned += uint64(len(rfa.values))
 		}
 		dstValues = append(dstValues, value)
@@ -924,6 +938,110 @@ func (rc *rollupConfig) doInternalSketch(dstValues []float64, tsm *timeseriesMap
 	putRollupFuncArg(rfa)
 
 	return dstValues, samplesScanned
+}
+
+func (rc *rollupConfig) doInternalSketchWithTail(dstValues []float64, tsm *timeseriesMap, rargs []interface{}, sr *vmsketch.SketchResult, tailTimestamps []int64, tailValues []float64) ([]float64, uint64) {
+	// Sanity checks.
+	if rc.Step <= 0 {
+		logger.Panicf("BUG: Step must be bigger than 0; got %d", rc.Step)
+	}
+	if rc.Start > rc.End {
+		logger.Panicf("BUG: Start cannot exceed End; got %d vs %d", rc.Start, rc.End)
+	}
+	if rc.Window < 0 {
+		logger.Panicf("BUG: Window must be non-negative; got %d", rc.Window)
+	}
+	if err := ValidateMaxPointsPerSeries(rc.Start, rc.End, rc.Step, rc.MaxPointsPerSeries); err != nil {
+		logger.Panicf("BUG: %s; this must be validated before the call to rollupConfig.DoSketchWithTail", err)
+	}
+
+	// Extend dstValues in order to remove mallocs below.
+	dstValues = decimal.ExtendFloat64sCapacity(dstValues, len(rc.Timestamps))
+
+	scrapeInterval := rc.Step
+	maxPrevInterval := getMaxPrevInterval(scrapeInterval)
+	if rc.LookbackDelta > 0 && maxPrevInterval > rc.LookbackDelta {
+		maxPrevInterval = rc.LookbackDelta
+	}
+	if *minStalenessInterval > 0 {
+		if msi := minStalenessInterval.Milliseconds(); msi > 0 && maxPrevInterval < msi {
+			maxPrevInterval = msi
+		}
+	}
+	window := rc.Window
+	if window <= 0 {
+		window = rc.Step
+		if rc.MayAdjustWindow && window < maxPrevInterval {
+			window = maxPrevInterval
+		}
+		if rc.isDefaultRollup && rc.LookbackDelta > 0 && window > rc.LookbackDelta {
+			window = rc.LookbackDelta
+		}
+	}
+	rfa := getRollupFuncArg()
+	rfa.idx = 0
+	rfa.window = window
+	rfa.tsm = tsm
+
+	samplesScanned := uint64(0)
+	samplesScannedPerCall := uint64(rc.samplesScannedPerCall)
+	for _, tEnd := range rc.Timestamps {
+		tStart := tEnd - window
+		rfa.prevValue = nan
+		rfa.prevTimestamp = tStart - maxPrevInterval
+
+		rfa.currTimestamp = tEnd
+		sargs := getRollupArgForSketches(rargs, rfa.idx)
+
+		value := float64(nan)
+		if sr.MaxTimestamp >= 0 && tEnd > sr.MaxTimestamp && len(tailTimestamps) > 0 {
+			tailStart := sr.MaxTimestamp + 1
+			if tailStart < tStart {
+				tailStart = tStart
+			}
+			extra := getValuesInTimeRange(tailTimestamps, tailValues, tailStart, tEnd)
+			value = sr.EvalWithExtraValues(sr.MetricName, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp, extra)
+			samplesScanned += uint64(len(extra))
+		} else {
+			value = sr.Eval(sr.MetricName, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
+		}
+
+		if math.IsNaN(value) && os.Getenv("VMSKETCH_DEBUG_EVAL") != "" {
+			metric := "<nil>"
+			if sr.MetricName != nil {
+				metric = sr.MetricName.String()
+			}
+			fmt.Fprintf(os.Stderr, "[vmsketch] NaN rollup sample: metric=%s func=%q args=%v range=[%d,%d] t=%d\n",
+				metric, rc.FuncName, sargs, tStart, tEnd, rfa.currTimestamp)
+		}
+
+		rfa.idx++
+		if samplesScannedPerCall > 0 {
+			samplesScanned += samplesScannedPerCall
+		}
+		dstValues = append(dstValues, value)
+	}
+	putRollupFuncArg(rfa)
+
+	return dstValues, samplesScanned
+}
+
+func getValuesInTimeRange(timestamps []int64, values []float64, t1, t2 int64) []float64 {
+	if len(timestamps) == 0 || t1 > t2 {
+		return nil
+	}
+	start := sort.Search(len(timestamps), func(i int) bool { return timestamps[i] >= t1 })
+	end := sort.Search(len(timestamps), func(i int) bool { return timestamps[i] > t2 })
+	if start >= end {
+		return nil
+	}
+	if start < 0 {
+		start = 0
+	}
+	if end > len(values) {
+		end = len(values)
+	}
+	return values[start:end]
 }
 
 func seekFirstTimestampIdxAfter(timestamps []int64, seekTimestamp int64, nHint int) int {

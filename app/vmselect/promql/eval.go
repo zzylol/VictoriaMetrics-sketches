@@ -6,6 +6,7 @@ import (
 	"math"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -45,6 +46,14 @@ var (
 		"so there is no need in spending additional CPU time on its handling. Staleness markers may exist only in data obtained from Prometheus scrape targets")
 	minWindowForInstantRollupOptimization = flagutil.NewDuration("search.minWindowForInstantRollupOptimization", "3h", "Enable cache-based optimization for repeated queries "+
 		"to /api/v1/query (aka instant queries), which contain rollup functions with lookbehind window exceeding the given value")
+
+	sketchFallbackOnSpike   = flag.Bool("search.sketchFallbackOnSpike", false, "Whether to fall back to exact evaluation when sketch results contain abnormal spikes")
+	sketchSpikeRelThreshold = flag.Float64("search.sketchSpikeRelThreshold", 100, "Relative spike threshold for sketch results; triggers fallback when max(|v|,|prev|)/max(min(|v|,|prev|),eps) exceeds this value")
+	sketchSpikeAbsThreshold = flag.Float64("search.sketchSpikeAbsThreshold", 0, "Absolute spike threshold for sketch results; triggers fallback when |v-prev| exceeds this value (0 disables)")
+	sketchSpikeEpsilon      = flag.Float64("search.sketchSpikeEpsilon", 1e-12, "Epsilon for relative spike detection to avoid division by zero")
+
+	sketchTailRawThreshold = flagutil.NewDuration("search.sketchTailRawThreshold", "2s", "When sketch coverage ends shortly before query end, fetch raw samples for the missing tail and merge them into sketch evaluation. "+
+		"This avoids falling back to full exact evaluation when sketch cache lags behind ingestion by a small amount. Set to 0 to disable")
 )
 
 func timeseriesHaveNaN(tss []*timeseries) bool {
@@ -56,6 +65,55 @@ func timeseriesHaveNaN(tss []*timeseries) bool {
 		}
 	}
 	return false
+}
+
+func timeseriesHaveSpike(tss []*timeseries) bool {
+	relThreshold := *sketchSpikeRelThreshold
+	absThreshold := *sketchSpikeAbsThreshold
+	eps := *sketchSpikeEpsilon
+	if relThreshold <= 0 {
+		return false
+	}
+	if eps <= 0 {
+		eps = 1e-12
+	}
+	for _, ts := range tss {
+		prevSet := false
+		var prev float64
+		for _, v := range ts.Values {
+			if math.IsNaN(v) || math.IsInf(v, 0) {
+				prevSet = false
+				continue
+			}
+			if !prevSet {
+				prev = v
+				prevSet = true
+				continue
+			}
+			if absThreshold > 0 && math.Abs(v-prev) > absThreshold {
+				return true
+			}
+			av := math.Abs(v)
+			ap := math.Abs(prev)
+			hi := av
+			lo := ap
+			if ap > av {
+				hi, lo = ap, av
+			}
+			if hi/maxFloat64(lo, eps) > relThreshold {
+				return true
+			}
+			prev = v
+		}
+	}
+	return false
+}
+
+func maxFloat64(a, b float64) float64 {
+	if a > b {
+		return a
+	}
+	return b
 }
 
 // The minimum number of points per timeseries for enabling time rounding.
@@ -1003,6 +1061,13 @@ func evalRollupFuncWithSubquery(qt *querytracer.Tracer, ec *EvalConfig, funcName
 
 var rowsScannedPerQuery = metrics.NewHistogram(`vm_rows_scanned_per_query`)
 
+var (
+	searchMetricNamesDuration = metrics.NewHistogram(`vm_promql_search_metric_names_duration_seconds`)
+	sketchEvalDuration        = metrics.NewHistogram(`vm_promql_sketch_eval_duration_seconds`)
+	sketchTotalDuration       = metrics.NewHistogram(`vm_promql_sketch_total_duration_seconds`)
+	sketchEvalRequestsTotal   = metrics.NewCounter(`vm_promql_sketch_eval_requests_total`)
+)
+
 func getKeepMetricNames(expr metricsql.Expr) bool {
 	if ae, ok := expr.(*metricsql.AggrFuncExpr); ok {
 		// Extract rollupFunc(...) from aggrFunc(rollupFunc(...)).
@@ -1723,64 +1788,140 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 		minTimestamp -= ec.Step
 	}
 
-	// Fetch the result.
-	start := time.Now()
+	// Fetch matching metric names first (index-only).
+	// This is needed for sketch coverage checks and sketch evaluation and avoids
+	// fetching full time series data via ProcessSearchQuery().
 	sq := storage.NewSearchQuery(minTimestamp, ec.End, tfss, ec.MaxSeries)
-	rss, err := netstorage.ProcessSearchQuery(qt, sq, ec.Deadline)
-	since := time.Since(start)
-
+	startMN := time.Now()
+	mns, err := netstorage.SearchMetricNames(qt, sq, ec.Deadline)
+	sinceMN := time.Since(startMN)
 	if err != nil {
 		return nil, err
 	}
-	rssLen := rss.Len()
-	if rssLen == 0 {
-		rss.Cancel()
+	if len(mns) == 0 {
 		return nil, nil
 	}
-	ec.QueryStats.addSeriesFetched(rssLen)
+	fmt.Println("VM SearchMetricNames time:", sinceMN.Seconds(), "s", "func=", funcName)
+	searchMetricNamesDuration.Update(sinceMN.Seconds())
+	windowStr := strconv.FormatInt(window, 10)
+	metrics.GetOrCreateHistogram(fmt.Sprintf(`vm_promql_search_metric_names_duration_seconds{func=%q,window=%q}`, funcName, windowStr)).Update(sinceMN.Seconds())
+	ec.QueryStats.addSeriesFetched(len(mns))
 
-	// Check whether sketch cache has all queried data and funcName (queried types) covered
+	// Check whether sketch cache has all queried data and funcName (queried types) covered.
 	funcNames := getRollupFuncNames(rcs)
-	mns := rss.GetMetricNames()
-
-		scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries, ec.Deadline)
-		fmt.Println("isCovered=", isCovered)
-		if isCovered == true {
-			fmt.Println("VM ProcessSearchQuery time:", since.Seconds(), "s")
-			// fmt.Println("cover:", isCovered, minTimestamp, ec.End)
-	} else {
+	scs, isCovered, err := vmsketch.SearchTimeSeriesCoverage(minTimestamp, ec.End, mns, funcNames, ec.MaxSeries, ec.Deadline)
+	fmt.Println("isCovered=", isCovered, "func=", funcName)
+	if !isCovered {
+		metrics.GetOrCreateCounter(fmt.Sprintf(`vm_promql_sketch_not_covered_total{func=%q,window=%q}`, funcName, windowStr)).Inc()
 		if window != 0 {
-			fmt.Println(funcNames, minTimestamp, ec.End, err)
+			fmt.Println(funcNames, minTimestamp, ec.End, err, "func=", funcName)
 		}
-		}
+	}
 
-		// Treat empty sketch results as not covered, so the code below falls back to exact evaluation.
-		// This may happen if vmsketch cache doesn't have the requested series even if coverage checks passed.
-		if err == nil && isCovered && scs.Len() == 0 {
-			isCovered = false
-		}
+	// Treat empty sketch results as not covered, so the code below falls back to exact evaluation.
+	// This may happen if vmsketch cache doesn't have the requested series even if coverage checks passed.
+	if err == nil && isCovered && scs.Len() == 0 {
+		isCovered = false
+	}
 
-		if err == nil && isCovered {
-			keepMetricNames := getKeepMetricNames(expr)
-			start := time.Now()
-			tsResults, sketchErr := evalRollupSketchCache(qt, funcName, keepMetricNames, args, scs, rcs, sharedTimestamps)
-			since := time.Since(start)
-			fmt.Println("sketch evaluation time:", since.Seconds(), "s", "window=", window)
-			if sketchErr == nil && len(tsResults) > 0 && !timeseriesHaveNaN(tsResults) {
-				rss.Cancel()
-				return tsResults, nil
+	var (
+		tailRawBySeries map[string]rawSeries
+		useTailRaw      bool
+	)
+	if err == nil && !isCovered {
+		th := sketchTailRawThreshold.Milliseconds()
+		if th > 0 {
+			coveredStart := scs.EffectiveMinTimestamp()
+			coveredEnd := scs.EffectiveMaxTimestamp()
+			if coveredStart >= 0 && coveredStart <= minTimestamp && coveredEnd >= 0 && coveredEnd < ec.End && ec.End-coveredEnd <= th {
+				// Sketches cover query start, but lag behind a bit at the end.
+				// Fetch raw tail and merge it into sketch evaluation.
+				tailStart := coveredEnd + 1
+				if tailStart < minTimestamp {
+					tailStart = minTimestamp
+				}
+				var fetchErr error
+				tailRawBySeries, fetchErr = fetchRawSeriesByMetricName(qt, ec, tfss, funcName, tailStart, ec.End)
+				if fetchErr == nil {
+					useTailRaw = true
+					isCovered = true
+				}
 			}
-			// Fall back to exact evaluation if sketch evaluation produced NaN.
-			isCovered = false
 		}
-		if err != nil {
-			isCovered = false
-		}
-		if !isCovered {
+	}
 
-			// Verify timeseries fit available memory during rollup calculations.
-			timeseriesLen := rssLen
-			if iafc != nil {
+	if err == nil && isCovered {
+		keepMetricNames := getKeepMetricNames(expr)
+		mergedBucketsStart := vmsketch.MergedBucketsTotal()
+		var (
+			tsResults []*timeseries
+			sketchErr error
+			since     time.Duration
+		)
+		func() {
+			startSketch := time.Now()
+			defer func() {
+				since = time.Since(startSketch)
+				mergedBucketsDelta := vmsketch.MergedBucketsTotal() - mergedBucketsStart
+				fmt.Println("sketch evaluation time:", since.Seconds(), "s", "window=", window, "func=", funcName, "mergedBuckets=", mergedBucketsDelta)
+				sketchEvalRequestsTotal.Inc()
+				sketchEvalDuration.Update(since.Seconds())
+				sketchTotalDuration.Update((sinceMN + since).Seconds())
+				fmt.Println("sketch total time:", (sinceMN + since).Seconds(), "s", "func=", funcName, "window=", window)
+				metrics.GetOrCreateCounter(fmt.Sprintf(`vm_promql_sketch_eval_requests_total{func=%q,window=%q}`, funcName, windowStr)).Inc()
+				metrics.GetOrCreateHistogram(fmt.Sprintf(`vm_promql_sketch_eval_duration_seconds{func=%q,window=%q}`, funcName, windowStr)).Update(since.Seconds())
+				metrics.GetOrCreateHistogram(fmt.Sprintf(`vm_promql_sketch_total_duration_seconds{func=%q,window=%q}`, funcName, windowStr)).Update((sinceMN + since).Seconds())
+				if r := recover(); r != nil {
+					panic(r)
+				}
+			}()
+			if useTailRaw {
+				tsResults, sketchErr = evalRollupSketchCacheWithTail(qt, funcName, keepMetricNames, args, scs, rcs, sharedTimestamps, tailRawBySeries)
+			} else {
+				tsResults, sketchErr = evalRollupSketchCache(qt, funcName, keepMetricNames, args, scs, rcs, sharedTimestamps)
+			}
+		}()
+
+		sketchOK := sketchErr == nil && len(tsResults) > 0 && !timeseriesHaveNaN(tsResults) && (!*sketchFallbackOnSpike || !timeseriesHaveSpike(tsResults))
+		if sketchOK {
+			metrics.GetOrCreateCounter(fmt.Sprintf(`vm_promql_sketch_ok_total{func=%q,window=%q}`, funcName, windowStr)).Inc()
+			return tsResults, nil
+		}
+		reason := "unknown"
+		switch {
+		case sketchErr != nil:
+			reason = "sketch_err"
+		case len(tsResults) == 0:
+			reason = "empty"
+		case timeseriesHaveNaN(tsResults):
+			reason = "nan"
+		case *sketchFallbackOnSpike && timeseriesHaveSpike(tsResults):
+			reason = "spike"
+		}
+		metrics.GetOrCreateCounter(fmt.Sprintf(`vm_promql_sketch_fallback_total{func=%q,window=%q,reason=%q}`, funcName, windowStr, reason)).Inc()
+		isCovered = false
+	}
+	if err != nil {
+		isCovered = false
+	}
+	if !isCovered {
+		// Fetch the full series data for exact evaluation.
+		startPS := time.Now()
+		rss, err := netstorage.ProcessSearchQuery(qt, sq, ec.Deadline)
+		sincePS := time.Since(startPS)
+		_ = sincePS
+		if err != nil {
+			return nil, err
+		}
+		rssLen := rss.Len()
+		if rssLen == 0 {
+			rss.Cancel()
+			return nil, nil
+		}
+
+		// Verify timeseries fit available memory during rollup calculations.
+		timeseriesLen := rssLen
+		if iafc != nil {
 			// Incremental aggregates require holding only GOMAXPROCS timeseries in memory.
 			timeseriesLen = cgroup.AvailableCPUs()
 			if iafc.ae.Modifier.Op != "" {
@@ -1798,7 +1939,7 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 				timeseriesLen = rssLen
 			}
 		}
-			rollupPoints := mulNoOverflow(pointsPerSeries, int64(timeseriesLen*len(rcs)))
+		rollupPoints := mulNoOverflow(pointsPerSeries, int64(timeseriesLen*len(rcs)))
 		rollupMemorySize := sumNoOverflow(mulNoOverflow(int64(timeseriesLen), 1000), mulNoOverflow(rollupPoints, 16))
 		if maxMemory := int64(logQueryMemoryUsage.N); maxMemory > 0 && rollupMemorySize > maxMemory {
 			memoryIntensiveQueries.Inc()
@@ -1833,14 +1974,13 @@ func evalRollupFuncNoCache(qt *querytracer.Tracer, ec *EvalConfig, funcName stri
 
 		// Evaluate rollup
 		keepMetricNames := getKeepMetricNames(expr)
-			if iafc != nil {
-				return evalRollupWithIncrementalAggregate(qt, funcName, keepMetricNames, iafc, rss, rcs, preFunc, sharedTimestamps)
-			}
-			return evalRollupNoIncrementalAggregate(qt, funcName, keepMetricNames, rss, rcs, preFunc, sharedTimestamps)
+		if iafc != nil {
+			return evalRollupWithIncrementalAggregate(qt, funcName, keepMetricNames, iafc, rss, rcs, preFunc, sharedTimestamps)
 		}
-		rss.Cancel()
-		return nil, nil
+		return evalRollupNoIncrementalAggregate(qt, funcName, keepMetricNames, rss, rcs, preFunc, sharedTimestamps)
 	}
+	return nil, nil
+}
 
 var (
 	rollupMemoryLimiter     memoryLimiter
@@ -1974,6 +2114,85 @@ func evalRollupSketchCache(qt *querytracer.Tracer, funcName string, keepMetricNa
 	return tss, nil
 }
 
+type rawSeries struct {
+	timestamps []int64
+	values     []float64
+}
+
+func fetchRawSeriesByMetricName(qt *querytracer.Tracer, ec *EvalConfig, tfss [][]storage.TagFilter, funcName string, start, end int64) (map[string]rawSeries, error) {
+	if start > end {
+		return nil, nil
+	}
+	sq := storage.NewSearchQuery(start, end, tfss, ec.MaxSeries)
+	rss, err := netstorage.ProcessSearchQuery(qt, sq, ec.Deadline)
+	if err != nil {
+		return nil, err
+	}
+	if rss.Len() == 0 {
+		rss.Cancel()
+		return nil, nil
+	}
+	var (
+		mu sync.Mutex
+		m  = make(map[string]rawSeries, rss.Len())
+	)
+	err = rss.RunParallel(qt, func(rs *netstorage.Result, workerID uint) error {
+		_ = workerID
+		values, timestamps := dropStaleNaNs(funcName, rs.Values, rs.Timestamps)
+		if len(timestamps) == 0 {
+			return nil
+		}
+		key := rs.MetricName.String()
+		vs := append([]float64(nil), values...)
+		ts := append([]int64(nil), timestamps...)
+		mu.Lock()
+		m[key] = rawSeries{timestamps: ts, values: vs}
+		mu.Unlock()
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	return m, nil
+}
+
+func evalRollupSketchCacheWithTail(qt *querytracer.Tracer, funcName string, keepMetricNames bool, rargs []interface{}, srs *vmsketch.SketchResults, rcs []*rollupConfig,
+	sharedTimestamps []int64, tailRawBySeries map[string]rawSeries) ([]*timeseries, error) {
+	qt = qt.NewChild("rollup %s() over %d series with tail raw; rollupConfigs=%s", funcName, srs.Len(), rcs)
+	defer qt.Done()
+
+	var samplesScannedTotal atomic.Uint64
+	tsw := getTimeseriesByWorkerID()
+	seriesByWorkerID := tsw.byWorkerID
+	seriesLen := srs.Len()
+	err := srs.RunParallel(qt, func(sr *vmsketch.SketchResult, workerID uint) error {
+		key := "<nil>"
+		if sr.MetricName != nil {
+			key = sr.MetricName.String()
+		}
+		tail := tailRawBySeries[key]
+		for _, rc := range rcs {
+			var ts timeseries
+			samplesScanned := doRollupForTimeseriesSketchWithTail(funcName, keepMetricNames, rargs, rc, &ts, sr, sharedTimestamps, tail.timestamps, tail.values)
+			samplesScannedTotal.Add(samplesScanned)
+			seriesByWorkerID[workerID].tss = append(seriesByWorkerID[workerID].tss, &ts)
+		}
+		return nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	tss := make([]*timeseries, 0, seriesLen*len(rcs))
+	for i := range seriesByWorkerID {
+		tss = append(tss, seriesByWorkerID[i].tss...)
+	}
+	putTimeseriesByWorkerID(tsw)
+
+	rowsScannedPerQuery.Update(float64(samplesScannedTotal.Load()))
+	qt.Printf("samplesScanned=%d", samplesScannedTotal.Load())
+	return tss, nil
+}
+
 func doRollupForTimeseries(funcName string, keepMetricNames bool, rc *rollupConfig, tsDst *timeseries, mnSrc *storage.MetricName,
 	valuesSrc []float64, timestampsSrc []int64, sharedTimestamps []int64) uint64 {
 	tsDst.MetricName.CopyFrom(mnSrc)
@@ -2001,6 +2220,22 @@ func doRollupForTimeseriesSketch(funcName string, keepMetricNames bool, rargs []
 	}
 	var samplesScanned uint64
 	tsDst.Values, samplesScanned = rc.DoSketch(tsDst.Values[:0], rargs, sr)
+	tsDst.Timestamps = sharedTimestamps
+	tsDst.denyReuse = true
+	return samplesScanned
+}
+
+func doRollupForTimeseriesSketchWithTail(funcName string, keepMetricNames bool, rargs []interface{}, rc *rollupConfig, tsDst *timeseries, sr *vmsketch.SketchResult, sharedTimestamps []int64,
+	tailTimestamps []int64, tailValues []float64) uint64 {
+	tsDst.MetricName.CopyFrom(sr.MetricName)
+	if len(rc.TagValue) > 0 {
+		tsDst.MetricName.AddTag("rollup", rc.TagValue)
+	}
+	if !keepMetricNames && !rollupFuncsKeepMetricName[funcName] {
+		tsDst.MetricName.ResetMetricGroup()
+	}
+	var samplesScanned uint64
+	tsDst.Values, samplesScanned = rc.DoSketchWithTail(tsDst.Values[:0], rargs, sr, tailTimestamps, tailValues)
 	tsDst.Timestamps = sharedTimestamps
 	tsDst.denyReuse = true
 	return samplesScanned

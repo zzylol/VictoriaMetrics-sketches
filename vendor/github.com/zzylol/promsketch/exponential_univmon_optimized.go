@@ -525,6 +525,12 @@ func (ehu *ExpoHistogramUnivOptimized) QueryIntervalMergeUniv(t1, t2 int64, cur_
 	// fmt.Println("from_bucket =", from_bucket)
 	// fmt.Println("to_bucket =", to_bucket)
 
+	mergedBuckets := 1
+	if from_bucket < to_bucket {
+		mergedBuckets = to_bucket - from_bucket + 1
+	}
+	addMergedBucketsTotal(mergedBuckets)
+
 	if to_bucket < ehu.s_count {
 		// only in sketch part
 		if from_bucket < to_bucket {

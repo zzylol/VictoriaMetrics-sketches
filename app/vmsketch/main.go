@@ -1,7 +1,10 @@
 package vmsketch
 
 import (
+	"context"
 	"fmt"
+	"math"
+	"os"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -95,27 +98,72 @@ func GetSeriesCount() (uint64, error) {
 	return n, nil
 }
 
+// MergedBucketsTotal returns the total number of sketch buckets merged across all queries.
+func MergedBucketsTotal() uint64 {
+	return promsketch.MergedBucketsTotal()
+}
+
 // Result is a single timeseries result.
 //
 // Search returns Result slice.
 type SketchResult struct {
 	MetricName *storage.MetricName
 	sketchIns  *promsketch.SketchInstances
+
+	// MinTimestamp is the effective minimum timestamp covered by all the sketch types
+	// needed for the query (max over required sketch types).
+	MinTimestamp int64
+	// MaxTimestamp is the effective maximum timestamp covered by all the sketch types
+	// needed for the query (min over required sketch types).
+	MaxTimestamp int64
 }
 
 // Results holds results returned from ProcessSearchQuery.
 type SketchResults struct {
 	deadline   searchutils.Deadline
 	sketchInss []SketchResult
+
+	// minTimestamp is the effective minimum timestamp covered by all the series in sketchInss.
+	minTimestamp int64
+	// maxTimestamp is the effective maximum timestamp covered by all the series in sketchInss.
+	maxTimestamp int64
 }
 
 func (sr *SketchResult) Eval(mn *storage.MetricName, funcName string, args []float64, mint, maxt, cur_time int64) float64 {
+	if sr.sketchIns == nil {
+		if os.Getenv("VMSKETCH_DEBUG_EVAL") != "" {
+			metric := "<nil>"
+			if mn != nil {
+				metric = mn.String()
+			}
+			fmt.Fprintf(os.Stderr, "[vmsketch] nil sketchIns in SketchResult.Eval: metric=%s func=%q args=%v range=[%d,%d] t=%d\n",
+				metric, funcName, args, mint, maxt, cur_time)
+		}
+		return math.NaN()
+	}
 	return sr.sketchIns.Eval(mn, funcName, args, mint, maxt, cur_time)
+}
+
+func (sr *SketchResult) EvalWithExtraValues(mn *storage.MetricName, funcName string, args []float64, mint, maxt, curTime int64, extraValues []float64) float64 {
+	if sr.sketchIns == nil {
+		return math.NaN()
+	}
+	return promsketch.EvalWithExtraValues(context.TODO(), sr.sketchIns, funcName, args, mint, maxt, curTime, extraValues)
 }
 
 // Len returns the number of results in srs.
 func (srs *SketchResults) Len() int {
 	return len(srs.sketchInss)
+}
+
+// EffectiveMinTimestamp returns the effective minimum timestamp covered by all the series in srs.
+func (srs *SketchResults) EffectiveMinTimestamp() int64 {
+	return srs.minTimestamp
+}
+
+// EffectiveMaxTimestamp returns the effective maximum timestamp covered by all the series in srs.
+func (srs *SketchResults) EffectiveMaxTimestamp() int64 {
+	return srs.maxTimestamp
 }
 
 // Cancel cancels srs work.
@@ -320,8 +368,41 @@ func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string
 	srs := &SketchResults{
 		deadline:   deadline,
 		sketchInss: make([]SketchResult, 0),
+		minTimestamp: -1,
+		maxTimestamp: -1,
 	}
 
+	getMinMaxTimeRange := func(sketchIns *promsketch.SketchInstances, mn *storage.MetricName) (int64, int64) {
+		var (
+			minTS int64
+			maxTS int64
+			ok    bool
+		)
+		for _, fn := range funcNames {
+			mint, maxt := sketchIns.PrintMinMaxTimeRange(mn, fn)
+			if mint < 0 || maxt < 0 {
+				continue
+			}
+			if !ok {
+				minTS = mint
+				maxTS = maxt
+				ok = true
+				continue
+			}
+			if mint > minTS {
+				minTS = mint
+			}
+			if maxt < maxTS {
+				maxTS = maxt
+			}
+		}
+		if !ok {
+			return -1, -1
+		}
+		return minTS, maxTS
+	}
+
+	isFullyCovered := true
 	for _, mnstr := range mns {
 		mn := &storage.MetricName{}
 		if err := mn.Unmarshal(bytesutil.ToUnsafeBytes(mnstr)); err != nil {
@@ -331,17 +412,33 @@ func SearchTimeSeriesCoverage(start, end int64, mns []string, funcNames []string
 			return nil, false, fmt.Errorf("timeout exceeded before starting the query processing: %s", deadline.String())
 		}
 
-		sketchIns, _ := SketchCache.LookupMetricNameFuncNamesTimeRange(mn, funcNames, start, end)
+		sketchIns, lookup := SketchCache.LookupMetricNameFuncNamesTimeRange(mn, funcNames, start, end)
 		if sketchIns == nil {
 			return nil, false, fmt.Errorf("sketchIns doesn't allocated")
 		}
-		// if !lookup {
-		// 	fmt.Println(sketchIns.PrintMinMaxTimeRange(mn, funcNames[0]))
-		// 	return nil, false, fmt.Errorf("sketch cache doesn't cover metricName %q", mnstr)
-		// }
-		srs.sketchInss = append(srs.sketchInss, SketchResult{sketchIns: sketchIns, MetricName: mn})
+
+		minTS, maxTS := getMinMaxTimeRange(sketchIns, mn)
+		if minTS >= 0 {
+			if srs.minTimestamp < 0 || minTS > srs.minTimestamp {
+				srs.minTimestamp = minTS
+			}
+		}
+		if maxTS >= 0 {
+			if srs.maxTimestamp < 0 || maxTS < srs.maxTimestamp {
+				srs.maxTimestamp = maxTS
+			}
+		}
+		if !lookup {
+			isFullyCovered = false
+		}
+		srs.sketchInss = append(srs.sketchInss, SketchResult{
+			sketchIns:    sketchIns,
+			MetricName:   mn,
+			MinTimestamp: minTS,
+			MaxTimestamp: maxTS,
+		})
 	}
-	return srs, true, nil
+	return srs, isFullyCovered, nil
 }
 
 // AddRows adds mrs to the sketch cache.
